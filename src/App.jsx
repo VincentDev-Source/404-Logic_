@@ -8,7 +8,7 @@ import TicketTrackerModal from './components/TicketTrackerModal';
 import AnalyticsDashboard from './components/AnalyticsDashboard';
 import Footer from './components/Footer';
 import { getStoredReports, saveStoredReports, generateTicketId } from './utils/storage';
-import { CheckCircle2, Ticket, Sparkles, X } from 'lucide-react';
+import { CheckCircle2, X } from 'lucide-react';
 
 export default function App() {
   const [reports, setReports] = useState(() => getStoredReports());
@@ -18,6 +18,22 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [quickTicketInput, setQuickTicketInput] = useState('');
   const [viewMode, setViewMode] = useState('feed'); // 'feed' | 'map'
+  
+  // Theme mode: 'dark' | 'light'
+  const [theme, setTheme] = useState(() => {
+    const saved = localStorage.getItem('civicpulse_theme');
+    return saved ? saved : 'dark';
+  });
+
+  // Apply dark class to html document element
+  useEffect(() => {
+    localStorage.setItem('civicpulse_theme', theme);
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [theme]);
 
   // Modals
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -37,21 +53,18 @@ export default function App() {
     setToastMessage({ title, message, type });
     setTimeout(() => {
       setToastMessage(null);
-    }, 4500);
+    }, 4000);
   };
 
   // Filter reports based on search, category, and status
   const filteredReports = useMemo(() => {
     return reports.filter((report) => {
-      // Category filter
       if (selectedCategory !== 'semua' && report.category !== selectedCategory) {
         return false;
       }
-      // Status filter
       if (selectedStatus !== 'semua' && report.status !== selectedStatus) {
         return false;
       }
-      // Search query (Title, Description, Ticket ID, Location, City)
       if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase().trim();
         const matchesTitle = report.title.toLowerCase().includes(query);
@@ -81,9 +94,8 @@ export default function App() {
           const isUpvoted = report.upvotedByUser;
           const newUpvotes = isUpvoted ? report.upvotes - 1 : report.upvotes + 1;
           showToast(
-            isUpvoted ? 'Dukungan Dibatalkan' : 'Dukungan Berhasil Ditambahkan!',
-            `Laporan #${report.id} kini memiliki ${newUpvotes} dukungan warga.`,
-            'info'
+            isUpvoted ? 'Dukungan Dibatalkan' : 'Dukungan Berhasil Ditambahkan',
+            `Laporan #${report.id} kini memiliki ${newUpvotes} dukungan warga.`
           );
           return {
             ...report,
@@ -173,28 +185,27 @@ export default function App() {
 
     setReports([newReport, ...reports]);
     showToast(
-      'Laporan Berhasil Diterbitkan! 🎉',
-      `Nomor Tiket Anda: #${newId}. Simpan nomor tiket ini untuk memantau progres.`,
-      'success'
+      'Laporan Berhasil Diterbitkan 🎉',
+      `Nomor Tiket Anda: #${newId}. Simpan nomor tiket ini untuk memantau progres.`
     );
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-emerald-500 selection:text-white">
+    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300">
       
-      {/* Toast Notification Container */}
+      {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed top-24 right-4 z-50 max-w-md bg-slate-900/95 border border-emerald-500/40 rounded-2xl p-4 shadow-2xl backdrop-blur-xl animate-in slide-in-from-top-4 duration-300 flex items-start gap-3">
-          <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
-            <CheckCircle2 className="w-5 h-5" />
+        <div className="fixed top-20 right-4 z-50 max-w-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 shadow-lg flex items-start gap-2.5 animate-in slide-in-from-top-3 duration-200 text-xs">
+          <div className="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+            <CheckCircle2 className="w-4 h-4" />
           </div>
           <div className="flex-1 pr-2">
-            <h4 className="text-xs font-bold text-white">{toastMessage.title}</h4>
-            <p className="text-[11px] text-slate-300 mt-0.5 leading-relaxed">{toastMessage.message}</p>
+            <h4 className="font-bold text-slate-900 dark:text-white">{toastMessage.title}</h4>
+            <p className="text-slate-600 dark:text-slate-300 mt-0.5 leading-normal">{toastMessage.message}</p>
           </div>
           <button 
             onClick={() => setToastMessage(null)}
-            className="text-slate-400 hover:text-white"
+            className="text-slate-400 hover:text-slate-900 dark:hover:text-white"
           >
             <X className="w-4 h-4" />
           </button>
@@ -212,6 +223,8 @@ export default function App() {
         quickTicketInput={quickTicketInput}
         setQuickTicketInput={setQuickTicketInput}
         onSearchTicket={handleSearchTicketFromNav}
+        theme={theme}
+        setTheme={setTheme}
       />
 
       {/* Main Content Area */}
@@ -230,7 +243,7 @@ export default function App() {
           
           {/* Main View Router */}
           {activeTab === 'analytics' ? (
-            <AnalyticsDashboard reports={reports} />
+            <AnalyticsDashboard reports={reports} theme={theme} />
           ) : viewMode === 'map' || activeTab === 'map' ? (
             <InteractiveMap
               reports={filteredReports}

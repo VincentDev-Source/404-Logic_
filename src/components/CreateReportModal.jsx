@@ -3,23 +3,14 @@ import {
   X, 
   Upload, 
   MapPin, 
-  Sparkles, 
-  AlertTriangle, 
   CheckCircle2, 
   Navigation, 
   ShieldCheck, 
-  Image as ImageIcon,
-  Check,
-  Building2,
-  Trash2,
-  Zap,
-  Droplets,
   Loader2
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { CATEGORIES } from '../data/mockReports';
 
-// Preset sample photos for quick demo testing
 const SAMPLE_PHOTOS = [
   { label: 'Jalan Rusak', url: 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=800&q=80' },
   { label: 'Sampah Menumpuk', url: 'https://images.unsplash.com/photo-1530587191325-3db32d826c18?auto=format&fit=crop&w=800&q=80' },
@@ -41,17 +32,15 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport }) {
 
   if (!isOpen) return null;
 
-  // Simulate GPS location detector
   const handleSimulateGPS = () => {
     setIsLocating(true);
     setTimeout(() => {
-      setLocation('Jl. MH Thamrin No. 28, Jakarta Pusat (Dekat Bundaran HI)');
+      setLocation('Jl. MH Thamrin No. 28, Jakarta Pusat');
       setCity('Jakarta');
       setIsLocating(false);
-    }, 1000);
+    }, 800);
   };
 
-  // Custom File Upload Preview Simulation
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -73,10 +62,9 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport }) {
     setIsSubmitting(true);
 
     setTimeout(() => {
-      // Trigger confetti celebration
       confetti({
-        particleCount: 100,
-        spread: 70,
+        particleCount: 80,
+        spread: 60,
         origin: { y: 0.6 }
       });
 
@@ -95,67 +83,61 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport }) {
       setIsSubmitting(false);
       onClose();
 
-      // Reset form
       setTitle('');
       setLocation('');
       setDescription('');
       setAuthor('');
       setIsAnonymous(false);
-    }, 1200);
+    }, 1000);
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
-      <div className="relative w-full max-w-2xl bg-slate-900 rounded-2xl border border-slate-800 shadow-2xl overflow-hidden my-8 animate-in fade-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+      <div className="relative w-full max-w-xl bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden my-6">
         
         {/* Modal Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/90">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
-              <Sparkles className="w-5 h-5" />
-            </div>
-            <div>
-              <h2 className="text-lg font-bold text-white">Buat Laporan Fasilitas Publik Baru</h2>
-              <p className="text-xs text-slate-400">Partisipasi langsung warga untuk SDG 11 Kota Berkelanjutan</p>
-            </div>
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-800">
+          <div>
+            <h2 className="text-base font-bold text-slate-900 dark:text-white">Buat Laporan Fasilitas Baru</h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Partisipasi warga untuk SDG 11 Kota Berkelanjutan</p>
           </div>
 
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors"
+            className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-900 dark:hover:text-white"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Modal Form Content */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-5 max-h-[80vh] overflow-y-auto">
+        <form onSubmit={handleSubmit} className="p-5 space-y-4 max-h-[78vh] overflow-y-auto text-xs">
           
           {/* Judul Laporan */}
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+            <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
               Judul Laporan *
             </label>
             <input
               type="text"
               required
-              placeholder="Contoh: Lubang Jalan Rusak Rawan Kecelakaan di depan Stasiun..."
+              placeholder="Contoh: Lubang Jalan Rusak Rawan Kecelakaan..."
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+              className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 text-xs focus:outline-none focus:border-emerald-500"
             />
           </div>
 
-          {/* Kategori Dropdown */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Kategori & Kota */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 Kategori Fasilitas *
               </label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 text-sm focus:outline-none focus:border-emerald-500"
+                className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 text-xs focus:outline-none focus:border-emerald-500"
               >
                 {CATEGORIES.filter(c => c.id !== 'semua').map((cat) => (
                   <option key={cat.id} value={cat.name}>
@@ -166,13 +148,13 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport }) {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 Kota / Wilayah *
               </label>
               <select
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 text-sm focus:outline-none focus:border-emerald-500"
+                className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 text-xs focus:outline-none focus:border-emerald-500"
               >
                 <option value="Jakarta">Jakarta</option>
                 <option value="Surabaya">Surabaya</option>
@@ -187,15 +169,15 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport }) {
 
           {/* Lokasi Alamat & Tombol GPS */}
           <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="text-xs font-semibold text-slate-300">
+            <div className="flex items-center justify-between mb-1">
+              <label className="font-semibold text-slate-700 dark:text-slate-300">
                 Lokasi / Titik Alamat Lengkap *
               </label>
               <button
                 type="button"
                 onClick={handleSimulateGPS}
                 disabled={isLocating}
-                className="text-[11px] text-emerald-400 hover:text-emerald-300 font-semibold flex items-center gap-1 hover:underline"
+                className="text-[11px] text-emerald-600 dark:text-emerald-400 hover:underline font-semibold flex items-center gap-1"
               >
                 {isLocating ? (
                   <>
@@ -205,7 +187,7 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport }) {
                 ) : (
                   <>
                     <Navigation className="w-3 h-3" />
-                    <span>Gunakan Lokasi GPS Saya</span>
+                    <span>Gunakan Lokasi GPS</span>
                   </>
                 )}
               </button>
@@ -214,54 +196,52 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport }) {
               <input
                 type="text"
                 required
-                placeholder="Jl. Sudirman No. 45, Kecamatan..."
+                placeholder="Jl. Sudirman No. 45..."
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:border-emerald-500"
+                className="w-full pl-8 pr-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 text-xs focus:outline-none focus:border-emerald-500"
               />
-              <MapPin className="w-4 h-4 text-rose-400 absolute left-3.5 top-3.5" />
+              <MapPin className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" />
             </div>
           </div>
 
-          {/* Photo Upload Drag-and-Drop & Sample Preset */}
+          {/* Upload Foto */}
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+            <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
               Bukti Foto Kendala Fasilitas
             </label>
 
-            <div className="border-2 border-dashed border-slate-800 hover:border-emerald-500/50 rounded-2xl p-4 text-center bg-slate-950/60 transition-colors">
+            <div className="border border-dashed border-slate-300 dark:border-slate-700 rounded-lg p-3 text-center bg-slate-50 dark:bg-slate-950">
               {imageUrl ? (
-                <div className="relative h-40 w-full rounded-xl overflow-hidden group">
+                <div className="relative h-32 w-full rounded overflow-hidden group">
                   <img src={imageUrl} alt="Preview" className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                    <label className="px-3 py-1.5 bg-emerald-500 text-slate-950 text-xs font-bold rounded-lg cursor-pointer">
+                    <label className="px-2.5 py-1 bg-emerald-600 text-white text-[11px] font-bold rounded cursor-pointer">
                       Ganti Foto
                       <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
                     </label>
                   </div>
                 </div>
               ) : (
-                <label className="cursor-pointer block py-4 space-y-2">
-                  <Upload className="w-8 h-8 text-emerald-400 mx-auto" />
-                  <p className="text-xs text-slate-300 font-semibold">Klik atau tarik foto ke sini</p>
-                  <p className="text-[11px] text-slate-500">Format PNG, JPG maks 5MB</p>
+                <label className="cursor-pointer block py-3 space-y-1">
+                  <Upload className="w-6 h-6 text-emerald-600 dark:text-emerald-400 mx-auto" />
+                  <p className="text-[11px] text-slate-600 dark:text-slate-300 font-semibold">Klik untuk unggah foto</p>
                   <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
                 </label>
               )}
             </div>
 
-            {/* Quick Demo Sample Photos */}
-            <div className="mt-2 flex items-center gap-2 overflow-x-auto pt-1">
-              <span className="text-[11px] text-slate-400 shrink-0">atau pilih foto sampel demo:</span>
+            <div className="mt-1.5 flex items-center gap-1.5 overflow-x-auto">
+              <span className="text-[10px] text-slate-400 shrink-0">Sampel foto:</span>
               {SAMPLE_PHOTOS.map((sample, idx) => (
                 <button
                   key={idx}
                   type="button"
                   onClick={() => setImageUrl(sample.url)}
-                  className={`text-[10px] px-2.5 py-1 rounded-lg border font-semibold whitespace-nowrap transition-all ${
+                  className={`text-[10px] px-2 py-0.5 rounded border font-medium whitespace-nowrap ${
                     imageUrl === sample.url
-                      ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/50'
-                      : 'bg-slate-950 text-slate-400 border-slate-800 hover:text-slate-200'
+                      ? 'bg-emerald-600 text-white border-emerald-600'
+                      : 'bg-slate-100 dark:bg-slate-950 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800'
                   }`}
                 >
                   {sample.label}
@@ -270,60 +250,58 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport }) {
             </div>
           </div>
 
-          {/* Deskripsi Detail */}
+          {/* Deskripsi */}
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+            <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
               Deskripsi Detail Kendala *
             </label>
             <textarea
               required
               rows={3}
-              placeholder="Jelaskan kondisi spesifik, potensi bahaya, atau perkiraan lama kerusakan terjadi..."
+              placeholder="Jelaskan kondisi spesifik atau potensi bahaya..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:border-emerald-500"
+              className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 text-xs focus:outline-none focus:border-emerald-500"
             />
           </div>
 
-          {/* Author Name & Anonymous Toggle */}
-          <div className="glass-card p-4 rounded-xl space-y-3">
+          {/* Privasi Anonim */}
+          <div className="bg-slate-50 dark:bg-slate-950 p-3 rounded-lg border border-slate-200 dark:border-slate-800 space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
-                <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                Lapor sebagai Anonim (Privasi Terjaga)
+              <span className="font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                Lapor sebagai Anonim
               </span>
               <button
                 type="button"
                 onClick={() => setIsAnonymous(!isAnonymous)}
-                className={`w-11 h-6 rounded-full transition-colors relative ${
-                  isAnonymous ? 'bg-emerald-500' : 'bg-slate-800'
+                className={`w-9 h-5 rounded-full relative transition-colors ${
+                  isAnonymous ? 'bg-emerald-600' : 'bg-slate-300 dark:bg-slate-700'
                 }`}
               >
-                <span className={`w-4 h-4 bg-slate-950 rounded-full absolute top-1 transition-transform ${
-                  isAnonymous ? 'left-6' : 'left-1'
+                <span className={`w-3.5 h-3.5 bg-white rounded-full absolute top-0.75 transition-transform ${
+                  isAnonymous ? 'left-4.5' : 'left-0.75'
                 }`} />
               </button>
             </div>
 
             {!isAnonymous && (
-              <div>
-                <input
-                  type="text"
-                  placeholder="Nama Lengkap Pelapor (opsional)..."
-                  value={author}
-                  onChange={(e) => setAuthor(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-800 text-slate-200 text-xs focus:outline-none focus:border-emerald-500"
-                />
-              </div>
+              <input
+                type="text"
+                placeholder="Nama Lengkap Pelapor (opsional)..."
+                value={author}
+                onChange={(e) => setAuthor(e.target.value)}
+                className="w-full px-2.5 py-1.5 rounded bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 text-xs focus:outline-none focus:border-emerald-500"
+              />
             )}
           </div>
 
           {/* Form Actions */}
-          <div className="pt-2 flex items-center justify-end space-x-3">
+          <div className="pt-2 flex items-center justify-end space-x-2 border-t border-slate-100 dark:border-slate-800">
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white hover:bg-slate-800"
+              className="px-4 py-2 rounded-lg font-semibold text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
             >
               Batal
             </button>
@@ -331,17 +309,17 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport }) {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold text-xs shadow-lg shadow-emerald-500/20 flex items-center gap-2 transition-all"
+              className="px-5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold shadow flex items-center gap-1.5 transition-all"
             >
               {isSubmitting ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin text-slate-950" />
-                  <span>Menerbitkan Tiket...</span>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span>Menerbitkan...</span>
                 </>
               ) : (
                 <>
-                  <CheckCircle2 className="w-4 h-4" />
-                  <span>Kirim Laporan Sekarang</span>
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>Kirim Laporan</span>
                 </>
               )}
             </button>
