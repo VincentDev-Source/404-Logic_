@@ -9,6 +9,7 @@ import AnalyticsDashboard from './components/AnalyticsDashboard';
 import SplashScreen from './components/SplashScreen';
 import ConfirmModal from './components/ConfirmModal';
 import AlertModal from './components/AlertModal';
+import FaceAuth from './components/FaceAuth';
 import Footer from './components/Footer';
 import { CheckCircle2, X, AlertTriangle, RefreshCw, Loader2 } from 'lucide-react';
 
@@ -81,6 +82,10 @@ function normalizeReport(raw) {
 }
 
 export default function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return sessionStorage.getItem('civicpulse_face_auth') === 'true';
+  });
+
   const [showSplash, setShowSplash] = useState(true);
   const [reports, setReports] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -160,6 +165,19 @@ export default function App() {
     }, 4000);
   };
 
+  // Face Recognition Auth Callbacks
+  const handleFaceAuthSuccess = () => {
+    sessionStorage.setItem('civicpulse_face_auth', 'true');
+    setIsAuthenticated(true);
+    showToast('Autentikasi Berhasil 🎉', 'Akses diterima! Selamat datang di Dashboard CivicPulse.', 'success');
+  };
+
+  const handleLockFaceAuth = () => {
+    sessionStorage.removeItem('civicpulse_face_auth');
+    setIsAuthenticated(false);
+    showToast('Aplikasi Dikunci 🔒', 'Sesi autentikasi wajah Anda telah dikunci kembali.', 'info');
+  };
+
   // Fetch reports from backend API (/api/reports)
   const fetchReports = useCallback(async () => {
     setIsLoading(true);
@@ -181,8 +199,10 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    fetchReports();
-  }, [fetchReports]);
+    if (isAuthenticated) {
+      fetchReports();
+    }
+  }, [isAuthenticated, fetchReports]);
 
   // Filter reports based on search, category, and status
   const filteredReports = useMemo(() => {
@@ -334,6 +354,13 @@ export default function App() {
     }
   };
 
+  // If user is not authenticated with Face Recognition, display FaceAuth protection screen
+  if (!isAuthenticated) {
+    return (
+      <FaceAuth onSuccess={handleFaceAuthSuccess} />
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-white dark:bg-black text-neutral-900 dark:text-white transition-colors duration-300">
       
@@ -397,6 +424,7 @@ export default function App() {
         onSearchTicket={handleSearchTicketFromNav}
         theme={theme}
         setTheme={setTheme}
+        onLockFaceAuth={handleLockFaceAuth}
       />
 
       {/* Main Content Area */}

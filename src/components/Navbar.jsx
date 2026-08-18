@@ -9,7 +9,8 @@ import {
   ShieldCheck,
   Ticket,
   Sun,
-  Moon
+  Moon,
+  Lock
 } from 'lucide-react';
 
 export default function Navbar({ 
@@ -21,11 +22,12 @@ export default function Navbar({
   setQuickTicketInput,
   onSearchTicket,
   theme,
-  setTheme
+  setTheme,
+  onLockFaceAuth
 }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const handleTicketSubmit = (e) => {
+  const handleTicketFormSubmit = (e) => {
     e.preventDefault();
     if (quickTicketInput.trim()) {
       onSearchTicket(quickTicketInput.trim());
@@ -39,83 +41,76 @@ export default function Navbar({
   return (
     <header className="sticky top-0 z-40 w-full bg-white/90 dark:bg-black/90 backdrop-blur-md border-b border-neutral-200 dark:border-neutral-800 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 sm:h-20">
+        <div className="flex items-center justify-between h-16">
           
-          {/* Brand Logo & Title with Hover Scaling */}
-          <div 
-            className="flex items-center space-x-3 cursor-pointer group transition-transform active:scale-95" 
-            onClick={() => setActiveTab('feed')}
-          >
-            <div className="w-10 h-10 rounded-xl bg-emerald-500 text-black flex items-center justify-center font-bold shadow-md group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
+          {/* Brand Logo & Tagline */}
+          <div className="flex items-center space-x-3 cursor-pointer group" onClick={() => setActiveTab('feed')}>
+            <div className="w-10 h-10 rounded-xl bg-emerald-500 text-black flex items-center justify-center font-extrabold shadow-lg shadow-emerald-500/20 group-hover:scale-105 transition-transform duration-200">
               <Building2 className="w-5 h-5" />
             </div>
-            
             <div>
-              <div className="flex items-center space-x-2">
-                <h1 className="text-lg font-black tracking-tight text-neutral-900 dark:text-white group-hover:text-emerald-500 transition-colors">
-                  Civic<span className="text-emerald-500">Pulse</span>
-                </h1>
-                <span className="hidden sm:inline-block px-2 py-0.5 text-[10px] font-bold rounded bg-neutral-100 dark:bg-neutral-900 text-emerald-600 dark:text-emerald-400 border border-neutral-200 dark:border-neutral-800">
-                  LaporKota
+              <div className="flex items-center space-x-1.5">
+                <span className="font-black text-lg tracking-tight text-neutral-900 dark:text-white">
+                  CivicPulse
+                </span>
+                <span className="px-1.5 py-0.5 text-[10px] font-mono font-black rounded bg-emerald-500 text-black">
+                  SDG 11
                 </span>
               </div>
-              <p className="text-[11px] text-neutral-500 dark:text-neutral-400 font-medium flex items-center gap-1">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
-                SDG 11: Kota & Komunitas Berkelanjutan
-              </p>
+              <p className="text-[11px] text-neutral-500 dark:text-neutral-400 font-medium">Lapor Kota & Fasilitas Publik</p>
             </div>
           </div>
 
-          {/* Desktop Navigation Links */}
-          <nav className="hidden lg:flex items-center space-x-1 bg-neutral-100 dark:bg-neutral-900 p-1 rounded-xl border border-neutral-200 dark:border-neutral-800">
+          {/* Desktop Navigation Tabs */}
+          <nav className="hidden md:flex items-center space-x-1">
             <button
               onClick={() => setActiveTab('feed')}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all active:scale-95 flex items-center gap-1.5 ${
+              className={`px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all duration-200 active:scale-95 flex items-center space-x-1.5 ${
                 activeTab === 'feed'
-                  ? 'bg-emerald-500 text-black shadow-sm'
-                  : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-200/50 dark:hover:bg-neutral-800/50'
+                  ? 'bg-neutral-100 dark:bg-neutral-900 text-emerald-500 dark:text-emerald-400 border border-neutral-200 dark:border-neutral-800'
+                  : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-900'
               }`}
             >
-              <Building2 className="w-3.5 h-3.5" />
-              Beranda & Feed
+              <ShieldCheck className="w-4 h-4" />
+              <span>Semua Laporan</span>
             </button>
 
             <button
               onClick={() => setActiveTab('map')}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all active:scale-95 flex items-center gap-1.5 ${
+              className={`px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all duration-200 active:scale-95 flex items-center space-x-1.5 ${
                 activeTab === 'map'
-                  ? 'bg-emerald-500 text-black shadow-sm'
-                  : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-200/50 dark:hover:bg-neutral-800/50'
+                  ? 'bg-neutral-100 dark:bg-neutral-900 text-emerald-500 dark:text-emerald-400 border border-neutral-200 dark:border-neutral-800'
+                  : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-900'
               }`}
             >
-              <MapPin className="w-3.5 h-3.5" />
-              Peta Laporan
+              <MapPin className="w-4 h-4" />
+              <span>Peta Radar</span>
             </button>
 
             <button
               onClick={() => setActiveTab('analytics')}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all active:scale-95 flex items-center gap-1.5 ${
+              className={`px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all duration-200 active:scale-95 flex items-center space-x-1.5 ${
                 activeTab === 'analytics'
-                  ? 'bg-emerald-500 text-black shadow-sm'
-                  : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-200/50 dark:hover:bg-neutral-800/50'
+                  ? 'bg-neutral-100 dark:bg-neutral-900 text-emerald-500 dark:text-emerald-400 border border-neutral-200 dark:border-neutral-800'
+                  : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-900'
               }`}
             >
-              <BarChart3 className="w-3.5 h-3.5" />
-              Statistik Kota
+              <BarChart3 className="w-4 h-4" />
+              <span>Analitik SDG</span>
             </button>
           </nav>
 
-          {/* Quick Actions & Theme Switcher */}
-          <div className="hidden sm:flex items-center space-x-3">
+          {/* Quick Actions Bar */}
+          <div className="hidden lg:flex items-center space-x-2.5">
             
-            {/* Quick Ticket Search */}
-            <form onSubmit={handleTicketSubmit} className="relative">
+            {/* Quick Ticket Input Form */}
+            <form onSubmit={handleTicketFormSubmit} className="relative">
               <input
                 type="text"
-                placeholder="Cek Tiket #LP-..."
+                placeholder="Lacak Tiket #..."
                 value={quickTicketInput}
                 onChange={(e) => setQuickTicketInput(e.target.value)}
-                className="w-36 xl:w-44 pl-8 pr-3 py-1.5 text-xs bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl text-neutral-900 dark:text-white placeholder-neutral-400 focus:outline-none focus:border-emerald-500"
+                className="pl-8 pr-3 py-1.5 w-36 rounded-xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-neutral-900 dark:text-white placeholder-neutral-400 text-xs focus:outline-none focus:border-emerald-500 transition-all font-mono font-medium"
               />
               <Ticket className="w-3.5 h-3.5 text-neutral-400 absolute left-2.5 top-2.5" />
             </form>
@@ -141,6 +136,17 @@ export default function Navbar({
               )}
             </button>
 
+            {/* Lock / Logout Face Auth Button */}
+            {onLockFaceAuth && (
+              <button
+                onClick={onLockFaceAuth}
+                className="p-2 text-neutral-600 dark:text-neutral-400 hover:text-red-500 dark:hover:text-red-400 bg-neutral-100 dark:bg-neutral-900 hover:bg-neutral-200 dark:hover:bg-neutral-800 border border-neutral-200 dark:border-neutral-800 rounded-xl transition-all active:scale-95 flex items-center justify-center"
+                title="Kunci Aplikasi / Logout Face Auth"
+              >
+                <Lock className="w-4 h-4" />
+              </button>
+            )}
+
             {/* CTA Button */}
             <button
               onClick={onOpenCreateModal}
@@ -159,6 +165,16 @@ export default function Navbar({
             >
               {theme === 'dark' ? <Sun className="w-4 h-4 text-emerald-400" /> : <Moon className="w-4 h-4 text-neutral-700" />}
             </button>
+
+            {onLockFaceAuth && (
+              <button
+                onClick={onLockFaceAuth}
+                className="p-2 rounded-xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-neutral-700 dark:text-neutral-300 active:scale-95"
+                title="Kunci Aplikasi"
+              >
+                <Lock className="w-4 h-4 text-red-400" />
+              </button>
+            )}
 
             <button
               onClick={onOpenCreateModal}
@@ -181,46 +197,43 @@ export default function Navbar({
 
       {/* Mobile Menu Dropdown */}
       {mobileMenuOpen && (
-        <div className="lg:hidden border-t border-neutral-200 dark:border-neutral-800 bg-white dark:bg-black px-4 pt-3 pb-6 space-y-2 text-xs animate-fade-in-up">
+        <div className="lg:hidden border-b border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 px-4 py-3 space-y-2 text-xs font-bold">
           <button
             onClick={() => { setActiveTab('feed'); setMobileMenuOpen(false); }}
-            className={`w-full px-3 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-all ${
-              activeTab === 'feed' ? 'bg-emerald-500 text-black' : 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-900'
-            }`}
+            className={`w-full text-left px-3 py-2 rounded-xl flex items-center gap-2 ${activeTab === 'feed' ? 'bg-emerald-500 text-black' : 'text-neutral-700 dark:text-neutral-300'}`}
           >
-            <Building2 className="w-4 h-4 text-emerald-500" />
-            Beranda & Feed Aduan
+            <ShieldCheck className="w-4 h-4" />
+            <span>Semua Laporan</span>
           </button>
-          
+
           <button
             onClick={() => { setActiveTab('map'); setMobileMenuOpen(false); }}
-            className={`w-full px-3 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-all ${
-              activeTab === 'map' ? 'bg-emerald-500 text-black' : 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-900'
-            }`}
+            className={`w-full text-left px-3 py-2 rounded-xl flex items-center gap-2 ${activeTab === 'map' ? 'bg-emerald-500 text-black' : 'text-neutral-700 dark:text-neutral-300'}`}
           >
-            <MapPin className="w-4 h-4 text-emerald-500" />
-            Peta Laporan Interaktif
+            <MapPin className="w-4 h-4" />
+            <span>Peta Radar</span>
           </button>
 
           <button
             onClick={() => { setActiveTab('analytics'); setMobileMenuOpen(false); }}
-            className={`w-full px-3 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-all ${
-              activeTab === 'analytics' ? 'bg-emerald-500 text-black' : 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-900'
-            }`}
+            className={`w-full text-left px-3 py-2 rounded-xl flex items-center gap-2 ${activeTab === 'analytics' ? 'bg-emerald-500 text-black' : 'text-neutral-700 dark:text-neutral-300'}`}
           >
-            <BarChart3 className="w-4 h-4 text-emerald-500" />
-            Statistik Kota Cerdas
+            <BarChart3 className="w-4 h-4" />
+            <span>Analitik SDG</span>
           </button>
 
-          <button
-            onClick={() => { onOpenTrackerModal(); setMobileMenuOpen(false); }}
-            className="w-full px-3 py-2.5 rounded-xl font-bold flex items-center gap-2 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-all"
-          >
-            <Ticket className="w-4 h-4 text-emerald-500" />
-            Cek Tiket Status
-          </button>
+          {onLockFaceAuth && (
+            <button
+              onClick={() => { setMobileMenuOpen(false); onLockFaceAuth(); }}
+              className="w-full text-left px-3 py-2 rounded-xl flex items-center gap-2 text-red-500 hover:bg-neutral-100 dark:hover:bg-neutral-900"
+            >
+              <Lock className="w-4 h-4" />
+              <span>Kunci Aplikasi / Logout Face Auth</span>
+            </button>
+          )}
         </div>
       )}
+
     </header>
   );
 }

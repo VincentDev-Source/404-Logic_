@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import L from 'leaflet';
-import { 
-  MapPin, 
-  X, 
-  Ticket, 
-  ThumbsUp, 
-  Compass, 
+import {
+  MapPin,
+  X,
+  Ticket,
+  ThumbsUp,
+  Compass,
   Trash2,
   Navigation,
   Loader2,
@@ -21,14 +21,14 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-export default function InteractiveMap({ 
-  reports, 
-  onUpvote, 
-  onTrackTicket, 
-  onDeleteReport, 
-  openConfirm, 
-  openAlert, 
-  theme 
+export default function InteractiveMap({
+  reports,
+  onUpvote,
+  onTrackTicket,
+  onDeleteReport,
+  openConfirm,
+  openAlert,
+  theme
 }) {
   const [selectedReport, setSelectedReport] = useState(null);
   const [filterCategory, setFilterCategory] = useState('semua');
@@ -154,13 +154,13 @@ export default function InteractiveMap({
       const isResolved = report.status === 'Selesai';
       const isProcessing = report.status === 'Sedang Ditangani';
 
-      const badgeBg = isSelected 
-        ? '#10b981' 
-        : isResolved 
-        ? '#10b981' 
-        : isProcessing 
-        ? '#f59e0b' 
-        : isDark ? '#ffffff' : '#000000';
+      const badgeBg = isSelected
+        ? '#10b981'
+        : isResolved
+          ? '#10b981'
+          : isProcessing
+            ? '#f59e0b'
+            : isDark ? '#ffffff' : '#000000';
 
       const textColor = isSelected || isResolved ? '#000000' : isDark ? '#000000' : '#ffffff';
 
@@ -357,10 +357,10 @@ export default function InteractiveMap({
 
   return (
     <div className="space-y-4">
-      
+
       {/* Map Control Bar */}
       <div className="bg-white dark:bg-neutral-900 p-4 rounded-xl border border-neutral-200 dark:border-neutral-800 flex flex-wrap items-center justify-between gap-3 shadow-sm transition-colors">
-        
+
         <div className="flex items-center space-x-2.5">
           <div className="w-9 h-9 rounded-xl bg-emerald-500/10 dark:bg-black border border-emerald-500/30 flex items-center justify-center text-emerald-500 animate-pulse">
             <Compass className="w-5 h-5" />
@@ -378,7 +378,7 @@ export default function InteractiveMap({
 
         {/* Action Controls & Category Filters */}
         <div className="flex items-center gap-2 overflow-x-auto">
-          
+
           <button
             onClick={handleLocateUserOnMap}
             disabled={isLocatingUser}
@@ -392,18 +392,17 @@ export default function InteractiveMap({
             ) : (
               <>
                 <Navigation className="w-3.5 h-3.5" />
-                <span>Deteksi Lokasi Saya (Presisi High-Accuracy)</span>
+                <span>Deteksi Lokasi</span>
               </>
             )}
           </button>
 
           <button
             onClick={() => setFilterCategory('semua')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-extrabold whitespace-nowrap transition-all active:scale-95 ${
-              filterCategory === 'semua'
+            className={`px-3 py-1.5 rounded-xl text-xs font-extrabold whitespace-nowrap transition-all active:scale-95 ${filterCategory === 'semua'
                 ? 'bg-neutral-900 dark:bg-white text-white dark:text-black shadow-sm'
                 : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 border border-neutral-200 dark:border-neutral-700'
-            }`}
+              }`}
           >
             Semua ({reports.length})
           </button>
@@ -412,11 +411,10 @@ export default function InteractiveMap({
             <button
               key={c.id}
               onClick={() => setFilterCategory(c.id)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap border transition-all active:scale-95 ${
-                filterCategory === c.id
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap border transition-all active:scale-95 ${filterCategory === c.id
                   ? 'bg-neutral-900 dark:bg-white text-white dark:text-black border-neutral-900 dark:border-white'
                   : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 border-neutral-200 dark:border-neutral-700'
-              }`}
+                }`}
             >
               {c.name}
             </button>
@@ -432,16 +430,16 @@ export default function InteractiveMap({
         {/* High-Aesthetic Glassmorphism Bottom Drawer Overlay Card */}
         {selectedReport && (
           <div className="absolute bottom-4 left-4 right-4 max-w-lg mx-auto bg-white/95 dark:bg-black/90 backdrop-blur-md border border-neutral-200 dark:border-neutral-800 rounded-2xl p-4 shadow-2xl z-[1000] space-y-3 animate-fade-in-up">
-            
+
             <div className="flex items-start gap-3">
               {/* Photo Thumbnail */}
-              <div 
+              <div
                 onClick={() => setPreviewImage(selectedReport.image)}
                 className="relative w-20 h-20 rounded-xl overflow-hidden bg-neutral-100 dark:bg-neutral-900 shrink-0 border border-neutral-200 dark:border-neutral-800 cursor-pointer group"
               >
-                <img 
-                  src={selectedReport.image} 
-                  alt={selectedReport.title} 
+                <img
+                  src={selectedReport.image}
+                  alt={selectedReport.title}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                 />
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity text-white">
@@ -489,11 +487,10 @@ export default function InteractiveMap({
               <div className="flex items-center gap-1.5">
                 <button
                   onClick={() => onUpvote(selectedReport.id)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition-all active:scale-95 ${
-                    selectedReport.upvotedByUser
+                  className={`px-3 py-1.5 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition-all active:scale-95 ${selectedReport.upvotedByUser
                       ? 'bg-emerald-500 text-black shadow-sm'
                       : 'bg-neutral-100 dark:bg-neutral-900 text-neutral-900 dark:text-white hover:text-emerald-500 border border-neutral-200 dark:border-neutral-800'
-                  }`}
+                    }`}
                 >
                   <ThumbsUp className="w-3.5 h-3.5" />
                   <span>{selectedReport.upvotes} Dukungan</span>
