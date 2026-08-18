@@ -20,7 +20,15 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-export default function InteractiveMap({ reports, onUpvote, onTrackTicket, onDeleteReport, theme }) {
+export default function InteractiveMap({ 
+  reports, 
+  onUpvote, 
+  onTrackTicket, 
+  onDeleteReport, 
+  openConfirm, 
+  openAlert, 
+  theme 
+}) {
   const [selectedReport, setSelectedReport] = useState(null);
   const [filterCategory, setFilterCategory] = useState('semua');
   const [isLocatingUser, setIsLocatingUser] = useState(false);
@@ -143,7 +151,9 @@ export default function InteractiveMap({ reports, onUpvote, onTrackTicket, onDel
   // Jump to user's real browser GPS location
   const handleLocateUserOnMap = () => {
     if (!navigator.geolocation) {
-      alert('Browser Anda tidak mendukung Geolocation GPS.');
+      if (openAlert) {
+        openAlert({ title: 'GPS Tidak Didukung', message: 'Browser Anda tidak mendukung fitur Geolocation GPS.', type: 'error' });
+      }
       return;
     }
 
@@ -181,11 +191,32 @@ export default function InteractiveMap({ reports, onUpvote, onTrackTicket, onDel
       },
       (err) => {
         console.error('GPS error:', err);
-        alert('Gagal mendeteksi lokasi GPS Anda.');
+        if (openAlert) {
+          openAlert({ title: 'Gagal Memuat GPS', message: 'Akses lokasi GPS Anda ditolak atau gagal didapatkan.', type: 'error' });
+        }
         setIsLocatingUser(false);
       },
       { enableHighAccuracy: true, timeout: 10000 }
     );
+  };
+
+  const handleConfirmDeleteOnMap = (reportId) => {
+    if (openConfirm) {
+      openConfirm({
+        title: 'Hapus Aduan Fasilitas',
+        message: `Apakah Anda yakin ingin menghapus aduan #${reportId} secara permanen? Data yang dihapus tidak dapat dikembalikan.`,
+        confirmText: 'Ya, Hapus Aduan',
+        cancelText: 'Batal',
+        type: 'danger',
+        onConfirm: () => {
+          onDeleteReport(reportId);
+          setSelectedReport(null);
+        }
+      });
+    } else {
+      onDeleteReport(reportId);
+      setSelectedReport(null);
+    }
   };
 
   return (
@@ -292,12 +323,7 @@ export default function InteractiveMap({ reports, onUpvote, onTrackTicket, onDel
                 </button>
 
                 <button
-                  onClick={() => {
-                    if (window.confirm(`Apakah Anda yakin ingin menghapus aduan #${selectedReport.id}?`)) {
-                      onDeleteReport(selectedReport.id);
-                      setSelectedReport(null);
-                    }
-                  }}
+                  onClick={() => handleConfirmDeleteOnMap(selectedReport.id)}
                   className="p-1.5 rounded bg-red-600 hover:bg-red-500 text-white font-bold text-xs"
                   title="Hapus Aduan"
                 >

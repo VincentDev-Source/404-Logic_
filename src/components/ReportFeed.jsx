@@ -24,6 +24,8 @@ export default function ReportFeed({
   onUpvote, 
   onTrackTicket, 
   onDeleteReport,
+  openConfirm,
+  openAlert,
   selectedCategory, 
   setSelectedCategory,
   selectedStatus,
@@ -74,11 +76,23 @@ export default function ReportFeed({
     }
   };
 
+  // Modern confirm modal trigger replacing window.confirm
   const confirmDelete = (reportId) => {
-    if (window.confirm(`Apakah Anda yakin ingin menghapus aduan #${reportId} secara permanen?`)) {
-      setDeletingId(reportId);
+    if (openConfirm) {
+      openConfirm({
+        title: 'Hapus Aduan Fasilitas',
+        message: `Apakah Anda yakin ingin menghapus aduan #${reportId} secara permanen? Data yang dihapus tidak dapat dikembalikan.`,
+        confirmText: 'Ya, Hapus Aduan',
+        cancelText: 'Batal',
+        type: 'danger',
+        onConfirm: () => {
+          setDeletingId(reportId);
+          onDeleteReport(reportId);
+          setDeletingId(null);
+        }
+      });
+    } else {
       onDeleteReport(reportId);
-      setDeletingId(null);
     }
   };
 

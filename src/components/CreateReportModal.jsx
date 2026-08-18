@@ -18,7 +18,7 @@ const SAMPLE_PHOTOS = [
   { label: 'Banjir Selokan', url: 'https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?auto=format&fit=crop&w=800&q=80' },
 ];
 
-export default function CreateReportModal({ isOpen, onClose, onSubmitReport }) {
+export default function CreateReportModal({ isOpen, onClose, onSubmitReport, openAlert }) {
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('Jalan Rusak');
   const [location, setLocation] = useState('');
@@ -36,7 +36,9 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport }) {
   // Real Browser GPS Geolocation + OpenStreetMap Reverse Geocoding
   const handleFetchRealGPS = () => {
     if (!navigator.geolocation) {
-      alert('Browser Anda tidak mendukung fitur lokasi GPS.');
+      if (openAlert) {
+        openAlert({ title: 'GPS Tidak Didukung', message: 'Browser Anda tidak mendukung fitur lokasi GPS.', type: 'error' });
+      }
       return;
     }
 
@@ -66,7 +68,9 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport }) {
       },
       (error) => {
         console.error('Geolocation error:', error);
-        alert('Gagal mendeteksi lokasi GPS. Pastikan izin lokasi browser telah diberikan.');
+        if (openAlert) {
+          openAlert({ title: 'Izin Lokasi Ditolak', message: 'Gagal mendeteksi lokasi GPS. Pastikan izin akses lokasi browser telah diberikan.', type: 'warning' });
+        }
         setLocation('Jl. MH Thamrin No. 28, Jakarta Pusat');
         setCity('Jakarta');
         setIsLocating(false);
@@ -89,7 +93,9 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!title.trim() || !location.trim() || !description.trim()) {
-      alert('Mohon lengkapi Judul, Lokasi, dan Deskripsi laporan.');
+      if (openAlert) {
+        openAlert({ title: 'Form Belum Lengkap', message: 'Mohon lengkapi Judul Laporan, Lokasi, dan Deskripsi Detail Kendala.', type: 'warning' });
+      }
       return;
     }
 

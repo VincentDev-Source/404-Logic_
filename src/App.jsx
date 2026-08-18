@@ -6,6 +6,9 @@ import InteractiveMap from './components/InteractiveMap';
 import CreateReportModal from './components/CreateReportModal';
 import TicketTrackerModal from './components/TicketTrackerModal';
 import AnalyticsDashboard from './components/AnalyticsDashboard';
+import SplashScreen from './components/SplashScreen';
+import ConfirmModal from './components/ConfirmModal';
+import AlertModal from './components/AlertModal';
 import Footer from './components/Footer';
 import { CheckCircle2, X, AlertTriangle, RefreshCw, Loader2 } from 'lucide-react';
 
@@ -59,6 +62,7 @@ function normalizeReport(raw) {
 }
 
 export default function App() {
+  const [showSplash, setShowSplash] = useState(true);
   const [reports, setReports] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -69,6 +73,41 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [quickTicketInput, setQuickTicketInput] = useState('');
   const [viewMode, setViewMode] = useState('feed'); // 'feed' | 'map'
+
+  // Custom Confirm & Alert Modal States (Replaces native browser "says" popups)
+  const [confirmModalState, setConfirmModalState] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {},
+    type: 'danger',
+  });
+
+  const [alertModalState, setAlertModalState] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    type: 'warning',
+  });
+
+  const openConfirm = useCallback(({ title, message, onConfirm, type = 'danger' }) => {
+    setConfirmModalState({
+      isOpen: true,
+      title,
+      message,
+      onConfirm,
+      type,
+    });
+  }, []);
+
+  const openAlert = useCallback(({ title = 'Pemberitahuan', message, type = 'warning' }) => {
+    setAlertModalState({
+      isOpen: true,
+      title,
+      message,
+      type,
+    });
+  }, []);
 
   // Theme mode: 'dark' | 'light'
   const [theme, setTheme] = useState(() => {
@@ -279,6 +318,30 @@ export default function App() {
   return (
     <div className="min-h-screen flex flex-col bg-white dark:bg-black text-neutral-900 dark:text-white transition-colors duration-300">
       
+      {/* Initial Entrance Splash Screen with Real Progress Bar */}
+      {showSplash && (
+        <SplashScreen onComplete={() => setShowSplash(false)} />
+      )}
+
+      {/* Modern Custom Confirmation Modal (Replaces window.confirm "says" popup) */}
+      <ConfirmModal
+        isOpen={confirmModalState.isOpen}
+        onClose={() => setConfirmModalState(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={confirmModalState.onConfirm}
+        title={confirmModalState.title}
+        message={confirmModalState.message}
+        type={confirmModalState.type}
+      />
+
+      {/* Modern Custom Alert Modal (Replaces window.alert "says" popup) */}
+      <AlertModal
+        isOpen={alertModalState.isOpen}
+        onClose={() => setAlertModalState(prev => ({ ...prev, isOpen: false }))}
+        title={alertModalState.title}
+        message={alertModalState.message}
+        type={alertModalState.type}
+      />
+
       {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed top-20 right-4 z-50 max-w-sm bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-3.5 shadow-xl flex items-start gap-2.5 animate-in slide-in-from-top-3 duration-200 text-xs">
@@ -362,6 +425,8 @@ export default function App() {
                 onUpvote={handleUpvote}
                 onTrackTicket={handleTrackTicket}
                 onDeleteReport={handleDeleteReport}
+                openConfirm={openConfirm}
+                openAlert={openAlert}
                 theme={theme}
               />
             ) : (
@@ -370,6 +435,8 @@ export default function App() {
                 onUpvote={handleUpvote}
                 onTrackTicket={handleTrackTicket}
                 onDeleteReport={handleDeleteReport}
+                openConfirm={openConfirm}
+                openAlert={openAlert}
                 selectedCategory={selectedCategory}
                 setSelectedCategory={setSelectedCategory}
                 selectedStatus={selectedStatus}
@@ -394,6 +461,7 @@ export default function App() {
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         onSubmitReport={handleCreateReport}
+        openAlert={openAlert}
       />
 
       <TicketTrackerModal
