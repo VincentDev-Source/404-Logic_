@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import * as faceapi from '@vladmandic/face-api';
 import {
   Camera,
+  CameraOff,
   ShieldCheck,
   ShieldAlert,
   UserCheck,
@@ -15,7 +16,8 @@ import {
   Sparkles,
   User,
   KeyRound,
-  Zap
+  Zap,
+  Power
 } from 'lucide-react';
 
 const MODEL_URL = 'https://cdn.jsdelivr.net/gh/cgarciagl/face-api.js@0.22.2/weights';
@@ -100,7 +102,12 @@ export default function FaceAuthOperator({ onLoginSuccess, onCancel }) {
       }
 
       setIsWebcamActive(true);
-      setStatusMessage({ text: 'Kamera aktif. Pemindaian biometrik otomatis sedang berjalan...', type: 'info' });
+      setStatusMessage({ 
+        text: activeTab === 'login' 
+          ? 'Kamera aktif. Pemindaian biometrik otomatis sedang berjalan...' 
+          : 'Kamera aktif. Silakan isi form di bawah lalu klik "Daftarkan Wajah Petugas Resmi".', 
+        type: 'info' 
+      });
     } catch (err) {
       console.error('Webcam permission error:', err);
       setWebcamError('Akses kamera webcam tidak diizinkan atau kamera tidak ditemukan.');
@@ -115,7 +122,7 @@ export default function FaceAuthOperator({ onLoginSuccess, onCancel }) {
     }
   }, [isModelsLoaded]);
 
-  // Ensure stream is bound to videoRef whenever video element is mounted or isWebcamActive changes
+  // Ensure stream is bound to videoRef whenever video element is mounted or activeTab changes
   useEffect(() => {
     if (isWebcamActive && videoRef.current && streamRef.current) {
       videoRef.current.srcObject = streamRef.current;
@@ -137,7 +144,17 @@ export default function FaceAuthOperator({ onLoginSuccess, onCancel }) {
     setAutoScanning(false);
   };
 
-  // Automatic Hands-Free Real-Time Face Verification Scan Loop
+  // Toggle Camera State (Nyalakan / Matikan)
+  const toggleWebcam = () => {
+    if (isWebcamActive) {
+      stopWebcam();
+      setStatusMessage({ text: 'Kamera dinonaktifkan.', type: 'warning' });
+    } else {
+      startWebcam();
+    }
+  };
+
+  // Automatic Hands-Free Real-Time Face Verification Scan Loop (ONLY RUNS IN LOGIN TAB!)
   useEffect(() => {
     if (activeTab === 'login' && isModelsLoaded && isWebcamActive && videoRef.current) {
       setAutoScanning(true);
@@ -275,7 +292,7 @@ export default function FaceAuthOperator({ onLoginSuccess, onCancel }) {
     }
 
     if (!videoRef.current || !isWebcamActive) {
-      setStatusMessage({ text: 'Aktifkan kamera terlebih dahulu untuk memindai wajah!', type: 'warning' });
+      setStatusMessage({ text: 'Nyalakan kamera terlebih dahulu untuk memindai wajah!', type: 'warning' });
       return;
     }
 
@@ -405,7 +422,35 @@ export default function FaceAuthOperator({ onLoginSuccess, onCancel }) {
           ) : (
             <div className="space-y-4">
               
-              {/* Webcam Viewport - Video tag ALWAYS kept in DOM for reliable srcObject binding */}
+              {/* Camera Header Control Bar (Nyalakan / Matikan Kamera Toggle) */}
+              <div className="flex items-center justify-between p-2.5 bg-neutral-950 rounded-2xl border border-neutral-800">
+                <div className="flex items-center gap-2">
+                  <Camera className="w-4 h-4 text-blue-400" />
+                  <span className="text-xs font-bold text-neutral-300">Status Kamera:</span>
+                  <span className={`px-2.5 py-0.5 rounded-full font-extrabold text-[10px] ${
+                    isWebcamActive
+                      ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                      : 'bg-red-500/20 text-red-400 border border-red-500/30'
+                  }`}>
+                    {isWebcamActive ? 'AKTIFF ON' : 'NONAKTIF OFF'}
+                  </span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={toggleWebcam}
+                  className={`px-3 py-1.5 rounded-xl font-extrabold text-xs flex items-center gap-1.5 transition-all active:scale-95 shadow ${
+                    isWebcamActive
+                      ? 'bg-red-600/90 hover:bg-red-500 text-white'
+                      : 'bg-emerald-500 hover:bg-emerald-400 text-black'
+                  }`}
+                >
+                  <Power className="w-3.5 h-3.5" />
+                  <span>{isWebcamActive ? 'Matikan Kamera' : 'Nyalakan Kamera'}</span>
+                </button>
+              </div>
+
+              {/* Webcam Viewport */}
               <div className="relative w-full h-64 bg-neutral-950 rounded-2xl overflow-hidden border border-neutral-800 shadow-inner flex items-center justify-center">
                 
                 {/* Live Video Feed (Always Mounted) */}
@@ -420,14 +465,15 @@ export default function FaceAuthOperator({ onLoginSuccess, onCancel }) {
                 {/* Webcam Fallback overlay when inactive */}
                 {!isWebcamActive && (
                   <div className="text-center space-y-3 p-6 z-10">
-                    <Camera className="w-10 h-10 text-neutral-600 mx-auto" />
-                    <p className="text-neutral-400 font-bold">Kamera Belum Aktif</p>
+                    <CameraOff className="w-10 h-10 text-neutral-600 mx-auto" />
+                    <p className="text-neutral-400 font-bold">Kamera Dalam Keadaan Mati</p>
                     <button
                       type="button"
                       onClick={startWebcam}
-                      className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs shadow transition-all active:scale-95"
+                      className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-xs shadow transition-all active:scale-95 flex items-center gap-1.5 mx-auto"
                     >
-                      Buka Kamera Webcam
+                      <Power className="w-4 h-4" />
+                      <span>Nyalakan Kamera Sekarang</span>
                     </button>
                   </div>
                 )}
@@ -436,10 +482,17 @@ export default function FaceAuthOperator({ onLoginSuccess, onCancel }) {
                 {isWebcamActive && (
                   <div className="absolute inset-0 border-2 border-dashed border-blue-500/50 rounded-2xl pointer-events-none flex items-center justify-center">
                     <div className="w-48 h-48 border-2 border-emerald-500/80 rounded-full animate-pulse flex items-center justify-center">
-                      {autoScanning && (
+                      {autoScanning && activeTab === 'login' && (
                         <div className="text-[10px] font-mono font-bold bg-black/80 px-2 py-1 rounded text-emerald-400 border border-emerald-500/30 flex items-center gap-1 shadow-lg">
                           <Zap className="w-3.5 h-3.5 text-amber-400 animate-bounce" />
                           Auto-Scanning AI...
+                        </div>
+                      )}
+
+                      {activeTab === 'register' && (
+                        <div className="text-[10px] font-mono font-bold bg-black/80 px-2 py-1 rounded text-blue-400 border border-blue-500/30 flex items-center gap-1 shadow-lg">
+                          <UserPlus className="w-3.5 h-3.5 text-blue-400" />
+                          Mode Pendaftaran
                         </div>
                       )}
                     </div>
@@ -479,9 +532,14 @@ export default function FaceAuthOperator({ onLoginSuccess, onCancel }) {
                 </div>
               )}
 
-              {/* Tab 2: Operator Registration Form */}
+              {/* Tab 2: Operator Registration Form (Auto-login fully disabled to prevent accidental verifications!) */}
               {activeTab === 'register' && (
                 <form onSubmit={handleRegisterOperator} className="space-y-3">
+                  <div className="p-2.5 bg-blue-600/10 border border-blue-500/30 rounded-xl text-[11px] text-blue-400 font-bold flex items-center gap-2">
+                    <ShieldCheck className="w-4 h-4 shrink-0 text-blue-400" />
+                    <span>Mode Pendaftaran Aktif: Auto-login dimatikan agar tidak langsung terverifikasi secara tidak sengaja.</span>
+                  </div>
+
                   <div>
                     <label className="block text-neutral-300 font-bold mb-1">
                       Nama Lengkap Petugas Kota *
