@@ -43,24 +43,26 @@ export default function Navbar({
   return (
     <>
       <header className="sticky top-0 z-40 w-full bg-white/90 dark:bg-black/90 backdrop-blur-md border-b border-neutral-200 dark:border-neutral-800 transition-colors">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-14 sm:h-16">
             
             {/* Brand Logo & Tagline */}
-            <div className="flex items-center space-x-3 cursor-pointer group" onClick={() => setActiveTab('feed')}>
-              <div className="w-10 h-10 rounded-xl bg-emerald-500 text-black flex items-center justify-center font-extrabold shadow-lg shadow-emerald-500/20 group-hover:scale-105 transition-transform duration-200">
-                <Building2 className="w-5 h-5" />
+            <div className="flex items-center space-x-2 sm:space-x-3 cursor-pointer group" onClick={() => setActiveTab('feed')}>
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-emerald-500 text-black flex items-center justify-center font-extrabold shadow-lg shadow-emerald-500/20 group-hover:scale-105 transition-transform duration-200 shrink-0">
+                <Building2 className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
-              <div>
-                <div className="flex items-center space-x-1.5">
-                  <span className="font-black text-lg tracking-tight text-neutral-900 dark:text-white">
+              <div className="truncate">
+                <div className="flex items-center space-x-1 sm:space-x-1.5">
+                  <span className="font-black text-sm sm:text-lg tracking-tight text-neutral-900 dark:text-white truncate">
                     CivicPulse
                   </span>
-                  <span className="px-1.5 py-0.5 text-[10px] font-mono font-black rounded bg-emerald-500 text-black">
+                  <span className="px-1 py-0.5 text-[9px] sm:text-[10px] font-mono font-black rounded bg-emerald-500 text-black shrink-0">
                     SDG 11
                   </span>
                 </div>
-                <p className="text-[11px] text-neutral-500 dark:text-neutral-400 font-medium">Lapor Kota & Fasilitas Publik</p>
+                <p className="text-[10px] sm:text-[11px] text-neutral-500 dark:text-neutral-400 font-medium truncate hidden xs:block">
+                  Lapor Kota & Fasilitas Publik
+                </p>
               </div>
             </div>
 
@@ -103,7 +105,7 @@ export default function Navbar({
               </button>
             </nav>
 
-            {/* Quick Actions Bar */}
+            {/* Quick Actions Bar (Desktop) */}
             <div className="hidden lg:flex items-center space-x-2.5">
               
               {/* Operator Portal Entry Button */}
@@ -171,35 +173,20 @@ export default function Navbar({
               </button>
             </div>
 
-            {/* Mobile menu button */}
-            <div className="flex lg:hidden items-center gap-2">
-              {onOpenOperatorPortal && (
-                <button
-                  onClick={onOpenOperatorPortal}
-                  className="px-2.5 py-1.5 rounded-xl bg-blue-600/10 text-blue-400 border border-blue-500/30 text-xs font-bold active:scale-95"
-                >
-                  Petugas
-                </button>
-              )}
-
+            {/* Mobile Top Header Control Buttons (Clean & Non-Crowded on < 640px Mobile screens) */}
+            <div className="flex lg:hidden items-center gap-1.5 shrink-0">
               <button
                 onClick={toggleTheme}
                 className="p-2 rounded-xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-neutral-700 dark:text-neutral-300 active:scale-95"
+                title="Ganti Mode Gelap / Terang"
               >
                 {theme === 'dark' ? <Sun className="w-4 h-4 text-emerald-400" /> : <Moon className="w-4 h-4 text-neutral-700" />}
               </button>
 
               <button
-                onClick={onOpenCreateModal}
-                className="px-3 py-1.5 rounded-xl bg-emerald-500 text-black font-bold text-xs flex items-center gap-1 active:scale-95"
-              >
-                <PlusCircle className="w-3.5 h-3.5" />
-                Lapor
-              </button>
-
-              <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 className="p-2 rounded-xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-neutral-700 dark:text-neutral-300 active:scale-95"
+                title="Buka Menu"
               >
                 {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
               </button>
@@ -210,13 +197,13 @@ export default function Navbar({
 
         {/* Mobile Menu Dropdown */}
         {mobileMenuOpen && (
-          <div className="lg:hidden border-b border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 px-4 py-3 space-y-2 text-xs font-bold">
+          <div className="lg:hidden border-b border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 px-4 py-3 space-y-2 text-xs font-bold animate-in slide-in-from-top-2 duration-150">
             <button
               onClick={() => { setActiveTab('feed'); setMobileMenuOpen(false); }}
               className={`w-full text-left px-3 py-2 rounded-xl flex items-center gap-2 ${activeTab === 'feed' ? 'bg-emerald-500 text-black' : 'text-neutral-700 dark:text-neutral-300'}`}
             >
               <ShieldCheck className="w-4 h-4" />
-              <span>Semua Laporan</span>
+              <span>Semua Laporan Warga</span>
             </button>
 
             <button
@@ -224,7 +211,7 @@ export default function Navbar({
               className={`w-full text-left px-3 py-2 rounded-xl flex items-center gap-2 ${activeTab === 'map' ? 'bg-emerald-500 text-black' : 'text-neutral-700 dark:text-neutral-300'}`}
             >
               <MapPin className="w-4 h-4" />
-              <span>Peta Radar</span>
+              <span>Peta Radar GPS Satelit</span>
             </button>
 
             <button
@@ -232,7 +219,23 @@ export default function Navbar({
               className={`w-full text-left px-3 py-2 rounded-xl flex items-center gap-2 ${activeTab === 'analytics' ? 'bg-emerald-500 text-black' : 'text-neutral-700 dark:text-neutral-300'}`}
             >
               <BarChart3 className="w-4 h-4" />
-              <span>Analitik SDG</span>
+              <span>Analitik Statistik SDG 11</span>
+            </button>
+
+            <button
+              onClick={() => { setMobileMenuOpen(false); onOpenCreateModal(); }}
+              className="w-full text-left px-3 py-2 rounded-xl flex items-center gap-2 bg-emerald-500 text-black font-extrabold shadow"
+            >
+              <PlusCircle className="w-4 h-4" />
+              <span>Buat Aduan Publik Baru</span>
+            </button>
+
+            <button
+              onClick={() => { setMobileMenuOpen(false); onOpenTrackerModal(); }}
+              className="w-full text-left px-3 py-2 rounded-xl flex items-center gap-2 text-neutral-800 dark:text-neutral-200 bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800"
+            >
+              <Ticket className="w-4 h-4 text-emerald-500" />
+              <span>Lacak Nomor Tiket Laporan</span>
             </button>
 
             {onOpenOperatorPortal && (
@@ -240,7 +243,7 @@ export default function Navbar({
                 onClick={() => { setMobileMenuOpen(false); onOpenOperatorPortal(); }}
                 className="w-full text-left px-3 py-2 rounded-xl flex items-center gap-2 text-blue-400 bg-blue-500/10 border border-blue-500/20"
               >
-                <UserCheck className="w-4 h-4" />
+                <UserCheck className="w-4 h-4 text-blue-400" />
                 <span>Portal Masuk Petugas (Biometrik Wajah)</span>
               </button>
             )}
@@ -283,6 +286,7 @@ export default function Navbar({
         <button
           onClick={onOpenCreateModal}
           className="flex flex-col items-center justify-center w-10 h-10 rounded-full bg-emerald-500 text-black shadow-lg shadow-emerald-500/30 -mt-5 active:scale-95"
+          title="Buat Laporan"
         >
           <PlusCircle className="w-5 h-5" />
         </button>

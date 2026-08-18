@@ -73,10 +73,10 @@ export default function ReportFeed({
     <div className="space-y-6">
       
       {/* Control Filter Bar */}
-      <div className="bg-white dark:bg-neutral-900 p-4 rounded-xl border border-neutral-200 dark:border-neutral-800 flex flex-wrap items-center justify-between gap-3 shadow-sm transition-colors">
+      <div className="bg-white dark:bg-neutral-900 p-3 sm:p-4 rounded-xl border border-neutral-200 dark:border-neutral-800 flex flex-wrap items-center justify-between gap-3 shadow-sm transition-colors">
         
         {/* Category Filters */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 w-full sm:w-auto">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 w-full sm:w-auto scrollbar-none">
           {CATEGORIES.map((cat) => {
             const Icon = cat.icon;
             const isSelected = selectedCategory === cat.name || (cat.id === 'semua' && selectedCategory === 'semua');
@@ -98,7 +98,7 @@ export default function ReportFeed({
         </div>
 
         {/* Status Filters & View Toggle */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
           
           <select
             value={selectedStatus}
@@ -120,7 +120,7 @@ export default function ReportFeed({
                   : 'text-neutral-500 dark:text-neutral-400'
               }`}
             >
-              Feed Kartu
+              Kartu
             </button>
             <button
               onClick={() => setViewMode('map')}
@@ -130,7 +130,7 @@ export default function ReportFeed({
                   : 'text-neutral-500 dark:text-neutral-400'
               }`}
             >
-              Peta Radar
+              Peta
             </button>
           </div>
 
@@ -140,7 +140,7 @@ export default function ReportFeed({
 
       {/* Reports Feed Grid with Staggered Entrance Animations */}
       {reports.length === 0 ? (
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-12 text-center space-y-3 animate-fade-in-up">
+        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-8 sm:p-12 text-center space-y-3 animate-fade-in-up">
           <div className="w-12 h-12 rounded-full bg-neutral-100 dark:bg-neutral-800 mx-auto flex items-center justify-center text-neutral-400">
             <Filter className="w-6 h-6" />
           </div>
@@ -150,7 +150,7 @@ export default function ReportFeed({
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
           {reports.map((report, idx) => {
             const catBadge = getCategoryBadge(report.category);
             const CatIcon = catBadge.icon;
@@ -163,10 +163,10 @@ export default function ReportFeed({
               <div 
                 key={report.id}
                 style={{ animationDelay: `${(idx % 6) * 0.08}s` }}
-                className="bg-white dark:bg-black border border-neutral-200 dark:border-neutral-800 rounded-xl overflow-hidden flex flex-col justify-between hover:border-emerald-500/60 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group animate-fade-in-up"
+                className="bg-white dark:bg-black border border-neutral-200 dark:border-neutral-800 rounded-2xl overflow-hidden flex flex-col justify-between hover:border-emerald-500/60 hover:shadow-xl transition-all duration-300 group animate-fade-in-up"
               >
                 {/* Image Container (Before vs After - Only shown on Completed reports) */}
-                <div className="relative h-44 w-full overflow-hidden bg-neutral-100 dark:bg-neutral-900">
+                <div className="relative h-40 sm:h-44 w-full overflow-hidden bg-neutral-100 dark:bg-neutral-900">
                   {hasAfterImage ? (
                     <div className="grid grid-cols-2 h-full w-full divide-x divide-neutral-800">
                       <div className="relative h-full w-full overflow-hidden">
@@ -175,7 +175,7 @@ export default function ReportFeed({
                           alt="Sebelum"
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
-                        <span className="absolute bottom-1 left-1 px-1.5 py-0.5 rounded bg-black/80 text-amber-400 text-[9px] font-bold">
+                        <span className="absolute bottom-1 left-1 px-1.5 py-0.5 rounded bg-black/80 text-amber-400 text-[8px] sm:text-[9px] font-bold">
                           Sebelum
                         </span>
                       </div>
@@ -186,7 +186,7 @@ export default function ReportFeed({
                           alt="Sesudah"
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
-                        <span className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-emerald-500 text-black text-[9px] font-extrabold">
+                        <span className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-emerald-500 text-black text-[8px] sm:text-[9px] font-extrabold">
                           Hasil Petugas
                         </span>
                       </div>
@@ -200,15 +200,15 @@ export default function ReportFeed({
                   )}
                   
                   {/* Category Badge */}
-                  <div className="absolute top-2.5 left-2.5 z-10">
-                    <span className="px-2.5 py-1 rounded-md text-[10px] font-bold bg-black/80 text-white backdrop-blur-md flex items-center gap-1 border border-neutral-800 shadow">
+                  <div className="absolute top-2 left-2 z-10">
+                    <span className="px-2 py-0.5 rounded-md text-[9px] sm:text-[10px] font-bold bg-black/80 text-white backdrop-blur-md flex items-center gap-1 border border-neutral-800 shadow">
                       <CatIcon className="w-3 h-3 text-emerald-400" />
                       {report.category}
                     </span>
                   </div>
 
                   {/* Top Right Action Overlay (Zoom + Delete) */}
-                  <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
+                  <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
                     <button
                       onClick={() => setPreviewImage((hasAfterImage && report.afterImage) || report.image)}
                       className="p-1.5 rounded-md bg-black/80 hover:bg-black text-white backdrop-blur-md border border-neutral-800 active:scale-95 transition-all"
@@ -227,8 +227,8 @@ export default function ReportFeed({
                   </div>
 
                   {/* Status Badge */}
-                  <div className="absolute bottom-2.5 right-2.5 z-10">
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold border flex items-center gap-1 backdrop-blur-md shadow ${statusBadge.class}`}>
+                  <div className="absolute bottom-2 right-2 z-10">
+                    <span className={`px-2 py-0.5 rounded text-[9px] sm:text-[10px] font-bold border flex items-center gap-1 backdrop-blur-md shadow ${statusBadge.class}`}>
                       <StatusIcon className="w-3 h-3" />
                       {statusBadge.label}
                     </span>
@@ -236,30 +236,30 @@ export default function ReportFeed({
                 </div>
 
                 {/* Card Body */}
-                <div className="p-4 space-y-3 flex-1 flex flex-col justify-between">
+                <div className="p-3.5 sm:p-4 space-y-2.5 sm:space-y-3 flex-1 flex flex-col justify-between">
                   <div>
-                    <h3 className="text-sm font-bold text-neutral-900 dark:text-white group-hover:text-emerald-500 transition-colors line-clamp-2">
+                    <h3 className="text-xs sm:text-sm font-bold text-neutral-900 dark:text-white group-hover:text-emerald-500 transition-colors line-clamp-2 leading-snug">
                       {report.title}
                     </h3>
-                    <p className="text-xs text-neutral-600 dark:text-neutral-400 mt-1.5 line-clamp-2 leading-relaxed font-medium">
+                    <p className="text-[11px] sm:text-xs text-neutral-600 dark:text-neutral-400 mt-1 line-clamp-2 leading-relaxed font-medium">
                       {report.description}
                     </p>
                   </div>
 
-                  {/* Rating Component for Completed Reports */}
+                  {/* Rating Component for Completed Reports (Multi-Line Flex Wrap for Small Mobile Screens) */}
                   {report.status === 'Selesai' && (
-                    <div className="bg-emerald-500/10 border border-emerald-500/20 p-2.5 rounded-xl space-y-1">
-                      <div className="flex items-center justify-between text-[10px]">
-                        <span className="font-extrabold text-emerald-500 uppercase tracking-wider">
-                          Ulasan Kepuasan Penanganan Warga:
+                    <div className="bg-emerald-500/10 border border-emerald-500/20 p-2 sm:p-2.5 rounded-xl space-y-1">
+                      <div className="flex items-center justify-between flex-wrap gap-1 text-[9px] sm:text-[10px]">
+                        <span className="font-extrabold text-emerald-500 uppercase tracking-wider truncate">
+                          Kepuasan Penanganan Warga:
                         </span>
                         {report.rating && (
-                          <span className="font-black text-amber-400">{report.rating}/5 ★</span>
+                          <span className="font-black text-amber-400 shrink-0">{report.rating}/5 ★</span>
                         )}
                       </div>
 
                       {report.rating ? (
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-1 pt-0.5">
                           {[1, 2, 3, 4, 5].map((star) => (
                             <Star
                               key={star}
@@ -272,17 +272,17 @@ export default function ReportFeed({
                           ))}
                         </div>
                       ) : (
-                        <div className="flex items-center gap-1.5 pt-0.5">
-                          <span className="text-[10px] text-neutral-400 font-bold">Beri Rating:</span>
+                        <div className="flex items-center gap-1 pt-0.5 flex-wrap">
+                          <span className="text-[9px] sm:text-[10px] text-neutral-400 font-bold">Beri Rating:</span>
                           {[1, 2, 3, 4, 5].map((star) => (
                             <button
                               key={star}
                               type="button"
                               onClick={() => onRateReport && onRateReport(report.id, star, 'Ulasan Warga')}
-                              className="text-neutral-400 hover:text-amber-400 hover:scale-125 transition-transform"
+                              className="text-neutral-400 hover:text-amber-400 hover:scale-125 transition-transform p-0.5"
                               title={`Beri ${star} Bintang`}
                             >
-                              <Star className="w-4 h-4 fill-amber-400 text-amber-400 hover:fill-amber-400" />
+                              <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400 hover:fill-amber-400" />
                             </button>
                           ))}
                         </div>
@@ -291,36 +291,36 @@ export default function ReportFeed({
                   )}
 
                   {/* Info Tags */}
-                  <div className="space-y-1.5 pt-2 border-t border-neutral-100 dark:border-neutral-800 text-[11px] text-neutral-500 dark:text-neutral-400">
-                    <div className="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-300 font-medium">
+                  <div className="space-y-1 pt-2 border-t border-neutral-100 dark:border-neutral-800 text-[10px] sm:text-[11px] text-neutral-500 dark:text-neutral-400">
+                    <div className="flex items-center gap-1 text-neutral-700 dark:text-neutral-300 font-medium">
                       <MapPin className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
                       <span className="truncate">{report.location}</span>
                     </div>
 
-                    <div className="flex items-center justify-between text-neutral-500 dark:text-neutral-400 text-[10px]">
+                    <div className="flex items-center justify-between text-neutral-500 dark:text-neutral-400 text-[9px] sm:text-[10px] flex-wrap gap-1">
                       <div className="flex items-center gap-1">
                         <Clock className="w-3 h-3 text-neutral-400" />
                         <span>{report.date}</span>
                       </div>
-                      <div className="flex items-center gap-1">
-                        <UserCheck className="w-3 h-3 text-neutral-400" />
-                        <span>{report.isAnonymous ? 'Pelapor Anonim' : report.author}</span>
+                      <div className="flex items-center gap-1 truncate">
+                        <UserCheck className="w-3 h-3 text-neutral-400 shrink-0" />
+                        <span className="truncate">{report.isAnonymous ? 'Pelapor Anonim' : report.author}</span>
                       </div>
                     </div>
 
                     {report.verifiedBy && (
-                      <div className="text-[10px] text-emerald-500 font-bold flex items-center gap-1 pt-0.5">
-                        <CheckCircle2 className="w-3 h-3" />
-                        <span>Diverifikasi oleh: {report.verifiedBy}</span>
+                      <div className="text-[9px] sm:text-[10px] text-emerald-500 font-bold flex items-center gap-1 pt-0.5 truncate">
+                        <CheckCircle2 className="w-3 h-3 shrink-0" />
+                        <span className="truncate">Diverifikasi oleh: {report.verifiedBy}</span>
                       </div>
                     )}
                   </div>
 
                   {/* Card Actions Footer */}
-                  <div className="pt-2 flex items-center justify-between border-t border-neutral-100 dark:border-neutral-800">
+                  <div className="pt-2 flex items-center justify-between border-t border-neutral-100 dark:border-neutral-800 gap-1">
                     <button
                       onClick={() => onUpvote(report.id)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-extrabold flex items-center gap-1.5 transition-all active:scale-95 ${
+                      className={`px-2.5 py-1.5 rounded-lg text-[11px] sm:text-xs font-extrabold flex items-center gap-1 transition-all active:scale-95 ${
                         report.upvotedByUser
                           ? 'bg-emerald-500 text-black shadow-sm'
                           : 'bg-neutral-100 dark:bg-neutral-900 text-neutral-700 dark:text-neutral-300 hover:text-emerald-500 border border-neutral-200 dark:border-neutral-800'
@@ -332,7 +332,7 @@ export default function ReportFeed({
 
                     <button
                       onClick={() => onTrackTicket(report.id)}
-                      className="px-3.5 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-xs flex items-center gap-1 shadow transition-all active:scale-95"
+                      className="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-[11px] sm:text-xs flex items-center gap-1 shadow transition-all active:scale-95"
                     >
                       <Ticket className="w-3.5 h-3.5" />
                       <span>Lacak</span>
