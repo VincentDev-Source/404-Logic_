@@ -62,10 +62,10 @@ export default function OpeningScreen({ onFinish }) {
               duration: 1.0,
               ease: [0.76, 0, 0.24, 1], // Custom smooth 60 FPS cubic-bezier
             }}
-            className="absolute inset-0 bg-[#050505] text-white flex flex-col items-center justify-center pointer-events-auto"
+            className="absolute inset-0 bg-[#050505] text-white flex flex-col items-center justify-center pointer-events-auto overflow-hidden"
           >
-            {/* Ambient Emerald Glow Radial Orb */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[450px] h-[450px] bg-emerald-500/15 rounded-full blur-[140px] pointer-events-none animate-pulse" />
+            {/* Ambient Soft Emerald Radial Orb (No Square Borders) */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-emerald-500/15 rounded-full blur-[150px] pointer-events-none animate-pulse" />
 
             {/* Opening Screen Content */}
             <motion.div
@@ -77,16 +77,21 @@ export default function OpeningScreen({ onFinish }) {
               {/* CIRCULAR PROGRESS RING (PROGRESS BUNDAR) + OFFICIAL LOGO */}
               <div className="relative w-36 h-36 flex items-center justify-center">
                 
-                {/* Background Track Circle */}
-                <svg className="w-full h-full transform -rotate-90" viewBox="0 0 120 120">
+                {/* Seamless Radial Glow Backdrop Layer Behind Ring (Eliminates Box Clipping) */}
+                <div className="absolute inset-[-12px] rounded-full bg-emerald-500/25 blur-2xl pointer-events-none animate-pulse" />
+
+                {/* SVG Progress Ring with Expanded ViewBox & overflow-visible to prevent clipping */}
+                <svg className="w-full h-full transform -rotate-90 overflow-visible relative z-10" viewBox="-15 -15 150 150">
+                  {/* Background Track Circle */}
                   <circle
                     cx="60"
                     cy="60"
                     r={radius}
-                    className="stroke-neutral-900"
+                    stroke="#18181b"
                     strokeWidth="6"
-                    fill="transparent"
+                    fill="none"
                   />
+
                   {/* Dynamic Glowing Emerald Progress Circle */}
                   <circle
                     cx="60"
@@ -95,15 +100,15 @@ export default function OpeningScreen({ onFinish }) {
                     stroke="#10B981"
                     strokeWidth="6"
                     strokeLinecap="round"
-                    fill="transparent"
+                    fill="none"
                     strokeDasharray={circumference}
                     strokeDashoffset={strokeDashoffset}
-                    className="transition-all duration-150 ease-out drop-shadow-[0_0_12px_#10B981]"
+                    className="transition-all duration-150 ease-out"
                   />
                 </svg>
 
                 {/* Official CivicPulse Building2 Emblem in Center of Ring */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <div className="absolute inset-0 flex flex-col items-center justify-center z-20">
                   <div className="w-14 h-14 rounded-2xl bg-emerald-500 text-black flex items-center justify-center font-extrabold shadow-lg shadow-emerald-500/40 border border-emerald-400">
                     <Building2 className="w-7 h-7" />
                   </div>
