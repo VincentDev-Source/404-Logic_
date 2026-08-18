@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Building2, 
   MapPin, 
@@ -9,7 +9,11 @@ import {
   Sun,
   Moon,
   Lock,
-  UserCheck
+  UserCheck,
+  Plus,
+  X,
+  Sparkles,
+  FileText
 } from 'lucide-react';
 
 export default function Navbar({ 
@@ -25,6 +29,8 @@ export default function Navbar({
   onLockFaceAuth,
   onOpenOperatorPortal
 }) {
+  const [speedDialOpen, setSpeedDialOpen] = useState(false);
+
   const handleTicketFormSubmit = (e) => {
     e.preventDefault();
     if (quickTicketInput.trim()) {
@@ -174,64 +180,172 @@ export default function Navbar({
         </div>
       </header>
 
-      {/* Smartphone Sticky Bottom Quick Action Navigation Bar (With Lock App Button Included) */}
-      <div className="sm:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 dark:bg-black/95 backdrop-blur-lg border-t border-neutral-200 dark:border-neutral-800 px-2 py-1.5 flex items-center justify-around text-[9px] font-extrabold shadow-2xl">
-        <button
-          onClick={() => setActiveTab('feed')}
-          className={`flex flex-col items-center gap-0.5 p-1 transition-colors ${
-            activeTab === 'feed' ? 'text-emerald-500' : 'text-neutral-400'
-          }`}
-        >
-          <ShieldCheck className="w-4 h-4" />
-          <span>Beranda</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('map')}
-          className={`flex flex-col items-center gap-0.5 p-1 transition-colors ${
-            activeTab === 'map' ? 'text-emerald-500' : 'text-neutral-400'
-          }`}
-        >
-          <MapPin className="w-4 h-4" />
-          <span>Peta</span>
-        </button>
-
-        <button
-          onClick={onOpenCreateModal}
-          className="flex flex-col items-center justify-center w-10 h-10 rounded-full bg-emerald-500 text-black shadow-lg shadow-emerald-500/30 -mt-5 active:scale-95"
-          title="Buat Laporan"
-        >
-          <PlusCircle className="w-5 h-5" />
-        </button>
-
-        <button
-          onClick={onOpenTrackerModal}
-          className="flex flex-col items-center gap-0.5 p-1 text-neutral-400 hover:text-emerald-500 transition-colors"
-        >
-          <Ticket className="w-4 h-4" />
-          <span>Lacak</span>
-        </button>
-
-        {onOpenOperatorPortal && (
-          <button
-            onClick={onOpenOperatorPortal}
-            className="flex flex-col items-center gap-0.5 p-1 text-blue-400 hover:text-blue-300 transition-colors"
-          >
-            <UserCheck className="w-4 h-4" />
-            <span>Petugas</span>
-          </button>
+      {/* 
+        ========================================================================
+        SMARTPHONE ANIMATED FLOATING GLASSMORPHISM DOCK WITH 100% CENTERED (+)
+        ========================================================================
+      */}
+      <div className="sm:hidden fixed bottom-4 inset-x-3 max-w-sm mx-auto z-50 pointer-events-auto">
+        
+        {/* Backdrop overlay when speed dial menu is open */}
+        {speedDialOpen && (
+          <div
+            onClick={() => setSpeedDialOpen(false)}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 animate-in fade-in duration-200"
+          />
         )}
 
-        {onLockFaceAuth && (
-          <button
-            onClick={onLockFaceAuth}
-            className="flex flex-col items-center gap-0.5 p-1 text-red-500 hover:text-red-400 transition-colors"
-            title="Kunci Aplikasi"
-          >
-            <Lock className="w-4 h-4" />
-            <span>Kunci</span>
-          </button>
+        {/* Expandable Speed-Dial Floating Menu Popup */}
+        {speedDialOpen && (
+          <div className="absolute bottom-16 inset-x-0 z-50 bg-neutral-900/95 dark:bg-black/95 border border-neutral-800 rounded-3xl p-3 shadow-2xl backdrop-blur-2xl space-y-2 animate-in slide-in-from-bottom-5 duration-300">
+            <div className="flex items-center justify-between px-3 py-1.5 border-b border-neutral-800 text-[10px] font-extrabold text-neutral-400">
+              <span className="flex items-center gap-1 text-emerald-400">
+                <Sparkles className="w-3.5 h-3.5" />
+                PILIH OPSI FITUR LAPORAN
+              </span>
+              <button onClick={() => setSpeedDialOpen(false)} className="text-neutral-400 hover:text-white">✕</button>
+            </div>
+
+            <div className="grid grid-cols-1 gap-1.5 text-xs font-bold pt-1">
+              <button
+                onClick={() => { setSpeedDialOpen(false); onOpenCreateModal(); }}
+                className="w-full p-2.5 rounded-2xl bg-emerald-500 text-black font-extrabold flex items-center justify-between shadow active:scale-95 transition-all"
+              >
+                <div className="flex items-center gap-2">
+                  <PlusCircle className="w-4 h-4" />
+                  <span>Buat Aduan Publik Baru</span>
+                </div>
+                <span className="text-[10px] bg-black/20 px-2 py-0.5 rounded-full font-mono">+Lapor</span>
+              </button>
+
+              <button
+                onClick={() => { setSpeedDialOpen(false); onOpenTrackerModal(); }}
+                className="w-full p-2.5 rounded-2xl bg-neutral-800 hover:bg-neutral-700 text-white flex items-center justify-between active:scale-95 transition-all"
+              >
+                <div className="flex items-center gap-2">
+                  <Ticket className="w-4 h-4 text-emerald-400" />
+                  <span>Lacak Nomor Tiket Laporan</span>
+                </div>
+                <span className="text-[10px] text-neutral-400">#LP-2026</span>
+              </button>
+
+              {onOpenOperatorPortal && (
+                <button
+                  onClick={() => { setSpeedDialOpen(false); onOpenOperatorPortal(); }}
+                  className="w-full p-2.5 rounded-2xl bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 border border-blue-500/30 flex items-center justify-between active:scale-95 transition-all"
+                >
+                  <div className="flex items-center gap-2">
+                    <UserCheck className="w-4 h-4" />
+                    <span>Portal Petugas (Biometrik Wajah)</span>
+                  </div>
+                  <span className="text-[10px] text-blue-400 font-mono">SDG 11</span>
+                </button>
+              )}
+
+              <button
+                onClick={() => { setSpeedDialOpen(false); setActiveTab('analytics'); }}
+                className="w-full p-2.5 rounded-2xl bg-neutral-800 hover:bg-neutral-700 text-white flex items-center justify-between active:scale-95 transition-all"
+              >
+                <div className="flex items-center gap-2">
+                  <BarChart3 className="w-4 h-4 text-amber-400" />
+                  <span>Dashboard Analitik SDG 11</span>
+                </div>
+                <span className="text-[10px] text-neutral-400">Statistik</span>
+              </button>
+
+              {onLockFaceAuth && (
+                <button
+                  onClick={() => { setSpeedDialOpen(false); onLockFaceAuth(); }}
+                  className="w-full p-2.5 rounded-2xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 flex items-center justify-between active:scale-95 transition-all"
+                >
+                  <div className="flex items-center gap-2">
+                    <Lock className="w-4 h-4" />
+                    <span>Kunci Aplikasi / Logout Face Auth</span>
+                  </div>
+                  <span className="text-[10px] text-red-400">Lock 🔒</span>
+                </button>
+              )}
+            </div>
+          </div>
         )}
+
+        {/* 
+          FLOATING DOCK BAR: 5 Main items for 100% mathematical center alignment!
+          Item 1: Beranda
+          Item 2: Peta
+          Item 3: (+) Center Action Hub (MATHEMATICALLY CENTERED!)
+          Item 4: Analitik
+          Item 5: Kunci
+        */}
+        <div className="relative z-50 bg-neutral-950/90 dark:bg-black/90 backdrop-blur-2xl border border-neutral-800/80 rounded-full p-1.5 shadow-2xl flex items-center justify-between text-[9px] font-extrabold text-white">
+          
+          {/* Item 1: Beranda */}
+          <button
+            onClick={() => { setSpeedDialOpen(false); setActiveTab('feed'); }}
+            className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 rounded-full transition-all active:scale-95 ${
+              activeTab === 'feed' ? 'text-emerald-400 font-black' : 'text-neutral-400 hover:text-white'
+            }`}
+          >
+            <ShieldCheck className="w-4 h-4" />
+            <span>Beranda</span>
+          </button>
+
+          {/* Item 2: Peta */}
+          <button
+            onClick={() => { setSpeedDialOpen(false); setActiveTab('map'); }}
+            className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 rounded-full transition-all active:scale-95 ${
+              activeTab === 'map' ? 'text-emerald-400 font-black' : 'text-neutral-400 hover:text-white'
+            }`}
+          >
+            <MapPin className="w-4 h-4" />
+            <span>Peta</span>
+          </button>
+
+          {/* Item 3: (+) CENTER ACTION HUB (100% MATHEMATICALLY CENTERED IN DOCK) */}
+          <div className="flex-1 flex items-center justify-center -my-3">
+            <button
+              onClick={() => setSpeedDialOpen(!speedDialOpen)}
+              className={`w-11 h-11 rounded-full bg-emerald-500 text-black flex items-center justify-center shadow-lg shadow-emerald-500/40 border-2 border-neutral-950 transition-transform duration-300 active:scale-90 ${
+                speedDialOpen ? 'rotate-45 bg-emerald-400' : 'hover:scale-110 animate-pulse'
+              }`}
+              title="Menu Aksi Cepat"
+            >
+              <Plus className="w-6 h-6 stroke-[3]" />
+            </button>
+          </div>
+
+          {/* Item 4: Analitik */}
+          <button
+            onClick={() => { setSpeedDialOpen(false); setActiveTab('analytics'); }}
+            className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 rounded-full transition-all active:scale-95 ${
+              activeTab === 'analytics' ? 'text-emerald-400 font-black' : 'text-neutral-400 hover:text-white'
+            }`}
+          >
+            <BarChart3 className="w-4 h-4" />
+            <span>Analitik</span>
+          </button>
+
+          {/* Item 5: Kunci */}
+          {onLockFaceAuth ? (
+            <button
+              onClick={() => { setSpeedDialOpen(false); onLockFaceAuth(); }}
+              className="flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 rounded-full text-red-400 hover:text-red-300 transition-all active:scale-95"
+              title="Kunci Aplikasi"
+            >
+              <Lock className="w-4 h-4" />
+              <span>Kunci</span>
+            </button>
+          ) : (
+            <button
+              onClick={() => setSpeedDialOpen(!speedDialOpen)}
+              className="flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 rounded-full text-neutral-400 hover:text-white transition-all active:scale-95"
+            >
+              <Sparkles className="w-4 h-4 text-emerald-400" />
+              <span>Menu</span>
+            </button>
+          )}
+
+        </div>
       </div>
     </>
   );
