@@ -17,7 +17,6 @@ import FaceAuthOperator from './components/FaceAuthOperator';
 import OperatorDashboard from './components/OperatorDashboard';
 import Footer from './components/Footer';
 import CurvedNavbar from './components/CurvedNavbar';
-import { INITIAL_REPORTS } from './data/mockReports';
 import { CheckCircle2, X, AlertTriangle, RefreshCw, Loader2 } from 'lucide-react';
 
 // Normalize database records to match frontend component requirements
@@ -224,7 +223,7 @@ export default function App() {
     showToast('Aplikasi Dikunci 🔒', 'Sesi autentikasi wajah Anda telah dikunci kembali.', 'info');
   };
 
-  // Fetch reports from backend API (/api/reports)
+  // Fetch real reports strictly from backend API (/api/reports) with NO mock data fallbacks
   const fetchReports = useCallback(async () => {
     setIsLoading(true);
     setError(null);
@@ -235,22 +234,11 @@ export default function App() {
       }
       const data = await res.json();
       
-      let normalizedData = Array.isArray(data) ? data.map(normalizeReport) : [];
-      
-      // Fallback to rich initial mock reports if database returns empty array
-      if (normalizedData.length === 0 && Array.isArray(INITIAL_REPORTS)) {
-        normalizedData = INITIAL_REPORTS.map(normalizeReport);
-      }
-
+      const normalizedData = Array.isArray(data) ? data.map(normalizeReport) : [];
       setReports(normalizedData);
     } catch (err) {
       console.error('Error fetching reports from /api/reports:', err);
-      // Fallback to INITIAL_REPORTS on network or server error
-      if (Array.isArray(INITIAL_REPORTS)) {
-        setReports(INITIAL_REPORTS.map(normalizeReport));
-      } else {
-        setError('Gagal memuat data laporan dari database PostgreSQL. Silakan periksa koneksi internet atau server.');
-      }
+      setError('Gagal memuat data laporan dari database PostgreSQL. Silakan periksa koneksi internet atau server.');
     } finally {
       setIsLoading(false);
     }
@@ -473,14 +461,14 @@ export default function App() {
   return (
     <div className="min-h-screen flex flex-col bg-white dark:bg-black text-neutral-900 dark:text-white transition-colors duration-300">
       
-      {/* Animated Wavy Curtain Opening Screen */}
+      {/* Animated Opening Screen */}
       <AnimatePresence mode="wait">
         {showSplash && (
           <OpeningScreen onFinish={() => setShowSplash(false)} />
         )}
       </AnimatePresence>
 
-      {/* Modern Custom Confirmation Modal (Replaces window.confirm "says" popup) */}
+      {/* Modern Custom Confirmation Modal */}
       <ConfirmModal
         isOpen={confirmModalState.isOpen}
         onClose={() => setConfirmModalState(prev => ({ ...prev, isOpen: false }))}
@@ -490,7 +478,7 @@ export default function App() {
         type={confirmModalState.type}
       />
 
-      {/* Modern Custom Alert Modal (Replaces window.alert "says" popup) */}
+      {/* Modern Custom Alert Modal */}
       <AlertModal
         isOpen={alertModalState.isOpen}
         onClose={() => setAlertModalState(prev => ({ ...prev, isOpen: false }))}
@@ -566,12 +554,12 @@ export default function App() {
         ) : (
           /* Dedicated Tab View Router */
           activeTab === 'analytics' ? (
-            /* ANALITIK TAB VIEW (Full dedicated Analytics Dashboard, no HeroStats clutter above) */
+            /* ANALITIK TAB VIEW */
             <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-4 pb-28 sm:pb-16">
               <AnalyticsDashboard reports={reports} theme={theme} />
             </div>
           ) : activeTab === 'map' ? (
-            /* PETA TAB VIEW (Full dedicated Radar Map view directly at top of screen) */
+            /* PETA TAB VIEW */
             <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-4 pb-28 sm:pb-16">
               <InteractiveMap
                 reports={filteredReports}
@@ -585,7 +573,7 @@ export default function App() {
               />
             </div>
           ) : (
-            /* BERANDA TAB VIEW (Hero Impact Stats + Citizen Reports Feed) */
+            /* BERANDA TAB VIEW */
             <>
               <HeroStats
                 reports={reports}
@@ -617,7 +605,7 @@ export default function App() {
 
       </main>
 
-      {/* Global Curved Floating Bottom Navbar (For Smartphone Viewports) */}
+      {/* Global Curved Floating Bottom Navbar */}
       <div className="sm:hidden">
         <CurvedNavbar
           activeTab={
