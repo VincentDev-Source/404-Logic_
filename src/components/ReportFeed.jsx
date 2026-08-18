@@ -23,6 +23,7 @@ export default function ReportFeed({
   reports, 
   onUpvote, 
   onTrackTicket, 
+  onDeleteReport,
   selectedCategory, 
   setSelectedCategory,
   selectedStatus,
@@ -31,8 +32,9 @@ export default function ReportFeed({
   setViewMode
 }) {
   const [previewImage, setPreviewImage] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
 
-  // Category badge helper (Monochrome with single Emerald icon highlight)
+  // Category badge helper
   const getCategoryBadge = (categoryName) => {
     switch (categoryName) {
       case 'Jalan Rusak':
@@ -48,7 +50,7 @@ export default function ReportFeed({
     }
   };
 
-  // Status badge helper (Clean Black & White / Emerald accent)
+  // Status badge helper
   const getStatusBadge = (status) => {
     switch (status) {
       case 'Selesai':
@@ -69,6 +71,14 @@ export default function ReportFeed({
           icon: AlertCircle, 
           class: 'bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 border-neutral-300 dark:border-neutral-700' 
         };
+    }
+  };
+
+  const confirmDelete = (reportId) => {
+    if (window.confirm(`Apakah Anda yakin ingin menghapus aduan #${reportId} secara permanen?`)) {
+      setDeletingId(reportId);
+      onDeleteReport(reportId);
+      setDeletingId(null);
     }
   };
 
@@ -148,7 +158,7 @@ export default function ReportFeed({
               }`}
             >
               <MapPin className="w-3.5 h-3.5" />
-              <span>Peta Grid</span>
+              <span>Peta Leaflet</span>
             </button>
           </div>
 
@@ -196,14 +206,26 @@ export default function ReportFeed({
                     </span>
                   </div>
 
-                  {/* Zoom Image Button */}
-                  <button
-                    onClick={() => setPreviewImage(report.image)}
-                    className="absolute top-2.5 right-2.5 p-1.5 rounded-md bg-black/80 hover:bg-black text-white backdrop-blur-md transition-all opacity-0 group-hover:opacity-100 border border-neutral-800"
-                    title="Pratinjau Foto"
-                  >
-                    <Maximize2 className="w-3.5 h-3.5" />
-                  </button>
+                  {/* Top Right Action Overlay (Zoom + Delete) */}
+                  <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      onClick={() => setPreviewImage(report.image)}
+                      className="p-1.5 rounded-md bg-black/80 hover:bg-black text-white backdrop-blur-md border border-neutral-800"
+                      title="Pratinjau Foto"
+                    >
+                      <Maximize2 className="w-3.5 h-3.5" />
+                    </button>
+
+                    {/* Delete Report Button */}
+                    <button
+                      onClick={() => confirmDelete(report.id)}
+                      disabled={deletingId === report.id}
+                      className="p-1.5 rounded-md bg-red-600/90 hover:bg-red-600 text-white backdrop-blur-md border border-red-500/50 transition-colors"
+                      title="Hapus Aduan Ini"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
 
                   {/* Ticket ID */}
                   <div className="absolute bottom-2.5 left-2.5">
@@ -265,13 +287,23 @@ export default function ReportFeed({
                       <span>{report.upvotes} Dukungan</span>
                     </button>
 
-                    <button
-                      onClick={() => onTrackTicket(report.id)}
-                      className="px-3 py-1.5 rounded-lg text-xs font-bold bg-neutral-100 dark:bg-neutral-900 text-neutral-900 dark:text-white hover:text-emerald-500 dark:hover:text-emerald-400 border border-neutral-200 dark:border-neutral-800 flex items-center gap-1 transition-all"
-                    >
-                      <Ticket className="w-3.5 h-3.5" />
-                      <span>Lacak</span>
-                    </button>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => onTrackTicket(report.id)}
+                        className="px-3 py-1.5 rounded-lg text-xs font-bold bg-neutral-100 dark:bg-neutral-900 text-neutral-900 dark:text-white hover:text-emerald-500 dark:hover:text-emerald-400 border border-neutral-200 dark:border-neutral-800 flex items-center gap-1 transition-all"
+                      >
+                        <Ticket className="w-3.5 h-3.5" />
+                        <span>Lacak</span>
+                      </button>
+
+                      <button
+                        onClick={() => confirmDelete(report.id)}
+                        className="p-1.5 rounded-lg text-xs font-bold bg-neutral-100 dark:bg-neutral-900 text-red-500 hover:bg-red-500 hover:text-white border border-neutral-200 dark:border-neutral-800 transition-all sm:hidden"
+                        title="Hapus Aduan"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </div>
 
                 </div>

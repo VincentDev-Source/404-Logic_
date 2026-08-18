@@ -9,15 +9,18 @@ import AnalyticsDashboard from './components/AnalyticsDashboard';
 import Footer from './components/Footer';
 import { CheckCircle2, X, AlertTriangle, RefreshCw, Loader2 } from 'lucide-react';
 
-// Helper function to normalize database report records to match frontend expectations
+// Normalize database records to match frontend component requirements
 function normalizeReport(raw) {
   const id = raw.id;
   const numId = typeof id === 'number' ? id : parseInt(String(id).replace(/\D/g, ''), 10) || 1;
   const idStr = typeof id === 'number' ? `LP-2026-${String(id).padStart(4, '0')}` : String(id);
 
-  // Generate consistent pseudo-coordinates for map visualization based on numeric ID
-  const mapX = raw.coordinates?.mapX ?? ((numId * 37) % 65 + 15);
-  const mapY = raw.coordinates?.mapY ?? ((numId * 53) % 55 + 20);
+  // Real or generated Indonesia GPS coordinates (default center around Jakarta/Indonesia)
+  const defaultLat = -6.2088 + (((numId * 37) % 50) - 25) * 0.005;
+  const defaultLng = 106.8456 + (((numId * 53) % 50) - 25) * 0.005;
+
+  const lat = raw.coordinates?.lat || raw.lat || defaultLat;
+  const lng = raw.coordinates?.lng || raw.lng || defaultLng;
 
   const createdAtDate = raw.createdAt ? new Date(raw.createdAt) : new Date();
   const formattedDate = raw.date || `${createdAtDate.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' })}, ${createdAtDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}`;
@@ -34,7 +37,7 @@ function normalizeReport(raw) {
     location: raw.location || 'Lokasi tidak disebutkan',
     city: raw.city || 'Jakarta',
     district: raw.district || 'Kecamatan Terkait',
-    coordinates: raw.coordinates || { lat: -6.2088, lng: 106.8456, mapX, mapY },
+    coordinates: { lat, lng },
     description: raw.description || '',
     author: raw.author || 'Warga Peduli',
     isAnonymous: raw.isAnonymous ?? false,
@@ -91,7 +94,7 @@ export default function App() {
   // Toast notification state
   const [toastMessage, setToastMessage] = useState(null);
 
-  // Show Toast notification helper
+  // Show Toast helper
   const showToast = (title, message, type = 'success') => {
     setToastMessage({ title, message, type });
     setTimeout(() => {
@@ -152,6 +155,31 @@ export default function App() {
   const resolvedPercentage = totalReportsCount > 0 
     ? ((resolvedCount / totalReportsCount) * 100).toFixed(1) 
     : '94.2';
+
+  // Handle report deletion
+  const handleDeleteReport = async (reportId) => {
+    const target = reports.find((r) => r.id === reportId || String(r.rawId) === String(reportId));
+    if (!target) return;
+
+    const targetDbId = target.rawId || target.id;
+
+    try {
+      const res = await fetch(`/api/reports?id=${targetDbId}`, {
+        method: 'DELETE',
+      });
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || 'Gagal menghapus aduan dari database');
+      }
+
+      setReports((prev) => prev.filter((r) => r.id !== reportId && String(r.rawId) !== String(targetDbId)));
+      showToast('Aduan Dihapus', `Laporan #${target.id} telah berhasil dihapus secara permanen.`, 'success');
+    } catch (err) {
+      console.error('Error deleting report:', err);
+      showToast('Gagal Menghapus', err.message || 'Terjadi kesalahan sistem.', 'error');
+    }
+  };
 
   // Handle upvoting with API patch call
   const handleUpvote = async (reportId) => {
@@ -234,6 +262,7 @@ export default function App() {
         author: newReportData.author,
         isAnonymous: newReportData.isAnonymous,
         city: newReportData.city,
+        coordinates: newReportData.coordinates,
       });
 
       setReports((prev) => [normalized, ...prev]);
@@ -248,25 +277,25 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300">
+    <div className="min-h-screen flex flex-col bg-white dark:bg-black text-neutral-900 dark:text-white transition-colors duration-300">
       
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed top-20 right-4 z-50 max-w-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 shadow-lg flex items-start gap-2.5 animate-in slide-in-from-top-3 duration-200 text-xs">
+        <div className="fixed top-20 right-4 z-50 max-w-sm bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-3.5 shadow-xl flex items-start gap-2.5 animate-in slide-in-from-top-3 duration-200 text-xs">
           <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
             toastMessage.type === 'error' 
-              ? 'bg-red-500/10 text-red-600 dark:text-red-400' 
-              : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+              ? 'bg-red-500/10 text-red-500' 
+              : 'bg-emerald-500/10 text-emerald-500'
           }`}>
             {toastMessage.type === 'error' ? <AlertTriangle className="w-4 h-4" /> : <CheckCircle2 className="w-4 h-4" />}
           </div>
           <div className="flex-1 pr-2">
-            <h4 className="font-bold text-slate-900 dark:text-white">{toastMessage.title}</h4>
-            <p className="text-slate-600 dark:text-slate-300 mt-0.5 leading-normal">{toastMessage.message}</p>
+            <h4 className="font-bold text-neutral-900 dark:text-white">{toastMessage.title}</h4>
+            <p className="text-neutral-600 dark:text-neutral-300 mt-0.5 leading-normal">{toastMessage.message}</p>
           </div>
           <button 
             onClick={() => setToastMessage(null)}
-            className="text-slate-400 hover:text-slate-900 dark:hover:text-white"
+            className="text-neutral-400 hover:text-neutral-900 dark:hover:text-white"
           >
             <X className="w-4 h-4" />
           </button>
@@ -305,16 +334,16 @@ export default function App() {
           {/* Loading Indicator */}
           {isLoading ? (
             <div className="py-20 flex flex-col items-center justify-center space-y-3">
-              <Loader2 className="w-10 h-10 text-emerald-600 dark:text-emerald-400 animate-spin" />
-              <p className="text-slate-600 dark:text-slate-400 font-medium text-xs">
-                Mengambil data laporan dari database PostgreSQL Vercel...
+              <Loader2 className="w-10 h-10 text-emerald-500 animate-spin" />
+              <p className="text-neutral-600 dark:text-neutral-400 font-bold text-xs">
+                Mengambil data aduan dari database PostgreSQL...
               </p>
             </div>
           ) : error ? (
             /* Error State Fallback UI */
             <div className="p-6 my-6 bg-red-500/10 border border-red-500/20 rounded-2xl text-center flex flex-col items-center justify-center space-y-3">
               <AlertTriangle className="w-8 h-8 text-red-500" />
-              <p className="text-red-600 dark:text-red-400 font-semibold text-xs">{error}</p>
+              <p className="text-red-600 dark:text-red-400 font-bold text-xs">{error}</p>
               <button
                 onClick={fetchReports}
                 className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white font-bold rounded-lg text-xs flex items-center gap-2 transition-all shadow-md"
@@ -332,12 +361,15 @@ export default function App() {
                 reports={filteredReports}
                 onUpvote={handleUpvote}
                 onTrackTicket={handleTrackTicket}
+                onDeleteReport={handleDeleteReport}
+                theme={theme}
               />
             ) : (
               <ReportFeed
                 reports={filteredReports}
                 onUpvote={handleUpvote}
                 onTrackTicket={handleTrackTicket}
+                onDeleteReport={handleDeleteReport}
                 selectedCategory={selectedCategory}
                 setSelectedCategory={setSelectedCategory}
                 selectedStatus={selectedStatus}

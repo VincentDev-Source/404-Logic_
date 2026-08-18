@@ -89,6 +89,29 @@ export default async function handler(req, res) {
     }
   }
 
-  res.setHeader('Allow', ['GET', 'POST', 'PATCH', 'PUT']);
+  if (method === 'DELETE') {
+    try {
+      const targetId = req.query?.id || req.body?.id;
+      if (!targetId) {
+        return res.status(400).json({ error: 'ID laporan wajib disertakan untuk penghapusan.' });
+      }
+
+      const numericId = parseInt(targetId, 10);
+      if (isNaN(numericId)) {
+        return res.status(400).json({ error: 'ID laporan tidak valid.' });
+      }
+
+      await prisma.report.delete({
+        where: { id: numericId },
+      });
+
+      return res.status(200).json({ success: true, message: 'Laporan berhasil dihapus dari database.' });
+    } catch (error) {
+      console.error('Error deleting report:', error);
+      return res.status(500).json({ error: 'Gagal menghapus laporan dari database.', details: error.message });
+    }
+  }
+
+  res.setHeader('Allow', ['GET', 'POST', 'PATCH', 'PUT', 'DELETE']);
   return res.status(405).json({ error: `Metode ${method} tidak diizinkan.` });
 }

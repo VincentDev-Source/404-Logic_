@@ -23,6 +23,7 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport }) {
   const [category, setCategory] = useState('Jalan Rusak');
   const [location, setLocation] = useState('');
   const [city, setCity] = useState('Jakarta');
+  const [coordinates, setCoordinates] = useState({ lat: -6.2088, lng: 106.8456 });
   const [description, setDescription] = useState('');
   const [author, setAuthor] = useState('');
   const [isAnonymous, setIsAnonymous] = useState(false);
@@ -32,13 +33,46 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport }) {
 
   if (!isOpen) return null;
 
-  const handleSimulateGPS = () => {
+  // Real Browser GPS Geolocation + OpenStreetMap Reverse Geocoding
+  const handleFetchRealGPS = () => {
+    if (!navigator.geolocation) {
+      alert('Browser Anda tidak mendukung fitur lokasi GPS.');
+      return;
+    }
+
     setIsLocating(true);
-    setTimeout(() => {
-      setLocation('Jl. MH Thamrin No. 28, Jakarta Pusat');
-      setCity('Jakarta');
-      setIsLocating(false);
-    }, 800);
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        setCoordinates({ lat, lng });
+
+        try {
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+          const data = await res.json();
+          if (data && data.display_name) {
+            setLocation(data.display_name);
+            const cityFound = data.address?.city || data.address?.town || data.address?.regency || data.address?.county || data.address?.state || 'Jakarta';
+            setCity(cityFound);
+          } else {
+            setLocation(`Titik GPS Real: Lat ${lat.toFixed(5)}, Lng ${lng.toFixed(5)}`);
+          }
+        } catch (err) {
+          console.error('Reverse geocoding error:', err);
+          setLocation(`Titik GPS Real: Lat ${lat.toFixed(5)}, Lng ${lng.toFixed(5)}`);
+        } finally {
+          setIsLocating(false);
+        }
+      },
+      (error) => {
+        console.error('Geolocation error:', error);
+        alert('Gagal mendeteksi lokasi GPS. Pastikan izin lokasi browser telah diberikan.');
+        setLocation('Jl. MH Thamrin No. 28, Jakarta Pusat');
+        setCity('Jakarta');
+        setIsLocating(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
   };
 
   const handleFileChange = (e) => {
@@ -73,6 +107,7 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport }) {
         category,
         location,
         city,
+        coordinates,
         description,
         author: isAnonymous ? 'Warga Anonim' : (author.trim() || 'Warga Peduli'),
         isAnonymous,
@@ -168,7 +203,7 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport }) {
             </div>
           </div>
 
-          {/* Lokasi Alamat & Tombol GPS */}
+          {/* Lokasi Alamat & Tombol Real GPS */}
           <div>
             <div className="flex items-center justify-between mb-1">
               <label className="font-bold text-neutral-800 dark:text-neutral-200">
@@ -176,19 +211,19 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport }) {
               </label>
               <button
                 type="button"
-                onClick={handleSimulateGPS}
+                onClick={handleFetchRealGPS}
                 disabled={isLocating}
-                className="text-[11px] text-emerald-600 dark:text-emerald-400 hover:underline font-bold flex items-center gap-1"
+                className="text-[11px] text-emerald-500 hover:underline font-bold flex items-center gap-1"
               >
                 {isLocating ? (
                   <>
-                    <Loader2 className="w-3 h-3 animate-spin" />
-                    <span>Mendeteksi GPS...</span>
+                    <Loader2 className="w-3 h-3 animate-spin text-emerald-500" />
+                    <span>Mendeteksi Real GPS...</span>
                   </>
                 ) : (
                   <>
-                    <Navigation className="w-3 h-3" />
-                    <span>Gunakan Lokasi GPS</span>
+                    <Navigation className="w-3 h-3 text-emerald-500" />
+                    <span>Gunakan Real GPS Browser</span>
                   </>
                 )}
               </button>
