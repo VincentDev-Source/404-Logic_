@@ -18,12 +18,25 @@ function normalizeReport(raw) {
   const numId = typeof id === 'number' ? id : parseInt(String(id).replace(/\D/g, ''), 10) || 1;
   const idStr = typeof id === 'number' ? `LP-2026-${String(id).padStart(4, '0')}` : String(id);
 
-  // Real or generated Indonesia GPS coordinates (default center around Jakarta/Indonesia)
-  const defaultLat = -6.2088 + (((numId * 37) % 50) - 25) * 0.005;
-  const defaultLng = 106.8456 + (((numId * 53) % 50) - 25) * 0.005;
+  // Extract GPS coordinates from location string if present (format: "... (GPS: lat, lng)")
+  let lat = raw.coordinates?.lat || raw.lat;
+  let lng = raw.coordinates?.lng || raw.lng;
 
-  const lat = raw.coordinates?.lat || raw.lat || defaultLat;
-  const lng = raw.coordinates?.lng || raw.lng || defaultLng;
+  if ((!lat || !lng) && raw.location && raw.location.includes('GPS:')) {
+    const gpsMatch = raw.location.match(/GPS:\s*([-\d.]+),\s*([-\d.]+)/);
+    if (gpsMatch) {
+      lat = parseFloat(gpsMatch[1]);
+      lng = parseFloat(gpsMatch[2]);
+    }
+  }
+
+  // Default fallback if GPS is not present
+  if (!lat || !lng) {
+    const defaultLat = -6.2088 + (((numId * 37) % 50) - 25) * 0.005;
+    const defaultLng = 106.8456 + (((numId * 53) % 50) - 25) * 0.005;
+    lat = defaultLat;
+    lng = defaultLng;
+  }
 
   const createdAtDate = raw.createdAt ? new Date(raw.createdAt) : new Date();
   const formattedDate = raw.date || `${createdAtDate.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' })}, ${createdAtDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}`;
@@ -416,7 +429,7 @@ export default function App() {
               </button>
             </div>
           ) : (
-            /* Main View Router */
+            /* Main View Router Router */
             activeTab === 'analytics' ? (
               <AnalyticsDashboard reports={reports} theme={theme} />
             ) : viewMode === 'map' || activeTab === 'map' ? (

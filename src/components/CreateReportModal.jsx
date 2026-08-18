@@ -53,15 +53,15 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport, ope
           const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
           const data = await res.json();
           if (data && data.display_name) {
-            setLocation(data.display_name);
+            setLocation(`${data.display_name} (GPS: ${lat.toFixed(6)}, ${lng.toFixed(6)})`);
             const cityFound = data.address?.city || data.address?.town || data.address?.regency || data.address?.county || data.address?.state || 'Jakarta';
             setCity(cityFound);
           } else {
-            setLocation(`Titik GPS Real: Lat ${lat.toFixed(5)}, Lng ${lng.toFixed(5)}`);
+            setLocation(`Titik GPS Real: Lat ${lat.toFixed(6)}, Lng ${lng.toFixed(6)} (GPS: ${lat.toFixed(6)}, ${lng.toFixed(6)})`);
           }
         } catch (err) {
           console.error('Reverse geocoding error:', err);
-          setLocation(`Titik GPS Real: Lat ${lat.toFixed(5)}, Lng ${lng.toFixed(5)}`);
+          setLocation(`Titik GPS Real: Lat ${lat.toFixed(6)}, Lng ${lng.toFixed(6)} (GPS: ${lat.toFixed(6)}, ${lng.toFixed(6)})`);
         } finally {
           setIsLocating(false);
         }
@@ -69,13 +69,13 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport, ope
       (error) => {
         console.error('Geolocation error:', error);
         if (openAlert) {
-          openAlert({ title: 'Izin Lokasi Ditolak', message: 'Gagal mendeteksi lokasi GPS. Pastikan izin akses lokasi browser telah diberikan.', type: 'warning' });
+          openAlert({ title: 'Izin Lokasi GPS Ditolak', message: 'Gagal mendeteksi lokasi GPS. Pastikan telah memberikan izin akses lokasi pada browser Anda.', type: 'warning' });
         }
-        setLocation('Jl. MH Thamrin No. 28, Jakarta Pusat');
+        setLocation('Jl. MH Thamrin No. 28, Jakarta Pusat (GPS: -6.208800, 106.845600)');
         setCity('Jakarta');
         setIsLocating(false);
       },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
     );
   };
 
@@ -108,10 +108,15 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport, ope
         origin: { y: 0.6 }
       });
 
+      // Format location to persist GPS coordinates reliably in PostgreSQL
+      const formattedLocation = location.includes('GPS:')
+        ? location
+        : `${location} (GPS: ${coordinates.lat.toFixed(6)}, ${coordinates.lng.toFixed(6)})`;
+
       const newReportData = {
         title,
         category,
-        location,
+        location: formattedLocation,
         city,
         coordinates,
         description,
@@ -307,23 +312,23 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport, ope
             />
           </div>
 
-          {/* Privasi Anonim */}
+          {/* Privasi Anonim - Bulletproof Flex Toggle Switch */}
           <div className="bg-neutral-100 dark:bg-neutral-900 p-3 rounded-lg border border-neutral-200 dark:border-neutral-800 space-y-2">
             <div className="flex items-center justify-between">
               <span className="font-bold text-neutral-800 dark:text-neutral-200 flex items-center gap-1">
                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
                 Lapor sebagai Anonim
               </span>
+              
               <button
                 type="button"
                 onClick={() => setIsAnonymous(!isAnonymous)}
-                className={`w-9 h-5 rounded-full relative transition-colors ${
-                  isAnonymous ? 'bg-emerald-500' : 'bg-neutral-300 dark:bg-neutral-700'
+                className={`w-11 h-6 rounded-full p-1 transition-colors duration-200 ease-in-out focus:outline-none flex items-center ${
+                  isAnonymous ? 'bg-emerald-500 justify-end' : 'bg-neutral-300 dark:bg-neutral-700 justify-start'
                 }`}
+                title={isAnonymous ? 'Anonim Aktif' : 'Anonim Non-aktif'}
               >
-                <span className={`w-3.5 h-3.5 bg-black dark:bg-white rounded-full absolute top-0.75 transition-transform ${
-                  isAnonymous ? 'left-4.5 bg-black' : 'left-0.75'
-                }`} />
+                <span className="w-4 h-4 rounded-full bg-black dark:bg-white shadow-md transition-transform" />
               </button>
             </div>
 

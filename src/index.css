@@ -38,10 +38,6 @@
   border-radius: 0.75rem;
 }
 
-.dark .leaflet-tile {
-  filter: brightness(0.8) contrast(1.2) invert(0.9) hue-rotate(180deg);
-}
-
 .leaflet-popup-content-wrapper {
   background: var(--bg-card) !important;
   color: var(--text-primary) !important;
