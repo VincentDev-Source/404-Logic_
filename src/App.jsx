@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { AnimatePresence } from 'framer-motion';
 import Navbar from './components/Navbar';
 import HeroStats from './components/HeroStats';
 import ReportFeed from './components/ReportFeed';
@@ -6,6 +7,7 @@ import InteractiveMap from './components/InteractiveMap';
 import CreateReportModal from './components/CreateReportModal';
 import TicketTrackerModal from './components/TicketTrackerModal';
 import AnalyticsDashboard from './components/AnalyticsDashboard';
+import LoadingScreen from './components/LoadingScreen';
 import SplashScreen from './components/SplashScreen';
 import ConfirmModal from './components/ConfirmModal';
 import AlertModal from './components/AlertModal';
@@ -456,10 +458,12 @@ export default function App() {
   return (
     <div className="min-h-screen flex flex-col bg-white dark:bg-black text-neutral-900 dark:text-white transition-colors duration-300">
       
-      {/* Initial Entrance Splash Screen with Real Progress Bar */}
-      {showSplash && (
-        <SplashScreen onComplete={() => setShowSplash(false)} />
-      )}
+      {/* Futuristic Animated Loading Screen Container */}
+      <AnimatePresence mode="wait">
+        {showSplash && (
+          <LoadingScreen onFinish={() => setShowSplash(false)} />
+        )}
+      </AnimatePresence>
 
       {/* Modern Custom Confirmation Modal (Replaces window.confirm "says" popup) */}
       <ConfirmModal
