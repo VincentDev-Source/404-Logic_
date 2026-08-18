@@ -21,7 +21,8 @@ import {
   ArrowRight,
   Sparkles,
   FileText,
-  Edit3
+  Edit3,
+  Lock
 } from 'lucide-react';
 
 const SAMPLE_AFTER_PHOTOS = [
@@ -33,8 +34,9 @@ const SAMPLE_AFTER_PHOTOS = [
   { label: 'Taman Rapi (Hijau)', url: 'https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?auto=format&fit=crop&w=800&q=80' },
 ];
 
-// Complex Process & Inspection Modal Suite for City Officers
+// Process & Inspection Modal Suite for City Officers with Completed Locking Logic
 function ProcessReportModal({ report, operator, onClose, onUpdateStatus }) {
+  const isFinalLocked = report?.status === 'Selesai';
   const [status, setStatus] = useState(report?.status || 'Diproses');
   const [verifiedBy, setVerifiedBy] = useState(report?.verifiedBy || operator.name);
   const [officerNotes, setOfficerNotes] = useState(report?.officerNotes || '');
@@ -48,6 +50,7 @@ function ProcessReportModal({ report, operator, onClose, onUpdateStatus }) {
     : 'Tanggal tidak tercatat';
 
   const handleFileUpload = (e) => {
+    if (isFinalLocked) return;
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
@@ -59,6 +62,7 @@ function ProcessReportModal({ report, operator, onClose, onUpdateStatus }) {
   };
 
   const handleSubmit = async (targetStatus) => {
+    if (isFinalLocked) return;
     setIsSubmitting(true);
     try {
       await onUpdateStatus(
@@ -89,7 +93,9 @@ function ProcessReportModal({ report, operator, onClose, onUpdateStatus }) {
               #LP-2026-{String(report.id).padStart(4, '0')}
             </span>
             <div>
-              <h2 className="text-base font-black text-white">Pemeriksaan & Tindak Lanjut Kompleks Petugas</h2>
+              <h2 className="text-base font-black text-white">
+                {isFinalLocked ? 'Detail Final Aduan Selesai (Terkunci)' : 'Pemeriksaan & Tindak Lanjut Petugas'}
+              </h2>
               <p className="text-xs text-neutral-400 font-medium">Verifikasi Lapangan & Pengelolaan Foto Perbaikan</p>
             </div>
           </div>
@@ -105,50 +111,63 @@ function ProcessReportModal({ report, operator, onClose, onUpdateStatus }) {
         {/* Scrollable Modal Body */}
         <div className="flex-1 overflow-y-auto p-6 space-y-5 text-xs">
           
-          {/* Status Selection Switcher Pills */}
-          <div className="space-y-1.5 bg-neutral-950 p-4 rounded-2xl border border-neutral-800">
-            <label className="block text-[11px] font-extrabold uppercase text-neutral-400 tracking-wider">
-              Pilih Status Penanganan Aduan *
-            </label>
-            
-            <div className="grid grid-cols-3 gap-2 p-1 bg-neutral-900 rounded-xl border border-neutral-800">
-              <button
-                type="button"
-                onClick={() => setStatus('Menunggu')}
-                className={`py-2 rounded-lg font-extrabold text-xs transition-all ${
-                  status === 'Menunggu'
-                    ? 'bg-amber-500 text-black shadow'
-                    : 'text-amber-400 hover:bg-neutral-800'
-                }`}
-              >
-                Menunggu
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setStatus('Diproses')}
-                className={`py-2 rounded-lg font-extrabold text-xs transition-all ${
-                  status === 'Diproses' || status === 'Sedang Ditangani'
-                    ? 'bg-blue-600 text-white shadow'
-                    : 'text-blue-400 hover:bg-neutral-800'
-                }`}
-              >
-                Diproses
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setStatus('Selesai')}
-                className={`py-2 rounded-lg font-extrabold text-xs transition-all ${
-                  status === 'Selesai'
-                    ? 'bg-emerald-500 text-black shadow'
-                    : 'text-emerald-400 hover:bg-neutral-800'
-                }`}
-              >
-                Selesai
-              </button>
+          {/* Final Lock Notification Banner */}
+          {isFinalLocked ? (
+            <div className="p-3.5 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl text-emerald-400 font-bold flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Lock className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>Aduan ini telah diverifikasi Selesai & Terkunci Final (Tidak dapat diubah lagi).</span>
+              </div>
+              <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 uppercase font-mono font-black">
+                FINAL
+              </span>
             </div>
-          </div>
+          ) : (
+            /* Status Selection Switcher Pills for Active Reports */
+            <div className="space-y-1.5 bg-neutral-950 p-4 rounded-2xl border border-neutral-800">
+              <label className="block text-[11px] font-extrabold uppercase text-neutral-400 tracking-wider">
+                Pilih Status Penanganan Aduan *
+              </label>
+              
+              <div className="grid grid-cols-3 gap-2 p-1 bg-neutral-900 rounded-xl border border-neutral-800">
+                <button
+                  type="button"
+                  onClick={() => setStatus('Menunggu')}
+                  className={`py-2 rounded-lg font-extrabold text-xs transition-all ${
+                    status === 'Menunggu'
+                      ? 'bg-amber-500 text-black shadow'
+                      : 'text-amber-400 hover:bg-neutral-800'
+                  }`}
+                >
+                  Menunggu
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setStatus('Diproses')}
+                  className={`py-2 rounded-lg font-extrabold text-xs transition-all ${
+                    status === 'Diproses' || status === 'Sedang Ditangani'
+                      ? 'bg-blue-600 text-white shadow'
+                      : 'text-blue-400 hover:bg-neutral-800'
+                  }`}
+                >
+                  Diproses
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setStatus('Selesai')}
+                  className={`py-2 rounded-lg font-extrabold text-xs transition-all ${
+                    status === 'Selesai'
+                      ? 'bg-emerald-500 text-black shadow'
+                      : 'text-emerald-400 hover:bg-neutral-800'
+                  }`}
+                >
+                  Selesai
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Rincian Aduan Grid */}
           <div className="space-y-3 bg-neutral-950 p-4 rounded-2xl border border-neutral-800">
@@ -185,15 +204,15 @@ function ProcessReportModal({ report, operator, onClose, onUpdateStatus }) {
           <div className="space-y-3 bg-neutral-950 p-4 rounded-2xl border border-neutral-800">
             <div>
               <label className="block text-xs font-bold text-neutral-300 mb-1">
-                Nama Petugas Verifikator / Tim Lapangan *
+                Nama Petugas Verifikator / Tim Lapangan
               </label>
               <input
                 type="text"
-                required
+                disabled={isFinalLocked}
                 placeholder="Nama Petugas Penanggung Jawab..."
                 value={verifiedBy}
                 onChange={(e) => setVerifiedBy(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-white placeholder-neutral-500 text-xs focus:outline-none focus:border-blue-500 font-medium"
+                className="w-full px-3 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-white placeholder-neutral-500 text-xs focus:outline-none focus:border-blue-500 disabled:opacity-60 font-medium"
               />
             </div>
 
@@ -203,10 +222,11 @@ function ProcessReportModal({ report, operator, onClose, onUpdateStatus }) {
               </label>
               <textarea
                 rows={2}
-                placeholder="Tuliskan tindakan perbaikan yang telah/sedang dilakukan (e.g. Tim Bina Marga telah melakukan penambalan aspal setebal 5cm)..."
+                disabled={isFinalLocked}
+                placeholder="Tuliskan tindakan perbaikan yang telah dilakukan..."
                 value={officerNotes}
                 onChange={(e) => setOfficerNotes(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-white placeholder-neutral-500 text-xs focus:outline-none focus:border-blue-500 font-medium"
+                className="w-full px-3 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-white placeholder-neutral-500 text-xs focus:outline-none focus:border-blue-500 disabled:opacity-60 font-medium"
               />
             </div>
           </div>
@@ -241,7 +261,7 @@ function ProcessReportModal({ report, operator, onClose, onUpdateStatus }) {
                   ) : (
                     <div className="w-full h-full flex flex-col items-center justify-center text-neutral-500 space-y-1 p-2 text-center">
                       <Upload className="w-6 h-6" />
-                      <span className="text-[11px] font-bold">Unggah foto hasil pekerjaan</span>
+                      <span className="text-[11px] font-bold">Foto belum diunggah</span>
                     </div>
                   )}
                 </div>
@@ -249,49 +269,51 @@ function ProcessReportModal({ report, operator, onClose, onUpdateStatus }) {
 
             </div>
 
-            {/* Input Foto Petugas */}
-            <div className="p-4 bg-neutral-950 rounded-2xl border border-neutral-800 space-y-2">
-              <label className="block text-xs font-bold text-slate-300">
-                Pilih atau Unggah Foto Hasil Perbaikan Petugas *
-              </label>
-
-              <div className="flex items-center gap-2">
-                <input
-                  type="text"
-                  placeholder="URL Foto atau unggah berkas foto dari galeri HP/Laptop..."
-                  value={afterImage}
-                  onChange={(e) => setAfterImage(e.target.value)}
-                  className="flex-1 px-3 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-white placeholder-neutral-500 text-xs focus:outline-none focus:border-blue-500 font-medium"
-                />
-
-                <label className="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs cursor-pointer flex items-center gap-1.5 transition-all shadow shrink-0">
-                  <Upload className="w-3.5 h-3.5" />
-                  <span>Unggah Berkas</span>
-                  <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
+            {/* Input Foto Petugas (Only visible if not locked) */}
+            {!isFinalLocked && (
+              <div className="p-4 bg-neutral-950 rounded-2xl border border-neutral-800 space-y-2">
+                <label className="block text-xs font-bold text-slate-300">
+                  Pilih atau Unggah Foto Hasil Perbaikan Petugas *
                 </label>
-              </div>
 
-              {/* Sample Quick Select Photos for Officers */}
-              <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 pt-1">
-                {SAMPLE_AFTER_PHOTOS.map((sample, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    onClick={() => setAfterImage(sample.url)}
-                    className={`relative h-12 rounded-xl overflow-hidden border transition-all ${
-                      afterImage === sample.url
-                        ? 'border-emerald-500 ring-2 ring-emerald-500/30 scale-105'
-                        : 'border-neutral-800 opacity-60 hover:opacity-100'
-                    }`}
-                  >
-                    <img src={sample.url} alt={sample.label} className="w-full h-full object-cover" />
-                    <span className="absolute bottom-0 inset-x-0 bg-black/80 text-[8px] font-bold text-white text-center py-0.5 truncate px-1">
-                      {sample.label}
-                    </span>
-                  </button>
-                ))}
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    placeholder="URL Foto atau unggah berkas foto dari galeri HP/Laptop..."
+                    value={afterImage}
+                    onChange={(e) => setAfterImage(e.target.value)}
+                    className="flex-1 px-3 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-white placeholder-neutral-500 text-xs focus:outline-none focus:border-blue-500 font-medium"
+                  />
+
+                  <label className="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs cursor-pointer flex items-center gap-1.5 transition-all shadow shrink-0">
+                    <Upload className="w-3.5 h-3.5" />
+                    <span>Unggah Berkas</span>
+                    <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
+                  </label>
+                </div>
+
+                {/* Sample Quick Select Photos for Officers */}
+                <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 pt-1">
+                  {SAMPLE_AFTER_PHOTOS.map((sample, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setAfterImage(sample.url)}
+                      className={`relative h-12 rounded-xl overflow-hidden border transition-all ${
+                        afterImage === sample.url
+                          ? 'border-emerald-500 ring-2 ring-emerald-500/30 scale-105'
+                          : 'border-neutral-800 opacity-60 hover:opacity-100'
+                      }`}
+                    >
+                      <img src={sample.url} alt={sample.label} className="w-full h-full object-cover" />
+                      <span className="absolute bottom-0 inset-x-0 bg-black/80 text-[8px] font-bold text-white text-center py-0.5 truncate px-1">
+                        {sample.label}
+                      </span>
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
           </div>
 
@@ -304,22 +326,24 @@ function ProcessReportModal({ report, operator, onClose, onUpdateStatus }) {
             onClick={onClose}
             className="px-4 py-2.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-300 font-bold text-xs transition-colors"
           >
-            Batal
+            {isFinalLocked ? 'Tutup Pratinjau' : 'Batal'}
           </button>
 
-          <button
-            type="button"
-            onClick={() => handleSubmit(status)}
-            disabled={isSubmitting}
-            className="px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-xs flex items-center gap-1.5 transition-all active:scale-95 shadow disabled:opacity-50"
-          >
-            {isSubmitting ? (
-              <Loader2 className="w-4 h-4 animate-spin text-black" />
-            ) : (
-              <Check className="w-4 h-4" />
-            )}
-            <span>Simpan Perubahan & Foto ({status})</span>
-          </button>
+          {!isFinalLocked && (
+            <button
+              type="button"
+              onClick={() => handleSubmit(status)}
+              disabled={isSubmitting}
+              className="px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-xs flex items-center gap-1.5 transition-all active:scale-95 shadow disabled:opacity-50"
+            >
+              {isSubmitting ? (
+                <Loader2 className="w-4 h-4 animate-spin text-black" />
+              ) : (
+                <Check className="w-4 h-4" />
+              )}
+              <span>Simpan Perubahan & Status ({status})</span>
+            </button>
+          )}
         </div>
 
       </div>
@@ -620,7 +644,11 @@ export default function OperatorDashboard({ operator, onLogout }) {
                 <div
                   key={report.id}
                   onClick={() => setSelectedInspectReport(report)}
-                  className="bg-neutral-900 border border-neutral-800 rounded-2xl p-4 flex flex-col justify-between space-y-3 shadow-lg hover:border-blue-500/60 transition-all cursor-pointer group"
+                  className={`bg-neutral-900 border rounded-2xl p-4 flex flex-col justify-between space-y-3 shadow-lg transition-all cursor-pointer group ${
+                    isCompleted 
+                      ? 'border-emerald-500/40 hover:border-emerald-500' 
+                      : 'border-neutral-800 hover:border-blue-500/60'
+                  }`}
                 >
                   <div className="space-y-2">
                     {/* Header Badge */}
@@ -638,8 +666,9 @@ export default function OperatorDashboard({ operator, onLogout }) {
                           Sedang Diproses
                         </span>
                       ) : (
-                        <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 font-bold text-[10px] border border-emerald-500/30">
-                          Selesai Dikerjakan
+                        <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-extrabold text-[10px] border border-emerald-500/40 flex items-center gap-1">
+                          <Lock className="w-3 h-3 text-emerald-400" />
+                          Selesai Dikerjakan (Final)
                         </span>
                       )}
                     </div>
@@ -665,31 +694,49 @@ export default function OperatorDashboard({ operator, onLogout }) {
                     )}
                   </div>
 
-                  {/* Operator Action Buttons (Always Clickable on ALL Cards!) */}
-                  <div className="pt-3 border-t border-neutral-800 grid grid-cols-2 gap-2">
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedInspectReport(report);
-                      }}
-                      className="py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-extrabold flex items-center justify-center gap-1.5 transition-all active:scale-95 shadow-md"
-                    >
-                      <Eye className="w-3.5 h-3.5" />
-                      <span>Inspeksi Details</span>
-                    </button>
+                  {/* Operator Action Buttons */}
+                  <div className="pt-3 border-t border-neutral-800">
+                    {isCompleted ? (
+                      /* READ-ONLY LOCKED CARD FOR COMPLETED REPORTS */
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedInspectReport(report);
+                        }}
+                        className="w-full py-2.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-emerald-400 text-xs font-extrabold flex items-center justify-center gap-1.5 transition-all border border-emerald-500/30 shadow-md"
+                      >
+                        <Lock className="w-3.5 h-3.5 text-emerald-400" />
+                        <span>Lihat Detail Final (Terkunci)</span>
+                      </button>
+                    ) : (
+                      /* ACTIVE EDITABLE CARD FOR PENDING & PROCESSING REPORTS */
+                      <div className="grid grid-cols-2 gap-2">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedInspectReport(report);
+                          }}
+                          className="py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-extrabold flex items-center justify-center gap-1.5 transition-all active:scale-95 shadow-md"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                          <span>Inspeksi Details</span>
+                        </button>
 
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedInspectReport(report);
-                      }}
-                      className="py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-xs flex items-center justify-center gap-1 transition-all active:scale-95 shadow-md"
-                    >
-                      <Edit3 className="w-3.5 h-3.5" />
-                      <span>Edit Foto Hasil</span>
-                    </button>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedInspectReport(report);
+                          }}
+                          className="py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-xs flex items-center justify-center gap-1 transition-all active:scale-95 shadow-md"
+                        >
+                          <Check className="w-3.5 h-3.5" />
+                          <span>Tandai Selesai</span>
+                        </button>
+                      </div>
+                    )}
                   </div>
 
                 </div>

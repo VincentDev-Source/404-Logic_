@@ -14,7 +14,8 @@ import {
   Lock,
   Sparkles,
   User,
-  KeyRound
+  KeyRound,
+  Zap
 } from 'lucide-react';
 
 const MODEL_URL = 'https://cdn.jsdelivr.net/gh/cgarciagl/face-api.js@0.22.2/weights';
@@ -32,9 +33,12 @@ export default function FaceAuthOperator({ onLoginSuccess, onCancel }) {
   const [statusMessage, setStatusMessage] = useState({ text: '', type: 'info' });
   const [isProcessing, setIsProcessing] = useState(false);
   const [faceDistance, setFaceDistance] = useState(null);
+  const [autoScanning, setAutoScanning] = useState(false);
 
   const videoRef = useRef(null);
   const streamRef = useRef(null);
+  const scanIntervalRef = useRef(null);
+  const isCheckingRef = useRef(false);
 
   // Load face-api AI models from CDN on mount
   useEffect(() => {
@@ -70,6 +74,7 @@ export default function FaceAuthOperator({ onLoginSuccess, onCancel }) {
     return () => {
       isMounted = false;
       stopWebcam();
+      if (scanIntervalRef.current) clearInterval(scanIntervalRef.current);
     };
   }, []);
 
@@ -86,7 +91,7 @@ export default function FaceAuthOperator({ onLoginSuccess, onCancel }) {
         await videoRef.current.play();
       }
       setIsWebcamActive(true);
-      setStatusMessage({ text: 'Kamera aktif. Posisikan wajah Anda di dalam bingkai pemindai.', type: 'info' });
+      setStatusMessage({ text: 'Kamera aktif. Pemindaian otomatis berkecepatan tinggi sedang berjalan...', type: 'info' });
     } catch (err) {
       console.error('Webcam permission error:', err);
       setWebcamError('Akses kamera webcam tidak diizinkan atau kamera tidak ditemukan.');
@@ -96,14 +101,80 @@ export default function FaceAuthOperator({ onLoginSuccess, onCancel }) {
 
   // Stop Webcam stream
   const stopWebcam = () => {
+    if (scanIntervalRef.current) {
+      clearInterval(scanIntervalRef.current);
+      scanIntervalRef.current = null;
+    }
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop());
       streamRef.current = null;
     }
     setIsWebcamActive(false);
+    setAutoScanning(false);
   };
 
-  // Tab 1: Scan Wajah Petugas (Login)
+  // Automatic Hands-Free Real-Time Face Verification Scan Loop
+  useEffect(() => {
+    if (activeTab === 'login' && isModelsLoaded && isWebcamActive && videoRef.current) {
+      setAutoScanning(true);
+      
+      scanIntervalRef.current = setInterval(async () => {
+        if (isCheckingRef.current || !videoRef.current) return;
+        isCheckingRef.current = true;
+
+        try {
+          const detection = await faceapi
+            .detectSingleFace(videoRef.current)
+            .withFaceLandmarks()
+            .withFaceDescriptor();
+
+          if (detection) {
+            const scannedDescriptorArray = Array.from(detection.descriptor);
+
+            const res = await fetch('/api/auth/face-login', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ scannedDescriptor: scannedDescriptorArray }),
+            });
+
+            const data = await res.json();
+
+            if (res.ok && data.success) {
+              // MATCH FOUND! Automatically log in officer hands-free!
+              if (scanIntervalRef.current) clearInterval(scanIntervalRef.current);
+              setFaceDistance(data.distance);
+              setStatusMessage({
+                text: `⚡ Verifikasi Otomatis Sukses! Akses Diterima. Selamat bertugas, ${data.operator.name}.`,
+                type: 'success'
+              });
+
+              setTimeout(() => {
+                stopWebcam();
+                onLoginSuccess(data.operator);
+              }, 600);
+            }
+          }
+        } catch (err) {
+          console.warn('Auto scan loop warning:', err);
+        } finally {
+          isCheckingRef.current = false;
+        }
+      }, 350);
+
+    } else {
+      if (scanIntervalRef.current) {
+        clearInterval(scanIntervalRef.current);
+        scanIntervalRef.current = null;
+      }
+      setAutoScanning(false);
+    }
+
+    return () => {
+      if (scanIntervalRef.current) clearInterval(scanIntervalRef.current);
+    };
+  }, [activeTab, isModelsLoaded, isWebcamActive, onLoginSuccess]);
+
+  // Tab 1: Manual Scan Fallback Button
   const handleScanLogin = async () => {
     if (!videoRef.current || !isWebcamActive) {
       setStatusMessage({ text: 'Aktifkan kamera webcam terlebih dahulu!', type: 'warning' });
@@ -111,7 +182,7 @@ export default function FaceAuthOperator({ onLoginSuccess, onCancel }) {
     }
 
     setIsProcessing(true);
-    setStatusMessage({ text: 'Memindai wajah & mengirim vektor ke PostgreSQL backend...', type: 'info' });
+    setStatusMessage({ text: 'Memindai wajah biometrik...', type: 'info' });
 
     try {
       const detection = await faceapi
@@ -127,7 +198,6 @@ export default function FaceAuthOperator({ onLoginSuccess, onCancel }) {
 
       const scannedDescriptorArray = Array.from(detection.descriptor);
 
-      // Send scanned descriptor to Serverless API /api/auth/face-login
       const res = await fetch('/api/auth/face-login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -156,7 +226,7 @@ export default function FaceAuthOperator({ onLoginSuccess, onCancel }) {
       setTimeout(() => {
         stopWebcam();
         onLoginSuccess(data.operator);
-      }, 1000);
+      }, 600);
 
     } catch (err) {
       console.error('Operator face login error:', err);
@@ -202,7 +272,6 @@ export default function FaceAuthOperator({ onLoginSuccess, onCancel }) {
 
       const descriptorArray = Array.from(detection.descriptor);
 
-      // Send to Serverless API /api/auth/face-register
       const res = await fetch('/api/auth/face-register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -221,276 +290,244 @@ export default function FaceAuthOperator({ onLoginSuccess, onCancel }) {
       }
 
       setStatusMessage({
-        text: `Petugas "${data.operator.name}" Berhasil Didaftarkan ke Database PostgreSQL! Silakan uji Scan Masuk pada Tab Login.`,
+        text: `Registrasi Wajah Berhasil! Petugas "${data.operator.name}" terdaftar resmi. Mengalihkan ke tab Scan Masuk...`,
         type: 'success'
       });
 
       setOperatorName('');
       setAuthPassword('');
+
+      setTimeout(() => {
+        setActiveTab('login');
+      }, 1500);
+
     } catch (err) {
-      console.error('Operator face registration error:', err);
-      setStatusMessage({ text: err.message || 'Terjadi kesalahan saat pendaftaran petugas.', type: 'error' });
+      console.error('Operator registration error:', err);
+      setStatusMessage({ text: err.message || 'Gagal merestrukturisasi wajah ke database server.', type: 'error' });
     } finally {
       setIsProcessing(false);
     }
   };
 
-  // Demo Bypass Login
-  const handleBypassDemo = () => {
-    stopWebcam();
-    onLoginSuccess({
-      id: 99,
-      name: 'Petugas Demo (Indra Wijaya)',
-      role: 'OPERATOR_DEMO',
-    });
-  };
-
   return (
-    <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center p-4 relative overflow-hidden font-sans">
-
-      {/* Background Glow */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[550px] bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-10 right-10 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
-
-      <div className="relative w-full max-w-xl bg-slate-900/90 backdrop-blur-xl border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 animate-in zoom-in-95 duration-300">
-
+    <div className="fixed inset-0 z-50 bg-neutral-950/95 backdrop-blur-xl flex items-center justify-center p-3 sm:p-4 overflow-y-auto font-sans">
+      <div className="relative w-full max-w-xl bg-neutral-900 border border-neutral-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col my-auto text-white animate-in zoom-in-95 duration-200">
+        
         {/* Top Header */}
-        <div className="text-center space-y-2">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-500/10 border border-blue-500/30 text-blue-400 mb-1 shadow-lg shadow-blue-500/10">
-            <Building2 className="w-7 h-7" />
+        <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-800 bg-neutral-950">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center font-extrabold shadow-lg shadow-blue-600/30">
+              <Building2 className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-base font-black tracking-tight text-white flex items-center gap-2">
+                Otentikasi Wajah Petugas
+                <span className="px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 font-mono text-[10px] font-bold border border-blue-500/30">
+                  SDG 11
+                </span>
+              </h2>
+              <p className="text-xs text-neutral-400 font-medium">Sistem Biometrik AI 128-Dimensional Vector</p>
+            </div>
           </div>
-          <h1 className="text-2xl font-black tracking-tight text-white flex items-center justify-center gap-2">
-            Portal Biometrik Petugas
-            <span className="px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400 text-[10px] font-extrabold uppercase border border-blue-500/30">
-              AI
-            </span>
-          </h1>
-          <p className="text-xs text-slate-400 font-medium">
-            Verifikasi Wajah Petugas Resmi Dinas Kota (`@vladmandic/face-api` + Vercel Serverless)
-          </p>
+
+          <button
+            onClick={onCancel}
+            className="p-1.5 rounded-xl hover:bg-neutral-800 text-neutral-400 hover:text-white transition-colors"
+          >
+            ✕
+          </button>
         </div>
 
         {/* Tab Selection */}
-        <div className="grid grid-cols-2 p-1 bg-slate-950 rounded-2xl border border-slate-800 text-xs font-extrabold">
+        <div className="flex items-center border-b border-neutral-800 bg-neutral-950 p-1.5 gap-1">
           <button
             type="button"
             onClick={() => setActiveTab('login')}
-            className={`py-2.5 rounded-xl transition-all flex items-center justify-center gap-2 ${activeTab === 'login'
+            className={`flex-1 py-2 rounded-2xl font-black text-xs flex items-center justify-center space-x-2 transition-all ${
+              activeTab === 'login'
                 ? 'bg-blue-600 text-white shadow-md'
-                : 'text-slate-400 hover:text-white'
-              }`}
+                : 'text-neutral-400 hover:bg-neutral-900'
+            }`}
           >
             <Scan className="w-4 h-4" />
-            <span>Scan Wajah Petugas</span>
+            <span>Verifikasi Otomatis Instant</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab('register')}
-            className={`py-2.5 rounded-xl transition-all flex items-center justify-center gap-2 ${activeTab === 'register'
+            className={`flex-1 py-2 rounded-2xl font-black text-xs flex items-center justify-center space-x-2 transition-all ${
+              activeTab === 'register'
                 ? 'bg-blue-600 text-white shadow-md'
-                : 'text-slate-400 hover:text-white'
-              }`}
+                : 'text-neutral-400 hover:bg-neutral-900'
+            }`}
           >
             <UserPlus className="w-4 h-4" />
-            <span>Daftarkan Petugas Baru</span>
+            <span>Daftar Wajah Petugas</span>
           </button>
         </div>
 
-        {/* Model AI Loading Banner */}
-        {!isModelsLoaded ? (
-          <div className="bg-slate-800/80 border border-slate-700 p-4 rounded-2xl flex items-center gap-3">
-            <Loader2 className="w-5 h-5 text-blue-400 animate-spin shrink-0" />
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-bold text-slate-200">Memuat Model AI Biometrik...</p>
-              <p className="text-[11px] text-slate-400 truncate">{loadingStatus}</p>
+        {/* Modal Body */}
+        <div className="p-6 space-y-5 text-xs">
+
+          {/* Model Loading Status */}
+          {!isModelsLoaded ? (
+            <div className="p-8 text-center bg-neutral-950 rounded-2xl border border-neutral-800 space-y-3">
+              <Loader2 className="w-8 h-8 text-blue-500 animate-spin mx-auto" />
+              <p className="font-bold text-white text-xs">{loadingStatus}</p>
+              <p className="text-[11px] text-neutral-500">Memuat weights AI neural network biometrik wajah...</p>
             </div>
-          </div>
-        ) : (
-          /* Main Content */
-          <div className="space-y-4">
-
-            {/* Tab 2 Form Registration Name & Security Password Input */}
-            {activeTab === 'register' && (
-              <div className="space-y-3 bg-slate-950 p-4 rounded-2xl border border-slate-800">
-                <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1">
-                    Nama Lengkap Petugas *
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      required
-                      placeholder="Contoh: Ir. Hendra Saputra, M.T."
-                      value={operatorName}
-                      onChange={(e) => setOperatorName(e.target.value)}
-                      className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-blue-500 font-medium"
+          ) : (
+            <div className="space-y-4">
+              
+              {/* Webcam Viewport */}
+              <div className="relative w-full h-64 bg-neutral-950 rounded-2xl overflow-hidden border border-neutral-800 shadow-inner flex items-center justify-center">
+                
+                {isWebcamActive ? (
+                  <>
+                    <video
+                      ref={videoRef}
+                      className="w-full h-full object-cover transform -scale-x-100"
+                      playsInline
+                      muted
                     />
-                    <User className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
-                  </div>
-                </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1 flex items-center gap-1">
-                    <KeyRound className="w-3.5 h-3.5 text-blue-400" />
-                    Sandi Keamanan Otorisasi Petugas * (Sandi: 404logic)
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="password"
-                      required
-                      placeholder="Masukkan sandi rahasia (404logic)..."
-                      value={authPassword}
-                      onChange={(e) => setAuthPassword(e.target.value)}
-                      className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-blue-500 font-mono font-medium"
-                    />
-                    <Lock className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
+                    {/* Face Scan Overlay */}
+                    <div className="absolute inset-0 border-2 border-dashed border-blue-500/50 rounded-2xl pointer-events-none flex items-center justify-center">
+                      <div className="w-48 h-48 border-2 border-emerald-500/80 rounded-full animate-pulse flex items-center justify-center">
+                        {autoScanning && (
+                          <div className="text-[10px] font-mono font-bold bg-black/80 px-2 py-1 rounded text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+                            <Zap className="w-3 h-3 text-amber-400 animate-bounce" />
+                            Auto-Scanning...
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div className="text-center space-y-3 p-6">
+                    <Camera className="w-10 h-10 text-neutral-600 mx-auto" />
+                    <p className="text-neutral-400 font-bold">Kamera Belum Aktif</p>
+                    <button
+                      type="button"
+                      onClick={startWebcam}
+                      className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs shadow transition-all active:scale-95"
+                    >
+                      Buka Kamera Webcam
+                    </button>
                   </div>
-                </div>
+                )}
+
               </div>
-            )}
 
-            {/* Live WebCam Stream Frame */}
-            <div className="relative w-full h-72 sm:h-80 bg-slate-950 rounded-2xl overflow-hidden border-2 border-slate-800 flex items-center justify-center shadow-inner group">
-              <video
-                ref={videoRef}
-                autoPlay
-                playsInline
-                muted
-                className={`w-full h-full object-cover transform -scale-x-100 ${isWebcamActive ? 'block' : 'hidden'}`}
-              />
-
-              {!isWebcamActive && (
-                <div className="text-center p-6 space-y-3">
-                  <div className="w-16 h-16 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center mx-auto text-slate-500">
-                    <Camera className="w-8 h-8" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-slate-300">Kamera WebCam Belum Aktif</p>
-                    <p className="text-[11px] text-slate-500 mt-0.5">Aktifkan kamera untuk memindai wajah petugas.</p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={startWebcam}
-                    className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs shadow-lg shadow-blue-500/20 active:scale-95 transition-all"
-                  >
-                    Buka Kamera WebCam
-                  </button>
-                </div>
-              )}
-
-              {/* HUD Target Overlay */}
-              {isWebcamActive && (
-                <div className="absolute inset-0 pointer-events-none flex flex-col justify-between p-4">
-                  <div className="flex justify-between">
-                    <div className="w-8 h-8 border-t-2 border-l-2 border-blue-400 rounded-tl" />
-                    <div className="w-8 h-8 border-t-2 border-r-2 border-blue-400 rounded-tr" />
-                  </div>
-
-                  <div className="w-full h-0.5 bg-gradient-to-r from-transparent via-blue-400 to-transparent shadow-[0_0_15px_#3b82f6] animate-pulse" />
-
-                  <div className="flex justify-between">
-                    <div className="w-8 h-8 border-b-2 border-l-2 border-blue-400 rounded-bl" />
-                    <div className="w-8 h-8 border-b-2 border-r-2 border-blue-400 rounded-br" />
-                  </div>
-                </div>
-              )}
-
-              {/* Distance meter badge */}
-              {faceDistance !== null && (
-                <div className="absolute top-3 right-3 bg-slate-900/90 backdrop-blur-md border border-slate-700 px-3 py-1 rounded-full text-[11px] font-mono font-bold z-10">
-                  <span className="text-slate-400">Jarak Euclidean:</span>{' '}
-                  <span className={faceDistance < 0.5 ? 'text-emerald-400 font-extrabold' : 'text-red-400 font-extrabold'}>
-                    {faceDistance.toFixed(3)}
-                  </span>
-                </div>
-              )}
-            </div>
-
-            {/* Webcam Error Warning */}
-            {webcamError && (
-              <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-xs font-bold flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 shrink-0" />
-                <span>{webcamError}</span>
-              </div>
-            )}
-
-            {/* Status Message */}
-            {statusMessage.text && (
-              <div className={`p-3.5 rounded-2xl border text-xs font-bold flex items-start gap-2.5 transition-all ${statusMessage.type === 'success'
-                  ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
-                  : statusMessage.type === 'error'
+              {/* Status & Feedback Banner */}
+              {statusMessage.text && (
+                <div className={`p-3.5 rounded-2xl border text-xs font-bold flex items-center space-x-2.5 ${
+                  statusMessage.type === 'error'
                     ? 'bg-red-500/10 border-red-500/30 text-red-400'
+                    : statusMessage.type === 'success'
+                    ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
                     : statusMessage.type === 'warning'
-                      ? 'bg-amber-500/10 border-amber-500/30 text-amber-400'
-                      : 'bg-slate-800 border-slate-700 text-slate-300'
+                    ? 'bg-amber-500/10 border-amber-500/30 text-amber-400'
+                    : 'bg-blue-500/10 border-blue-500/30 text-blue-400'
                 }`}>
-                {statusMessage.type === 'success' ? (
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                ) : statusMessage.type === 'error' ? (
-                  <ShieldAlert className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
-                ) : (
-                  <ShieldCheck className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
-                )}
-                <div className="flex-1 min-w-0">
-                  <p className="leading-snug">{statusMessage.text}</p>
+                  {statusMessage.type === 'error' ? <AlertCircle className="w-5 h-5 shrink-0" /> : <CheckCircle2 className="w-5 h-5 shrink-0" />}
+                  <span className="leading-snug">{statusMessage.text}</span>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Submit Action Button */}
-            {activeTab === 'login' ? (
-              <button
-                type="button"
-                onClick={handleScanLogin}
-                disabled={!isModelsLoaded || isProcessing}
-                className="w-full py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-500 font-black text-xs text-white flex items-center justify-center gap-2 active:scale-95 transition-all disabled:opacity-50 shadow-lg shadow-blue-500/20"
-              >
-                {isProcessing ? (
-                  <Loader2 className="w-4 h-4 animate-spin text-white" />
-                ) : (
-                  <Scan className="w-4 h-4" />
-                )}
-                <span>Scan Wajah & Masuk Server</span>
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={handleRegisterOperator}
-                disabled={!isModelsLoaded || isProcessing}
-                className="w-full py-3.5 rounded-2xl bg-emerald-500 hover:bg-emerald-400 font-black text-xs text-black flex items-center justify-center gap-2 active:scale-95 transition-all disabled:opacity-50 shadow-lg shadow-emerald-500/20"
-              >
-                {isProcessing ? (
-                  <Loader2 className="w-4 h-4 animate-spin text-black" />
-                ) : (
-                  <UserPlus className="w-4 h-4" />
-                )}
-                <span>Simpan Petugas (Dengan Sandi 404logic)</span>
-              </button>
-            )}
+              {/* Tab 1: Scan Login Form */}
+              {activeTab === 'login' && (
+                <div className="space-y-3">
+                  <div className="p-3 bg-neutral-950 rounded-2xl border border-neutral-800 text-[11px] text-neutral-400 space-y-1">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-white flex items-center gap-1">
+                        <Zap className="w-3.5 h-3.5 text-amber-400" /> Auto-Scan Bebas Tombol:
+                      </span>
+                      <span className="text-emerald-400 font-bold">Aktif ⚡</span>
+                    </div>
+                    <p>Arahkan wajah Anda ke kamera. Pemindaian AI berjalan otomatis tanpa perlu menekan tombol apapun.</p>
+                  </div>
+                </div>
+              )}
 
-            {/* Bottom Actions Footer */}
-            <div className="pt-4 border-t border-slate-800 flex items-center justify-between text-xs">
-              <button
-                type="button"
-                onClick={onCancel}
-                className="text-slate-400 hover:text-white font-bold"
-              >
-                Kembali ke Portal Publik
-              </button>
+              {/* Tab 2: Operator Registration Form */}
+              {activeTab === 'register' && (
+                <form onSubmit={handleRegisterOperator} className="space-y-3">
+                  <div>
+                    <label className="block text-neutral-300 font-bold mb-1">
+                      Nama Lengkap Petugas Kota *
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        required
+                        placeholder="Contoh: Arka (Petugas Dinas Bina Marga)"
+                        value={operatorName}
+                        onChange={(e) => setOperatorName(e.target.value)}
+                        className="w-full pl-9 pr-3 py-2 rounded-xl bg-neutral-950 border border-neutral-800 text-white placeholder-neutral-500 text-xs focus:outline-none focus:border-blue-500 font-medium"
+                      />
+                      <User className="w-4 h-4 text-neutral-500 absolute left-3 top-2.5" />
+                    </div>
+                  </div>
 
-              <button
-                type="button"
-                onClick={handleBypassDemo}
-                className="text-blue-400 hover:underline font-bold flex items-center gap-1 text-[11px]"
-              >
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>Masuk Demo Petugas</span>
-              </button>
+                  <div>
+                    <label className="block text-neutral-300 font-bold mb-1">
+                      Sandi Otorisasi Pendaftaran Petugas *
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="password"
+                        required
+                        placeholder="Masukkan Sandi: 404logic"
+                        value={authPassword}
+                        onChange={(e) => setAuthPassword(e.target.value)}
+                        className="w-full pl-9 pr-3 py-2 rounded-xl bg-neutral-950 border border-neutral-800 text-white placeholder-neutral-500 text-xs focus:outline-none focus:border-blue-500 font-medium"
+                      />
+                      <KeyRound className="w-4 h-4 text-neutral-500 absolute left-3 top-2.5" />
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isProcessing || !isWebcamActive}
+                    className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs shadow flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-50"
+                  >
+                    {isProcessing ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Mendaftarkan Wajah Biometrik...</span>
+                      </>
+                    ) : (
+                      <>
+                        <UserPlus className="w-4 h-4" />
+                        <span>Daftarkan Wajah Petugas Resmi</span>
+                      </>
+                    )}
+                  </button>
+                </form>
+              )}
+
             </div>
+          )}
 
+        </div>
+
+        {/* Modal Footer */}
+        <div className="px-6 py-4 border-t border-neutral-800 bg-neutral-950 flex items-center justify-between text-neutral-400">
+          <div className="flex items-center space-x-1.5 text-[11px] font-bold text-neutral-400">
+            <Lock className="w-3.5 h-3.5 text-emerald-400" />
+            <span>Vektor Biometrik Terenkripsi PostgreSQL</span>
           </div>
-        )}
+
+          <button
+            type="button"
+            onClick={onCancel}
+            className="px-4 py-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-white font-bold text-xs transition-colors"
+          >
+            Batal
+          </button>
+        </div>
 
       </div>
     </div>

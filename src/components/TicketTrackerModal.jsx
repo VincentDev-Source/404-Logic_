@@ -257,7 +257,7 @@ export default function TicketTrackerModal({
                     <div className="space-y-1">
                       <span className="text-[10px] font-bold text-neutral-500 block">Hasil Perbaikan</span>
                       <div className="h-28 rounded-xl overflow-hidden border border-neutral-200 dark:border-neutral-800 bg-neutral-100 dark:bg-neutral-900 flex items-center justify-center text-center p-2">
-                        {selectedReport.afterImage ? (
+                        {selectedReport.status === 'Selesai' && selectedReport.afterImage ? (
                           <img src={selectedReport.afterImage} alt="Sesudah" className="w-full h-full object-cover" />
                         ) : (
                           <div className="space-y-1 text-neutral-400">

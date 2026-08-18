@@ -156,7 +156,8 @@ export default function ReportFeed({
             const CatIcon = catBadge.icon;
             const statusBadge = getStatusBadge(report.status);
             const StatusIcon = statusBadge.icon;
-            const hasAfterImage = Boolean(report.afterImage);
+            // After-Fix photo MUST strictly ONLY render when status is 'Selesai' AND afterImage exists!
+            const hasAfterImage = report.status === 'Selesai' && Boolean(report.afterImage);
 
             return (
               <div 
@@ -164,7 +165,7 @@ export default function ReportFeed({
                 style={{ animationDelay: `${(idx % 6) * 0.08}s` }}
                 className="bg-white dark:bg-black border border-neutral-200 dark:border-neutral-800 rounded-xl overflow-hidden flex flex-col justify-between hover:border-emerald-500/60 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group animate-fade-in-up"
               >
-                {/* Image Container (Before vs After) */}
+                {/* Image Container (Before vs After - Only shown on Completed reports) */}
                 <div className="relative h-44 w-full overflow-hidden bg-neutral-100 dark:bg-neutral-900">
                   {hasAfterImage ? (
                     <div className="grid grid-cols-2 h-full w-full divide-x divide-neutral-800">
@@ -209,7 +210,7 @@ export default function ReportFeed({
                   {/* Top Right Action Overlay (Zoom + Delete) */}
                   <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
                     <button
-                      onClick={() => setPreviewImage(report.afterImage || report.image)}
+                      onClick={() => setPreviewImage((hasAfterImage && report.afterImage) || report.image)}
                       className="p-1.5 rounded-md bg-black/80 hover:bg-black text-white backdrop-blur-md border border-neutral-800 active:scale-95 transition-all"
                       title="Pratinjau Foto"
                     >
