@@ -13,6 +13,7 @@
     "@prisma/client": "^6.19.3",
     "@vladmandic/face-api": "^1.7.15",
     "canvas-confetti": "^1.9.4",
+    "framer-motion": "^13.1.0",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.469.0",
     "prisma": "^6.19.3",
