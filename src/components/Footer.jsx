@@ -87,7 +87,7 @@ export default function Footer({ setActiveTab, onOpenCreateModal }) {
           <div className="flex items-center gap-1">
             <span>Siap Melayani dengan sepenuh</span>
             <Heart className="w-3.5 h-3.5 text-emerald-500 fill-emerald-500" />
-            <span>masyarakat</span>
+            <span>untuk masyarakat</span>
           </div>
         </div>
 

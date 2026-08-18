@@ -33,7 +33,7 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport, ope
 
   if (!isOpen) return null;
 
-  // Helper for IP-based Geolocation Fallback (Works on Desktop PCs, Laptops, Mobiles without error popups)
+  // Helper for IP-based Geolocation Fallback
   const fetchIPLocationFallback = async () => {
     try {
       const res = await fetch('https://ipapi.co/json/').catch(() => null);
@@ -55,11 +55,11 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport, ope
     return false;
   };
 
-  // Seamless Multi-Tier GPS Handler (Never throws error popups)
+  // High-Precision Hardware GPS Handler (enableHighAccuracy: true, maximumAge: 0, zoom=18 street level)
   const handleFetchRealGPS = () => {
     setIsLocating(true);
 
-    const tryBrowserGeolocation = () => {
+    const tryHighPrecisionBrowserGPS = () => {
       return new Promise((resolve) => {
         if (!navigator.geolocation) {
           resolve(false);
@@ -73,11 +73,22 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport, ope
             setCoordinates({ lat, lng });
 
             try {
-              const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+              // High accuracy zoom=18 reverse geocoding for building/street level precision
+              const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`);
               const data = await res.json();
               if (data && data.display_name) {
-                setLocation(`${data.display_name} (GPS: ${lat.toFixed(6)}, ${lng.toFixed(6)})`);
-                const cityFound = data.address?.city || data.address?.town || data.address?.regency || data.address?.county || data.address?.state || 'Jakarta';
+                const addr = data.address || {};
+                const road = addr.road || addr.street || addr.pedestrian || '';
+                const suburb = addr.suburb || addr.village || addr.neighbourhood || addr.hamlet || '';
+                const district = addr.city_district || addr.district || addr.county || '';
+                const cityFound = addr.city || addr.town || addr.regency || addr.state || 'Jakarta';
+
+                let formattedAddress = data.display_name;
+                if (road || suburb) {
+                  formattedAddress = [road, suburb, district, cityFound].filter(Boolean).join(', ');
+                }
+
+                setLocation(`${formattedAddress} (GPS: ${lat.toFixed(6)}, ${lng.toFixed(6)})`);
                 setCity(cityFound);
               } else {
                 setLocation(`Titik GPS Real: Lat ${lat.toFixed(6)}, Lng ${lng.toFixed(6)} (GPS: ${lat.toFixed(6)}, ${lng.toFixed(6)})`);
@@ -88,20 +99,19 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport, ope
             resolve(true);
           },
           (err) => {
-            console.warn('Browser GPS position error, switching to IP Geolocation:', err);
+            console.warn('High accuracy hardware GPS timed out or unavailable, trying IP fallback:', err);
             resolve(false);
           },
-          { enableHighAccuracy: false, timeout: 6000, maximumAge: 60000 }
+          { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
         );
       });
     };
 
     (async () => {
-      const browserSuccess = await tryBrowserGeolocation();
+      const browserSuccess = await tryHighPrecisionBrowserGPS();
       if (!browserSuccess) {
         const ipSuccess = await fetchIPLocationFallback();
         if (!ipSuccess) {
-          // Default City Fallback
           setLocation('Jl. MH Thamrin No. 28, Jakarta Pusat (GPS: -6.208800, 106.845600)');
           setCity('Jakarta');
           setCoordinates({ lat: -6.2088, lng: 106.8456 });
@@ -261,7 +271,7 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport, ope
                 {isLocating ? (
                   <>
                     <Loader2 className="w-3 h-3 animate-spin text-emerald-500" />
-                    <span>Mendeteksi Lokasi...</span>
+                    <span>Mengunci GPS Hardware...</span>
                   </>
                 ) : (
                   <>

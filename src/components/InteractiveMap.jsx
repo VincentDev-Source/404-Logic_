@@ -92,7 +92,7 @@ export default function InteractiveMap({
         tempClickMarkerRef.current = clickMarker;
 
         try {
-          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`);
           const data = await res.json();
           const address = data?.display_name || `Koordinat GPS: Lat ${lat.toFixed(5)}, Lng ${lng.toFixed(5)}`;
 
@@ -195,7 +195,7 @@ export default function InteractiveMap({
               align-items: center;
               justify-content: center;
               box-shadow: 0 8px 20px rgba(0,0,0,0.5);
-              border: 2.5 solid #10b981;
+              border: 2.5px solid #10b981;
               cursor: pointer;
             ">
               <span style="transform: rotate(45deg); font-size: 17px; display: block; line-height: 1;">
@@ -251,11 +251,11 @@ export default function InteractiveMap({
 
   }, [filteredReports, isDark, selectedReport]);
 
-  // Seamless Multi-Tier GPS Fallback (Browser GPS -> IP Geolocation -> Default City)
+  // High-Precision Hardware GPS Geolocation (enableHighAccuracy: true, maximumAge: 0, zoom=17 street focus)
   const handleLocateUserOnMap = async () => {
     setIsLocatingUser(true);
 
-    const tryBrowserGeo = () => {
+    const tryHighPrecisionBrowserGeo = () => {
       return new Promise((resolve) => {
         if (!navigator.geolocation) {
           resolve(null);
@@ -265,12 +265,12 @@ export default function InteractiveMap({
         navigator.geolocation.getCurrentPosition(
           (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
           () => resolve(null),
-          { enableHighAccuracy: false, timeout: 6000, maximumAge: 60000 }
+          { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
         );
       });
     };
 
-    let targetCoords = await tryBrowserGeo();
+    let targetCoords = await tryHighPrecisionBrowserGeo();
 
     if (!targetCoords) {
       // IP-based Geolocation Fallback
@@ -293,7 +293,8 @@ export default function InteractiveMap({
 
     if (mapInstanceRef.current && targetCoords) {
       const { lat, lng } = targetCoords;
-      mapInstanceRef.current.flyTo([lat, lng], 14, { duration: 1.5 });
+      // Fly to exact street view zoom level 17
+      mapInstanceRef.current.flyTo([lat, lng], 17, { duration: 1.5 });
 
       const userMarker = L.marker([lat, lng], {
         icon: L.divIcon({
@@ -301,20 +302,20 @@ export default function InteractiveMap({
           html: `
             <div style="
               background-color: #3b82f6;
-              width: 24px;
-              height: 24px;
+              width: 26px;
+              height: 26px;
               border-radius: 50%;
-              border: 3px solid #ffffff;
-              box-shadow: 0 0 20px #3b82f6;
-              animation: radarPulse 2s infinite ease-in-out;
+              border: 3.5px solid #ffffff;
+              box-shadow: 0 0 25px #3b82f6;
+              animation: radarPulse 1.8s infinite ease-in-out;
             "></div>
           `,
-          iconSize: [24, 24],
-          iconAnchor: [12, 12]
+          iconSize: [26, 26],
+          iconAnchor: [13, 13]
         })
       }).addTo(mapInstanceRef.current);
 
-      userMarker.bindPopup(`<b>Lokasi Terdeteksi (${targetCoords.city || 'Pengguna'})</b><br/>Lat: ${lat.toFixed(4)}, Lng: ${lng.toFixed(4)}`).openPopup();
+      userMarker.bindPopup(`<b>Lokasi Presisi GPS Anda</b><br/>Lat: ${lat.toFixed(6)}, Lng: ${lng.toFixed(6)}`).openPopup();
     }
 
     setIsLocatingUser(false);
@@ -371,12 +372,12 @@ export default function InteractiveMap({
             {isLocatingUser ? (
               <>
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                <span>Mendeteksi Lokasi...</span>
+                <span>Mengunci GPS Hardware...</span>
               </>
             ) : (
               <>
                 <Navigation className="w-3.5 h-3.5" />
-                <span>Deteksi Lokasi Saya</span>
+                <span>Deteksi Lokasi Saya (Presisi High-Accuracy)</span>
               </>
             )}
           </button>
