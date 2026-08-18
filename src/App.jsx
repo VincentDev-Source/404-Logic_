@@ -17,6 +17,7 @@ import FaceAuthOperator from './components/FaceAuthOperator';
 import OperatorDashboard from './components/OperatorDashboard';
 import Footer from './components/Footer';
 import CurvedNavbar from './components/CurvedNavbar';
+import EarthquakeAlert from './components/EarthquakeAlert';
 import { CheckCircle2, X, AlertTriangle, RefreshCw, Loader2 } from 'lucide-react';
 
 // Normalize database records to match frontend component requirements
@@ -575,6 +576,7 @@ export default function App() {
           ) : (
             /* BERANDA TAB VIEW */
             <>
+              {/* Hero Impact Stats */}
               <HeroStats
                 reports={reports}
                 searchQuery={searchQuery}
@@ -582,7 +584,12 @@ export default function App() {
                 onOpenCreateModal={() => setIsCreateModalOpen(true)}
               />
 
-              <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pb-28 sm:pb-16">
+              <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pb-28 sm:pb-16 space-y-6">
+                
+                {/* Real-Time Earthquake Early Warning System Widget (BMKG TEWS Open Data - SDG 11.5) */}
+                <EarthquakeAlert />
+
+                {/* Citizen Reports Feed */}
                 <ReportFeed
                   reports={filteredReports}
                   onUpvote={handleUpvote}
