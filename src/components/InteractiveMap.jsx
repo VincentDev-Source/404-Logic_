@@ -214,8 +214,23 @@ export default function InteractiveMap({
     // Add markers for all report GPS positions
     const bounds = [];
     filteredReports.forEach((report) => {
-      const lat = report.coordinates?.lat || -6.2088;
-      const lng = report.coordinates?.lng || 106.8456;
+      let lat = null;
+      let lng = null;
+
+      // Ground truth parser: extract GPS coordinates from embedded (GPS: lat, lng) string if present
+      if (report.location && report.location.includes('GPS:')) {
+        const gpsMatch = report.location.match(/GPS:\s*([-\d.]+),\s*([-\d.]+)/);
+        if (gpsMatch) {
+          lat = parseFloat(gpsMatch[1]);
+          lng = parseFloat(gpsMatch[2]);
+        }
+      }
+
+      if (lat === null || lng === null || isNaN(lat) || isNaN(lng)) {
+        lat = report.coordinates?.lat || -6.2088;
+        lng = report.coordinates?.lng || 106.8456;
+      }
+
       bounds.push([lat, lng]);
 
       const isSelected = selectedReport?.id === report.id;

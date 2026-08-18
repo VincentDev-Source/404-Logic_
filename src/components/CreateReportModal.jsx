@@ -155,12 +155,21 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport, ope
         ? location
         : `${location} (GPS: ${coordinates.lat.toFixed(6)}, ${coordinates.lng.toFixed(6)})`;
 
+      // Extract accurate lat and lng from formattedLocation
+      let finalCoords = coordinates;
+      if (formattedLocation.includes('GPS:')) {
+        const match = formattedLocation.match(/GPS:\s*([-\d.]+),\s*([-\d.]+)/);
+        if (match) {
+          finalCoords = { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
+        }
+      }
+
       const newReportData = {
         title,
         category,
         location: formattedLocation,
         city,
-        coordinates,
+        coordinates: finalCoords,
         description,
         author: isAnonymous ? 'Warga Anonim' : (author.trim() || 'Warga Peduli'),
         isAnonymous,

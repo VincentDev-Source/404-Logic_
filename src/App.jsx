@@ -18,11 +18,11 @@ function normalizeReport(raw) {
   const numId = typeof id === 'number' ? id : parseInt(String(id).replace(/\D/g, ''), 10) || 1;
   const idStr = typeof id === 'number' ? `LP-2026-${String(id).padStart(4, '0')}` : String(id);
 
-  // Extract GPS coordinates from location string if present (format: "... (GPS: lat, lng)")
-  let lat = raw.coordinates?.lat || raw.lat;
-  let lng = raw.coordinates?.lng || raw.lng;
+  let lat = null;
+  let lng = null;
 
-  if ((!lat || !lng) && raw.location && raw.location.includes('GPS:')) {
+  // PRIORITY 1 (Ground Truth): Parse exact embedded (GPS: lat, lng) from raw.location
+  if (raw.location && raw.location.includes('GPS:')) {
     const gpsMatch = raw.location.match(/GPS:\s*([-\d.]+),\s*([-\d.]+)/);
     if (gpsMatch) {
       lat = parseFloat(gpsMatch[1]);
@@ -30,8 +30,14 @@ function normalizeReport(raw) {
     }
   }
 
-  // Default fallback if GPS is not present
-  if (!lat || !lng) {
+  // PRIORITY 2: Fallback to raw.coordinates if present
+  if (lat === null || lng === null || isNaN(lat) || isNaN(lng)) {
+    lat = raw.coordinates?.lat || raw.lat;
+    lng = raw.coordinates?.lng || raw.lng;
+  }
+
+  // PRIORITY 3: Default fallback if coordinates remain null
+  if (lat === null || lng === null || isNaN(lat) || isNaN(lng)) {
     const defaultLat = -6.2088 + (((numId * 37) % 50) - 25) * 0.005;
     const defaultLng = 106.8456 + (((numId * 53) % 50) - 25) * 0.005;
     lat = defaultLat;
@@ -429,7 +435,7 @@ export default function App() {
               </button>
             </div>
           ) : (
-            /* Main View Router Router */
+            /* Main View Router */
             activeTab === 'analytics' ? (
               <AnalyticsDashboard reports={reports} theme={theme} />
             ) : viewMode === 'map' || activeTab === 'map' ? (
