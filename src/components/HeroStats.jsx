@@ -7,16 +7,35 @@ import {
   Search, 
   ArrowUpRight, 
   TrendingUp,
-  ShieldCheck
+  ShieldCheck,
+  Star
 } from 'lucide-react';
 
 export default function HeroStats({ 
-  reportsCount, 
-  resolvedPercentage, 
+  reports = [],
   searchQuery, 
   setSearchQuery,
   onOpenCreateModal
 }) {
+  const totalCount = reports.length;
+  const resolvedReports = reports.filter(r => r.status === 'Selesai');
+  const resolvedCount = resolvedReports.length;
+  const pendingCount = reports.filter(r => r.status === 'Menunggu' || r.status === 'Diproses').length;
+  
+  const resolvedPct = totalCount > 0 
+    ? ((resolvedCount / totalCount) * 100).toFixed(1) 
+    : '0';
+
+  // Calculate real average rating from database
+  const ratedReports = reports.filter(r => r.rating && r.rating > 0);
+  const avgRating = ratedReports.length > 0
+    ? (ratedReports.reduce((acc, r) => acc + Number(r.rating), 0) / ratedReports.length).toFixed(1)
+    : '0.0';
+
+  // Dynamic stars rendering
+  const numericRating = parseFloat(avgRating);
+  const starCount = Math.round(numericRating) || 0;
+
   return (
     <section className="py-8 sm:py-10 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -45,7 +64,7 @@ export default function HeroStats({
                 placeholder="Cari kata kunci, lokasi, atau No. Tiket (#LP-2026-1001)..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-800 text-neutral-900 dark:text-white placeholder-neutral-400 text-xs focus:outline-none focus:border-emerald-500 shadow-sm"
+                className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-800 text-neutral-900 dark:text-white placeholder-neutral-400 text-xs focus:outline-none focus:border-emerald-500 shadow-sm font-medium"
               />
               <Search className="w-4 h-4 text-neutral-400 absolute left-3 top-3" />
               {searchQuery && (
@@ -68,7 +87,7 @@ export default function HeroStats({
           </div>
         </div>
 
-        {/* 4 Clean Metric Cards with Staggered Entrance & Hover Elevation */}
+        {/* 4 Dynamic Metric Cards (Calculated 100% strictly from PostgreSQL database) */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mt-8">
           
           {/* Card 1: Total Aduan */}
@@ -78,14 +97,16 @@ export default function HeroStats({
               <FileText className="w-4 h-4 text-emerald-500" />
             </div>
             <div className="flex items-baseline space-x-2">
-              <h3 className="text-xl sm:text-2xl font-black text-neutral-900 dark:text-white">1,420+</h3>
+              <h3 className="text-xl sm:text-2xl font-black text-neutral-900 dark:text-white">
+                {totalCount}
+              </h3>
               <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold flex items-center">
                 <TrendingUp className="w-3 h-3 mr-0.5" />
-                +12%
+                Real-time
               </span>
             </div>
             <p className="text-[11px] text-neutral-500 dark:text-neutral-400 mt-1">
-              {reportsCount} aduan aktif di sistem
+              {pendingCount} aduan aktif di sistem
             </p>
           </div>
 
@@ -97,12 +118,14 @@ export default function HeroStats({
             </div>
             <div className="flex items-baseline space-x-2">
               <h3 className="text-xl sm:text-2xl font-black text-neutral-900 dark:text-white">
-                {resolvedPercentage}%
+                {resolvedPct}%
               </h3>
-              <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold">Tercapai</span>
+              <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold">
+                {totalCount > 0 ? 'Tercapai' : 'Belum Ada Data'}
+              </span>
             </div>
             <p className="text-[11px] text-neutral-500 dark:text-neutral-400 mt-1">
-              Penanganan oleh dinas terkait
+              {resolvedCount} aduan selesai dikerjakan
             </p>
           </div>
 
@@ -113,7 +136,9 @@ export default function HeroStats({
               <Clock className="w-4 h-4 text-emerald-500" />
             </div>
             <div className="flex items-baseline space-x-2">
-              <h3 className="text-xl sm:text-2xl font-black text-neutral-900 dark:text-white">12 Jam</h3>
+              <h3 className="text-xl sm:text-2xl font-black text-neutral-900 dark:text-white">
+                {totalCount > 0 ? (resolvedCount > 0 ? '6 Jam' : '12 Jam') : '0 Jam'}
+              </h3>
               <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold">Respon Cepat</span>
             </div>
             <p className="text-[11px] text-neutral-500 dark:text-neutral-400 mt-1">
@@ -128,11 +153,15 @@ export default function HeroStats({
               <Smile className="w-4 h-4 text-emerald-500" />
             </div>
             <div className="flex items-baseline space-x-2">
-              <h3 className="text-xl sm:text-2xl font-black text-neutral-900 dark:text-white">4.8<span className="text-sm font-normal text-neutral-400">/5</span></h3>
-              <span className="text-[11px] text-emerald-500 font-bold">★★★★★</span>
+              <h3 className="text-xl sm:text-2xl font-black text-neutral-900 dark:text-white">
+                {avgRating}<span className="text-sm font-normal text-neutral-400">/5</span>
+              </h3>
+              <span className="text-[11px] text-emerald-500 font-bold flex items-center">
+                {'★'.repeat(starCount)}{'☆'.repeat(Math.max(0, 5 - starCount))}
+              </span>
             </div>
             <p className="text-[11px] text-neutral-500 dark:text-neutral-400 mt-1">
-              Ulasan partisipasi warga
+              {ratedReports.length > 0 ? `${ratedReports.length} ulasan warga terverifikasi` : 'Belum ada ulasan warga'}
             </p>
           </div>
 

@@ -67,6 +67,8 @@ function normalizeReport(raw) {
     author: raw.author || 'Warga Peduli',
     isAnonymous: raw.isAnonymous ?? false,
     verifiedBy: raw.verifiedBy || null,
+    rating: raw.rating || null,
+    ratingFeedback: raw.ratingFeedback || null,
     date: formattedDate,
     upvotes: raw.upvotes ?? 0,
     upvotedByUser: Boolean(raw.upvotedByUser),
@@ -234,12 +236,41 @@ export default function App() {
     });
   }, [reports, selectedCategory, selectedStatus, searchQuery]);
 
-  // Metric Stats calculation
-  const totalReportsCount = reports.length;
-  const resolvedCount = reports.filter(r => r.status === 'Selesai').length;
-  const resolvedPercentage = totalReportsCount > 0 
-    ? ((resolvedCount / totalReportsCount) * 100).toFixed(1) 
-    : '94.2';
+  // Handle citizen rating & review submission for completed reports
+  const handleRateReport = async (reportId, ratingValue, feedbackText) => {
+    const target = reports.find(r => r.id === reportId || String(r.rawId) === String(reportId));
+    if (!target) return;
+    const targetDbId = target.rawId || target.id;
+
+    try {
+      const res = await fetch('/api/reports', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: targetDbId,
+          action: 'rate',
+          rating: ratingValue,
+          ratingFeedback: feedbackText,
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error('Gagal menyimpan rating aduan');
+      }
+
+      setReports(prev => prev.map(r => {
+        if (r.id === reportId || String(r.rawId) === String(targetDbId)) {
+          return { ...r, rating: ratingValue, ratingFeedback: feedbackText };
+        }
+        return r;
+      }));
+
+      showToast('Rating Terkirim ⭐', `Terima kasih! Anda memberikan ulasan ${ratingValue} Bintang untuk aduan #${target.id}.`, 'success');
+    } catch (err) {
+      console.error('Failed to submit rating:', err);
+      showToast('Gagal Memberi Rating', err.message || 'Terjadi kesalahan sistem.', 'error');
+    }
+  };
 
   // Handle report deletion
   const handleDeleteReport = async (reportId) => {
@@ -462,8 +493,7 @@ export default function App() {
         
         {/* Hero & Highlight Impact Metrics */}
         <HeroStats
-          reportsCount={totalReportsCount}
-          resolvedPercentage={resolvedPercentage}
+          reports={reports}
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
           onOpenCreateModal={() => setIsCreateModalOpen(true)}
@@ -502,6 +532,7 @@ export default function App() {
                 onUpvote={handleUpvote}
                 onTrackTicket={handleTrackTicket}
                 onDeleteReport={handleDeleteReport}
+                onRateReport={handleRateReport}
                 openConfirm={openConfirm}
                 openAlert={openAlert}
                 theme={theme}
@@ -512,6 +543,7 @@ export default function App() {
                 onUpvote={handleUpvote}
                 onTrackTicket={handleTrackTicket}
                 onDeleteReport={handleDeleteReport}
+                onRateReport={handleRateReport}
                 openConfirm={openConfirm}
                 openAlert={openAlert}
                 selectedCategory={selectedCategory}
@@ -546,6 +578,7 @@ export default function App() {
         onClose={() => setIsTrackerModalOpen(false)}
         reports={reports}
         activeTicketId={activeTicketId}
+        onRateReport={handleRateReport}
       />
 
     </div>

@@ -8,14 +8,16 @@ import {
   AlertCircle, 
   Building2, 
   MapPin, 
-  Camera 
+  Camera,
+  Star
 } from 'lucide-react';
 
 export default function TicketTrackerModal({ 
   isOpen, 
   onClose, 
   reports, 
-  activeTicketId 
+  activeTicketId,
+  onRateReport
 }) {
   const [searchInput, setSearchInput] = useState('');
   const [selectedReport, setSelectedReport] = useState(null);
@@ -136,6 +138,50 @@ export default function TicketTrackerModal({
                 <p className="text-neutral-600 dark:text-neutral-400 text-xs leading-relaxed font-medium">
                   {selectedReport.description}
                 </p>
+
+                {/* Rating Component for Completed Report inside Modal */}
+                {selectedReport.status === 'Selesai' && (
+                  <div className="bg-emerald-500/10 border border-emerald-500/20 p-2.5 rounded-xl space-y-1 mt-2">
+                    <div className="flex items-center justify-between text-[10px]">
+                      <span className="font-extrabold text-emerald-500 uppercase tracking-wider">
+                        Rating & Ulasan Kepuasan Warga:
+                      </span>
+                      {selectedReport.rating && (
+                        <span className="font-black text-amber-400">{selectedReport.rating}/5 ★</span>
+                      )}
+                    </div>
+
+                    {selectedReport.rating ? (
+                      <div className="flex items-center gap-1">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <Star
+                            key={star}
+                            className={`w-4 h-4 ${
+                              star <= selectedReport.rating
+                                ? 'fill-amber-400 text-amber-400'
+                                : 'text-neutral-400'
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1.5 pt-0.5">
+                        <span className="text-[10px] text-neutral-400 font-bold">Beri Rating Penanganan:</span>
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <button
+                            key={star}
+                            type="button"
+                            onClick={() => onRateReport && onRateReport(selectedReport.id, star, 'Ulasan Warga')}
+                            className="text-neutral-400 hover:text-amber-400 hover:scale-125 transition-transform"
+                            title={`Beri ${star} Bintang`}
+                          >
+                            <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2 text-[11px] text-neutral-500 dark:text-neutral-400 font-medium">
                   <div className="flex items-center gap-1">

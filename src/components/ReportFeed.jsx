@@ -1,29 +1,27 @@
 import React, { useState } from 'react';
 import { 
-  ThumbsUp, 
-  MapPin, 
-  Clock, 
-  Ticket, 
   Filter, 
-  Layers, 
-  Building2, 
-  AlertTriangle, 
-  Trash2, 
-  Zap, 
-  Droplets, 
+  MapPin, 
+  ThumbsUp, 
+  Ticket, 
+  Clock, 
+  UserCheck, 
   Maximize2,
-  X,
-  UserCheck,
+  Trash2,
+  AlertTriangle,
+  Flame,
   CheckCircle2,
-  AlertCircle
+  Sparkles,
+  Star
 } from 'lucide-react';
-import { CATEGORIES, STATUS_OPTIONS } from '../data/mockReports';
+import { CATEGORIES } from '../data/mockReports';
 
 export default function ReportFeed({ 
   reports, 
   onUpvote, 
   onTrackTicket, 
   onDeleteReport,
+  onRateReport,
   openConfirm,
   openAlert,
   selectedCategory, 
@@ -34,50 +32,27 @@ export default function ReportFeed({
   setViewMode
 }) {
   const [previewImage, setPreviewImage] = useState(null);
-  const [deletingId, setDeletingId] = useState(null);
 
-  // Category badge helper
-  const getCategoryBadge = (categoryName) => {
-    switch (categoryName) {
-      case 'Jalan Rusak':
-        return { icon: AlertTriangle, label: 'Jalan Rusak' };
-      case 'Sampah/Limbah':
-        return { icon: Trash2, label: 'Sampah/Limbah' };
-      case 'Lampu Jalan':
-        return { icon: Zap, label: 'Lampu Jalan' };
-      case 'Banjir/Drainase':
-        return { icon: Droplets, label: 'Banjir/Drainase' };
-      default:
-        return { icon: Building2, label: 'Fasilitas Umum' };
-    }
-  };
-
-  // Status badge helper
+  // Status badge styling helper
   const getStatusBadge = (status) => {
     switch (status) {
       case 'Selesai':
-        return { 
-          label: 'Selesai', 
-          icon: CheckCircle2, 
-          class: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30' 
-        };
+        return { label: 'Selesai', class: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/30', icon: CheckCircle2 };
       case 'Sedang Ditangani':
-        return { 
-          label: 'Sedang Ditangani', 
-          icon: Clock, 
-          class: 'bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 border-neutral-300 dark:border-neutral-700' 
-        };
+      case 'Diproses':
+        return { label: 'Diproses', class: 'bg-blue-500/10 text-blue-500 border-blue-500/30', icon: Sparkles };
       default:
-        return { 
-          label: 'Menunggu Verifikasi', 
-          icon: AlertCircle, 
-          class: 'bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 border-neutral-300 dark:border-neutral-700' 
-        };
+        return { label: 'Menunggu', class: 'bg-amber-500/10 text-amber-500 border-amber-500/30', icon: Clock };
     }
   };
 
-  // Modern confirm modal trigger replacing window.confirm
-  const confirmDelete = (reportId) => {
+  // Category badge helper
+  const getCategoryBadge = (catName) => {
+    const matched = CATEGORIES.find(c => c.name === catName);
+    return matched || { icon: Flame, name: catName };
+  };
+
+  const handleConfirmDelete = (reportId) => {
     if (openConfirm) {
       openConfirm({
         title: 'Hapus Aduan Fasilitas',
@@ -85,11 +60,7 @@ export default function ReportFeed({
         confirmText: 'Ya, Hapus Aduan',
         cancelText: 'Batal',
         type: 'danger',
-        onConfirm: () => {
-          setDeletingId(reportId);
-          onDeleteReport(reportId);
-          setDeletingId(null);
-        }
+        onConfirm: () => onDeleteReport(reportId),
       });
     } else {
       onDeleteReport(reportId);
@@ -97,82 +68,67 @@ export default function ReportFeed({
   };
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       
-      {/* Filter Bar & View Toggle */}
-      <div className="bg-white dark:bg-neutral-900 p-4 rounded-xl border border-neutral-200 dark:border-neutral-800 flex flex-col md:flex-row items-center justify-between gap-3 shadow-sm transition-colors animate-fade-in-up">
+      {/* Control Filter Bar */}
+      <div className="bg-white dark:bg-neutral-900 p-4 rounded-xl border border-neutral-200 dark:border-neutral-800 flex flex-wrap items-center justify-between gap-3 shadow-sm transition-colors">
         
-        {/* Category Filters Pill */}
-        <div className="flex items-center gap-1.5 overflow-x-auto w-full md:w-auto pb-1 md:pb-0 scrollbar-none">
-          <span className="text-xs font-bold text-neutral-500 dark:text-neutral-400 flex items-center gap-1 mr-1 whitespace-nowrap">
-            <Filter className="w-3.5 h-3.5" /> Filter:
-          </span>
-
-          <button
-            onClick={() => setSelectedCategory('semua')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-extrabold whitespace-nowrap transition-all active:scale-95 ${
-              selectedCategory === 'semua'
-                ? 'bg-emerald-500 text-black shadow-sm'
-                : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700'
-            }`}
-          >
-            Semua ({reports.length})
-          </button>
-
-          {CATEGORIES.filter(c => c.id !== 'semua').map((cat) => (
-            <button
-              key={cat.id}
-              onClick={() => setSelectedCategory(cat.id)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all border active:scale-95 ${
-                selectedCategory === cat.id
-                  ? 'bg-emerald-500 text-black border-emerald-500'
-                  : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 border-neutral-200 dark:border-neutral-700 hover:bg-neutral-200 dark:hover:bg-neutral-700'
-              }`}
-            >
-              {cat.name}
-            </button>
-          ))}
+        {/* Category Filters */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 w-full sm:w-auto">
+          {CATEGORIES.map((cat) => {
+            const Icon = cat.icon;
+            const isSelected = selectedCategory === cat.name || (cat.id === 'semua' && selectedCategory === 'semua');
+            return (
+              <button
+                key={cat.id}
+                onClick={() => setSelectedCategory(cat.id === 'semua' ? 'semua' : cat.name)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap flex items-center space-x-1.5 transition-all duration-200 active:scale-95 ${
+                  isSelected
+                    ? 'bg-emerald-500 text-black shadow-md font-extrabold'
+                    : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700'
+                }`}
+              >
+                <Icon className="w-3.5 h-3.5" />
+                <span>{cat.name}</span>
+              </button>
+            );
+          })}
         </div>
 
-        {/* Status Dropdown & Dual View Toggle Switch */}
-        <div className="flex items-center justify-between w-full md:w-auto gap-3">
+        {/* Status Filters & View Toggle */}
+        <div className="flex items-center gap-2">
           
           <select
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
-            className="bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-900 dark:text-neutral-100 text-xs rounded-lg px-3 py-1.5 focus:outline-none focus:border-emerald-500 font-semibold"
+            className="px-3 py-1.5 rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-900 dark:text-white text-xs focus:outline-none focus:border-emerald-500 font-bold"
           >
-            {STATUS_OPTIONS.map((status) => (
-              <option key={status.id} value={status.id}>
-                {status.name}
-              </option>
-            ))}
+            <option value="semua">Semua Status</option>
+            <option value="Menunggu">Menunggu</option>
+            <option value="Diproses">Diproses</option>
+            <option value="Selesai">Selesai</option>
           </select>
 
-          {/* Dual View Toggle */}
-          <div className="bg-neutral-100 dark:bg-neutral-800 p-1 rounded-lg border border-neutral-200 dark:border-neutral-700 flex items-center">
+          <div className="flex items-center p-1 rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700">
             <button
               onClick={() => setViewMode('feed')}
-              className={`px-2.5 py-1 rounded text-xs font-extrabold transition-all active:scale-95 flex items-center gap-1 ${
+              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all active:scale-95 ${
                 viewMode === 'feed'
-                  ? 'bg-emerald-500 text-black shadow-sm'
-                  : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white'
+                  ? 'bg-white dark:bg-black text-neutral-900 dark:text-white shadow-sm'
+                  : 'text-neutral-500 dark:text-neutral-400'
               }`}
             >
-              <Layers className="w-3.5 h-3.5" />
-              <span>Kartu</span>
+              Feed Kartu
             </button>
-
             <button
               onClick={() => setViewMode('map')}
-              className={`px-2.5 py-1 rounded text-xs font-extrabold transition-all active:scale-95 flex items-center gap-1 ${
+              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all active:scale-95 ${
                 viewMode === 'map'
-                  ? 'bg-emerald-500 text-black shadow-sm'
-                  : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white'
+                  ? 'bg-white dark:bg-black text-neutral-900 dark:text-white shadow-sm'
+                  : 'text-neutral-500 dark:text-neutral-400'
               }`}
             >
-              <MapPin className="w-3.5 h-3.5" />
-              <span>Peta Leaflet</span>
+              Peta Radar
             </button>
           </div>
 
@@ -231,22 +187,13 @@ export default function ReportFeed({
                       <Maximize2 className="w-3.5 h-3.5" />
                     </button>
 
-                    {/* Delete Report Button */}
                     <button
-                      onClick={() => confirmDelete(report.id)}
-                      disabled={deletingId === report.id}
-                      className="p-1.5 rounded-md bg-red-600/90 hover:bg-red-600 text-white backdrop-blur-md border border-red-500/50 active:scale-95 transition-all"
+                      onClick={() => handleConfirmDelete(report.id)}
+                      className="p-1.5 rounded-md bg-red-600/90 hover:bg-red-500 text-white backdrop-blur-md border border-red-500/50 active:scale-95 transition-all"
                       title="Hapus Aduan Ini"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
-                  </div>
-
-                  {/* Ticket ID */}
-                  <div className="absolute bottom-2.5 left-2.5">
-                    <span className="px-2 py-0.5 rounded bg-black/90 text-emerald-400 font-mono text-[10px] font-extrabold border border-neutral-800 shadow">
-                      #{report.id}
-                    </span>
                   </div>
 
                   {/* Status Badge */}
@@ -269,6 +216,50 @@ export default function ReportFeed({
                     </p>
                   </div>
 
+                  {/* Rating Component for Completed Reports */}
+                  {report.status === 'Selesai' && (
+                    <div className="bg-emerald-500/10 border border-emerald-500/20 p-2.5 rounded-xl space-y-1">
+                      <div className="flex items-center justify-between text-[10px]">
+                        <span className="font-extrabold text-emerald-500 uppercase tracking-wider">
+                          Ulasan Kepuasan Penanganan Warga:
+                        </span>
+                        {report.rating && (
+                          <span className="font-black text-amber-400">{report.rating}/5 ★</span>
+                        )}
+                      </div>
+
+                      {report.rating ? (
+                        <div className="flex items-center gap-1">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <Star
+                              key={star}
+                              className={`w-3.5 h-3.5 ${
+                                star <= report.rating
+                                  ? 'fill-amber-400 text-amber-400'
+                                  : 'text-neutral-400'
+                              }`}
+                            />
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-1.5 pt-0.5">
+                          <span className="text-[10px] text-neutral-400 font-bold">Beri Rating:</span>
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <button
+                              key={star}
+                              type="button"
+                              onClick={() => onRateReport && onRateReport(report.id, star, 'Ulasan Warga')}
+                              className="text-neutral-400 hover:text-amber-400 hover:scale-125 transition-transform"
+                              title={`Beri ${star} Bintang`}
+                            >
+                              <Star className="w-4 h-4 fill-amber-400 text-amber-400 hover:fill-amber-400" />
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   {/* Info Tags */}
                   <div className="space-y-1.5 pt-2 border-t border-neutral-100 dark:border-neutral-800 text-[11px] text-neutral-500 dark:text-neutral-400">
                     <div className="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-300 font-medium">
@@ -288,37 +279,27 @@ export default function ReportFeed({
                     </div>
                   </div>
 
-                  {/* Card Actions */}
-                  <div className="pt-2.5 flex items-center justify-between gap-2 border-t border-neutral-100 dark:border-neutral-800">
+                  {/* Card Actions Footer */}
+                  <div className="pt-2 flex items-center justify-between border-t border-neutral-100 dark:border-neutral-800">
                     <button
                       onClick={() => onUpvote(report.id)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95 ${
+                      className={`px-3 py-1.5 rounded-lg text-xs font-extrabold flex items-center gap-1.5 transition-all active:scale-95 ${
                         report.upvotedByUser
                           ? 'bg-emerald-500 text-black shadow-sm'
-                          : 'bg-neutral-100 dark:bg-neutral-900 text-neutral-800 dark:text-neutral-200 hover:bg-neutral-200 dark:hover:bg-neutral-800 border border-neutral-200 dark:border-neutral-800'
+                          : 'bg-neutral-100 dark:bg-neutral-900 text-neutral-700 dark:text-neutral-300 hover:text-emerald-500 border border-neutral-200 dark:border-neutral-800'
                       }`}
                     >
-                      <ThumbsUp className={`w-3.5 h-3.5 ${report.upvotedByUser ? 'fill-black' : ''}`} />
+                      <ThumbsUp className="w-3.5 h-3.5" />
                       <span>{report.upvotes} Dukungan</span>
                     </button>
 
-                    <div className="flex items-center gap-1">
-                      <button
-                        onClick={() => onTrackTicket(report.id)}
-                        className="px-3 py-1.5 rounded-lg text-xs font-bold bg-neutral-100 dark:bg-neutral-900 text-neutral-900 dark:text-white hover:text-emerald-500 dark:hover:text-emerald-400 border border-neutral-200 dark:border-neutral-800 flex items-center gap-1 transition-all active:scale-95"
-                      >
-                        <Ticket className="w-3.5 h-3.5" />
-                        <span>Lacak</span>
-                      </button>
-
-                      <button
-                        onClick={() => confirmDelete(report.id)}
-                        className="p-1.5 rounded-lg text-xs font-bold bg-neutral-100 dark:bg-neutral-900 text-red-500 hover:bg-red-500 hover:text-white border border-neutral-200 dark:border-neutral-800 transition-all active:scale-95 sm:hidden"
-                        title="Hapus Aduan"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
+                    <button
+                      onClick={() => onTrackTicket(report.id)}
+                      className="px-3.5 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-xs flex items-center gap-1 shadow transition-all active:scale-95"
+                    >
+                      <Ticket className="w-3.5 h-3.5" />
+                      <span>Lacak</span>
+                    </button>
                   </div>
 
                 </div>
@@ -330,15 +311,15 @@ export default function ReportFeed({
 
       {/* Image Preview Modal */}
       {previewImage && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="relative max-w-3xl w-full bg-white dark:bg-black rounded-xl overflow-hidden border border-neutral-200 dark:border-neutral-800 shadow-2xl animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="relative max-w-3xl w-full bg-white dark:bg-black rounded-xl overflow-hidden border border-neutral-200 dark:border-neutral-800 shadow-2xl">
             <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-200 dark:border-neutral-800">
-              <span className="text-xs font-bold text-neutral-900 dark:text-white">Pratinjau Foto Bukti</span>
+              <span className="text-xs font-bold text-neutral-900 dark:text-white">Pratinjau Foto Bukti Aduan</span>
               <button
                 onClick={() => setPreviewImage(null)}
                 className="p-1 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400 hover:text-neutral-900 dark:hover:text-white"
               >
-                <X className="w-4 h-4" />
+                ✕
               </button>
             </div>
             <div className="p-2 max-h-[75vh] flex items-center justify-center bg-neutral-100 dark:bg-neutral-900">

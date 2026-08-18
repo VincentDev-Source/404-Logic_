@@ -45,7 +45,7 @@ export default async function handler(req, res) {
   if (method === 'PATCH' || method === 'PUT') {
     try {
       const body = req.body || {};
-      const { id, action, upvotes, status } = body;
+      const { id, action, upvotes, status, rating, ratingFeedback } = body;
 
       if (!id) {
         return res.status(400).json({ error: 'ID laporan wajib disertakan.' });
@@ -67,6 +67,15 @@ export default async function handler(req, res) {
         updatedReport = await prisma.report.update({
           where: { id: numericId },
           data: { upvotes: { decrement: 1 } },
+        });
+      } else if (action === 'rate' || rating !== undefined) {
+        const ratingVal = Math.min(5, Math.max(1, parseInt(rating, 10) || 5));
+        updatedReport = await prisma.report.update({
+          where: { id: numericId },
+          data: { 
+            rating: ratingVal,
+            ratingFeedback: ratingFeedback ? String(ratingFeedback) : null,
+          },
         });
       } else if (upvotes !== undefined) {
         updatedReport = await prisma.report.update({

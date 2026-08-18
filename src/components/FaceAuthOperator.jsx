@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import * as faceapi from '@vladmandic/face-api';
-import { 
-  Camera, 
-  ShieldCheck, 
-  ShieldAlert, 
-  UserCheck, 
-  UserPlus, 
-  Scan, 
-  Loader2, 
-  CheckCircle2, 
+import {
+  Camera,
+  ShieldCheck,
+  ShieldAlert,
+  UserCheck,
+  UserPlus,
+  Scan,
+  Loader2,
+  CheckCircle2,
   AlertCircle,
   Building2,
   Lock,
@@ -21,12 +21,12 @@ const MODEL_URL = 'https://cdn.jsdelivr.net/gh/cgarciagl/face-api.js@0.22.2/weig
 
 export default function FaceAuthOperator({ onLoginSuccess, onCancel }) {
   const [activeTab, setActiveTab] = useState('login'); // 'login' | 'register'
-  
+
   const [isModelsLoaded, setIsModelsLoaded] = useState(false);
   const [loadingStatus, setLoadingStatus] = useState('Mengunduh model AI Face Recognition...');
   const [isWebcamActive, setIsWebcamActive] = useState(false);
   const [webcamError, setWebcamError] = useState(null);
-  
+
   const [operatorName, setOperatorName] = useState('');
   const [authPassword, setAuthPassword] = useState('');
   const [statusMessage, setStatusMessage] = useState({ text: '', type: 'info' });
@@ -137,9 +137,9 @@ export default function FaceAuthOperator({ onLoginSuccess, onCancel }) {
       const data = await res.json();
 
       if (!res.ok || !data.success) {
-        setStatusMessage({ 
-          text: data.message || 'Akses Ditolak: Wajah Bukan Petugas Resmi / Belum Terdaftar!', 
-          type: 'error' 
+        setStatusMessage({
+          text: data.message || 'Akses Ditolak: Wajah Bukan Petugas Resmi / Belum Terdaftar!',
+          type: 'error'
         });
         setFaceDistance(data.minDistance || null);
         setIsProcessing(false);
@@ -148,9 +148,9 @@ export default function FaceAuthOperator({ onLoginSuccess, onCancel }) {
 
       // SUCCESS MATCH
       setFaceDistance(data.distance);
-      setStatusMessage({ 
-        text: `Akses Diterima! Otentikasi Berhasil. Selamat bertugas, ${data.operator.name}.`, 
-        type: 'success' 
+      setStatusMessage({
+        text: `Akses Diterima! Otentikasi Berhasil. Selamat bertugas, ${data.operator.name}.`,
+        type: 'success'
       });
 
       setTimeout(() => {
@@ -169,7 +169,7 @@ export default function FaceAuthOperator({ onLoginSuccess, onCancel }) {
   // Tab 2: Daftarkan Petugas Baru (Pendaftaran)
   const handleRegisterOperator = async (e) => {
     if (e) e.preventDefault();
-    
+
     if (!operatorName.trim()) {
       setStatusMessage({ text: 'Masukkan Nama Lengkap Petugas terlebih dahulu!', type: 'warning' });
       return;
@@ -220,9 +220,9 @@ export default function FaceAuthOperator({ onLoginSuccess, onCancel }) {
         throw new Error(data.error || 'Gagal menyimpan data petugas ke database');
       }
 
-      setStatusMessage({ 
-        text: `Petugas "${data.operator.name}" Berhasil Didaftarkan ke Database PostgreSQL! Silakan uji Scan Masuk pada Tab Login.`, 
-        type: 'success' 
+      setStatusMessage({
+        text: `Petugas "${data.operator.name}" Berhasil Didaftarkan ke Database PostgreSQL! Silakan uji Scan Masuk pada Tab Login.`,
+        type: 'success'
       });
 
       setOperatorName('');
@@ -247,13 +247,13 @@ export default function FaceAuthOperator({ onLoginSuccess, onCancel }) {
 
   return (
     <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center p-4 relative overflow-hidden font-sans">
-      
+
       {/* Background Glow */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[550px] bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-10 right-10 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
 
       <div className="relative w-full max-w-xl bg-slate-900/90 backdrop-blur-xl border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 animate-in zoom-in-95 duration-300">
-        
+
         {/* Top Header */}
         <div className="text-center space-y-2">
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-500/10 border border-blue-500/30 text-blue-400 mb-1 shadow-lg shadow-blue-500/10">
@@ -262,7 +262,7 @@ export default function FaceAuthOperator({ onLoginSuccess, onCancel }) {
           <h1 className="text-2xl font-black tracking-tight text-white flex items-center justify-center gap-2">
             Portal Biometrik Petugas
             <span className="px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400 text-[10px] font-extrabold uppercase border border-blue-500/30">
-              PostgreSQL DB
+              AI
             </span>
           </h1>
           <p className="text-xs text-slate-400 font-medium">
@@ -275,11 +275,10 @@ export default function FaceAuthOperator({ onLoginSuccess, onCancel }) {
           <button
             type="button"
             onClick={() => setActiveTab('login')}
-            className={`py-2.5 rounded-xl transition-all flex items-center justify-center gap-2 ${
-              activeTab === 'login'
+            className={`py-2.5 rounded-xl transition-all flex items-center justify-center gap-2 ${activeTab === 'login'
                 ? 'bg-blue-600 text-white shadow-md'
                 : 'text-slate-400 hover:text-white'
-            }`}
+              }`}
           >
             <Scan className="w-4 h-4" />
             <span>Scan Wajah Petugas</span>
@@ -288,11 +287,10 @@ export default function FaceAuthOperator({ onLoginSuccess, onCancel }) {
           <button
             type="button"
             onClick={() => setActiveTab('register')}
-            className={`py-2.5 rounded-xl transition-all flex items-center justify-center gap-2 ${
-              activeTab === 'register'
+            className={`py-2.5 rounded-xl transition-all flex items-center justify-center gap-2 ${activeTab === 'register'
                 ? 'bg-blue-600 text-white shadow-md'
                 : 'text-slate-400 hover:text-white'
-            }`}
+              }`}
           >
             <UserPlus className="w-4 h-4" />
             <span>Daftarkan Petugas Baru</span>
@@ -311,7 +309,7 @@ export default function FaceAuthOperator({ onLoginSuccess, onCancel }) {
         ) : (
           /* Main Content */
           <div className="space-y-4">
-            
+
             {/* Tab 2 Form Registration Name & Security Password Input */}
             {activeTab === 'register' && (
               <div className="space-y-3 bg-slate-950 p-4 rounded-2xl border border-slate-800">
@@ -419,15 +417,14 @@ export default function FaceAuthOperator({ onLoginSuccess, onCancel }) {
 
             {/* Status Message */}
             {statusMessage.text && (
-              <div className={`p-3.5 rounded-2xl border text-xs font-bold flex items-start gap-2.5 transition-all ${
-                statusMessage.type === 'success'
+              <div className={`p-3.5 rounded-2xl border text-xs font-bold flex items-start gap-2.5 transition-all ${statusMessage.type === 'success'
                   ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
                   : statusMessage.type === 'error'
-                  ? 'bg-red-500/10 border-red-500/30 text-red-400'
-                  : statusMessage.type === 'warning'
-                  ? 'bg-amber-500/10 border-amber-500/30 text-amber-400'
-                  : 'bg-slate-800 border-slate-700 text-slate-300'
-              }`}>
+                    ? 'bg-red-500/10 border-red-500/30 text-red-400'
+                    : statusMessage.type === 'warning'
+                      ? 'bg-amber-500/10 border-amber-500/30 text-amber-400'
+                      : 'bg-slate-800 border-slate-700 text-slate-300'
+                }`}>
                 {statusMessage.type === 'success' ? (
                   <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                 ) : statusMessage.type === 'error' ? (
