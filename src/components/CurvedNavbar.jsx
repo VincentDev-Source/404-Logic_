@@ -1,18 +1,5 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { 
-  Home, 
-  Search, 
-  Plus, 
-  Heart, 
-  User, 
-  ShieldCheck, 
-  MapPin, 
-  PlusCircle, 
-  BarChart3, 
-  UserCheck, 
-  Lock 
-} from 'lucide-react';
 
 export default function CurvedNavbar({ 
   activeTab = 'home', 
@@ -23,7 +10,7 @@ export default function CurvedNavbar({
   onLockFaceAuth
 }) {
 
-  // 5 Tab items with labels & custom SVG icons
+  // 5 Tab items with labels & custom SVG icons for mobile bottom bar
   const tabs = [
     {
       id: 'home',
@@ -57,11 +44,14 @@ export default function CurvedNavbar({
       ),
     },
     {
-      id: 'like',
-      label: 'Analitik',
+      id: 'ticket',
+      label: 'Tiket',
       icon: (
         <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+          <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z" />
+          <path d="M13 5v2" />
+          <path d="M13 17v2" />
+          <path d="M13 11v2" />
         </svg>
       ),
     },
@@ -80,6 +70,8 @@ export default function CurvedNavbar({
   const handleTabClick = (tabId) => {
     if (tabId === 'create') {
       if (onOpenCreateModal) onOpenCreateModal();
+    } else if (tabId === 'ticket') {
+      if (onOpenTrackerModal) onOpenTrackerModal();
     } else if (tabId === 'profile') {
       if (onOpenOperatorPortal) onOpenOperatorPortal();
     } else {

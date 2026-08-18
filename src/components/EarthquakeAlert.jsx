@@ -168,38 +168,36 @@ export default function EarthquakeAlert() {
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             
             {/* Left: Magnitude Circle Badge + Main Info */}
-            <div className="flex items-start sm:items-center gap-3.5 flex-1 min-w-0">
+            <div className="flex items-start gap-3.5 flex-1 w-full min-w-0">
               
               {/* Large Magnitude Circle Badge */}
-              <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-2xl border ${severity.badgeBg} flex flex-col items-center justify-center shrink-0 shadow-inner`}>
+              <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-2xl border ${severity.badgeBg} flex flex-col items-center justify-center shrink-0 shadow-inner mt-0.5`}>
                 <span className="text-[9px] font-mono uppercase tracking-widest opacity-80">MAG</span>
                 <span className="text-xl sm:text-2xl font-black tracking-tight leading-none">
                   M {eqData.magnitude}
                 </span>
               </div>
 
-              {/* Title & Region Details */}
-              <div className="space-y-1 min-w-0 flex-1">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h4 className="text-xs sm:text-sm font-black text-white tracking-tight truncate">
-                    {eqData.wilayah}
-                  </h4>
-                </div>
+              {/* Title & Region Details (Clean Multi-line Text Wrapping - NO TRUNCATE / CUT OFF) */}
+              <div className="space-y-1.5 flex-1 min-w-0">
+                <h4 className="text-xs sm:text-sm font-black text-white tracking-tight leading-snug break-words">
+                  {eqData.wilayah}
+                </h4>
 
-                <div className="flex items-center gap-3 text-[11px] text-neutral-400 font-medium flex-wrap">
-                  <span className="flex items-center gap-1">
-                    <Clock className="w-3 h-3 text-neutral-500" />
-                    {eqData.tanggal}, {eqData.jam}
+                <div className="flex items-center gap-x-3 gap-y-1 text-[11px] text-neutral-400 font-medium flex-wrap">
+                  <span className="flex items-center gap-1 shrink-0">
+                    <Clock className="w-3 h-3 text-neutral-500 shrink-0" />
+                    <span>{eqData.tanggal}, {eqData.jam}</span>
                   </span>
-                  <span className="flex items-center gap-1">
-                    <Layers className="w-3 h-3 text-neutral-500" />
-                    Kedalaman {eqData.kedalaman}
+                  <span className="flex items-center gap-1 shrink-0">
+                    <Layers className="w-3 h-3 text-neutral-500 shrink-0" />
+                    <span>Kedalaman {eqData.kedalaman}</span>
                   </span>
                 </div>
 
-                {/* Tsunami & MMI Feeling Status */}
-                <div className="flex items-center gap-2 pt-1 flex-wrap text-[10px]">
-                  <span className={`px-2 py-0.5 rounded font-bold border ${
+                {/* Tsunami & MMI Feeling Status Badges (Clean Wrapping) */}
+                <div className="flex items-center gap-1.5 pt-1 flex-wrap text-[10px]">
+                  <span className={`px-2 py-1 rounded-lg font-bold border leading-normal break-words ${
                     eqData.potensi.toLowerCase().includes('tidak')
                       ? 'bg-emerald-950/40 text-emerald-400 border-emerald-800/60'
                       : 'bg-rose-950/60 text-rose-400 border-rose-800'
@@ -207,7 +205,7 @@ export default function EarthquakeAlert() {
                     {eqData.potensi}
                   </span>
                   {eqData.dirasakan && eqData.dirasakan !== 'Tidak dirasakan' && (
-                    <span className="px-2 py-0.5 rounded font-bold bg-neutral-900 text-neutral-300 border border-neutral-800">
+                    <span className="px-2 py-1 rounded-lg font-bold bg-neutral-900 text-neutral-300 border border-neutral-800 leading-normal break-words">
                       Dirasakan: {eqData.dirasakan}
                     </span>
                   )}
@@ -222,7 +220,7 @@ export default function EarthquakeAlert() {
               <div className="w-full sm:w-auto flex sm:flex-col items-center sm:items-end justify-between sm:justify-center border-t sm:border-t-0 border-neutral-800/60 pt-3 sm:pt-0 shrink-0">
                 <button
                   onClick={() => setIsModalOpen(true)}
-                  className="w-full sm:w-auto px-3.5 py-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-700/60 text-white font-extrabold text-xs flex items-center justify-center gap-2 transition-all active:scale-95 shadow-md group"
+                  className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-700/60 text-white font-extrabold text-xs flex items-center justify-center gap-2 transition-all active:scale-95 shadow-md group"
                 >
                   <Eye className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" />
                   <span>Peta Shakemap</span>
