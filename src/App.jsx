@@ -50,6 +50,42 @@ function normalizeReport(raw) {
   const createdAtDate = raw.createdAt ? new Date(raw.createdAt) : new Date();
   const formattedDate = raw.date || `${createdAtDate.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' })}, ${createdAtDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}`;
 
+  const isPending = !raw.status || raw.status === 'Menunggu';
+  const isProcessing = raw.status === 'Diproses' || raw.status === 'Sedang Ditangani';
+  const isCompleted = raw.status === 'Selesai';
+
+  // Dynamic Timeline reflecting exact officer status updates
+  const dynamicTimeline = [
+    {
+      step: 1,
+      title: 'Laporan Diterima',
+      date: formattedDate,
+      done: true,
+      desc: 'Laporan terdaftar secara resmi di sistem CivicPulse.'
+    },
+    {
+      step: 2,
+      title: 'Verifikasi Dinas',
+      date: raw.verifiedBy ? `Oleh: ${raw.verifiedBy}` : (!isPending ? 'Terverifikasi' : 'Dalam Antrean'),
+      done: !isPending,
+      desc: raw.verifiedBy ? `Telah diverifikasi oleh ${raw.verifiedBy}.` : 'Pengungahan berkas ke instansi dinas teknis terkait.'
+    },
+    {
+      step: 3,
+      title: 'Petugas Meluncur',
+      date: isCompleted ? 'Selesai Penanganan' : (isProcessing ? 'Sedang Diproses' : 'Menunggu Penugasan'),
+      done: isProcessing || isCompleted,
+      desc: isProcessing ? 'Tim teknis dinas sedang berada di lokasi untuk pengerjaan.' : 'Penugasan tim inspeksi dan perbaikan lapangan.'
+    },
+    {
+      step: 4,
+      title: 'Perbaikan Selesai',
+      date: isCompleted ? 'Selesai & Diverifikasi' : 'Menunggu Perbaikan',
+      done: isCompleted,
+      desc: isCompleted ? 'Proses pengerjaan selesai dan foto perbaikan diunggah.' : 'Proses pengerjaan dan konfirmasi perbaikan dari warga.'
+    }
+  ];
+
   return {
     id: idStr,
     rawId: numId,
@@ -58,7 +94,7 @@ function normalizeReport(raw) {
     categoryKey: (raw.category || '').toLowerCase().replace('/', '_').replace(/\s+/g, '_'),
     severity: raw.severity || 'Sedang',
     status: raw.status || 'Menunggu',
-    statusKey: raw.status === 'Selesai' ? 'selesai' : raw.status === 'Sedang Ditangani' || raw.status === 'Diproses' ? 'diproses' : 'menunggu',
+    statusKey: isCompleted ? 'selesai' : isProcessing ? 'diproses' : 'menunggu',
     location: raw.location || 'Lokasi tidak disebutkan',
     city: raw.city || 'Jakarta',
     district: raw.district || 'Kecamatan Terkait',
@@ -78,12 +114,7 @@ function normalizeReport(raw) {
     image: raw.imageUrl || raw.image || 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=800&q=80',
     beforeImage: raw.imageUrl || raw.image || 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=800&q=80',
     afterImage: raw.afterImage || null,
-    timeline: raw.timeline || [
-      { step: 1, title: 'Laporan Diterima', date: formattedDate, done: true, desc: 'Laporan terdaftar secara resmi di sistem CivicPulse.' },
-      { step: 2, title: 'Verifikasi Dinas', date: 'Dalam Antrean', done: raw.status !== 'Menunggu', desc: 'Pengungahan berkas ke instansi dinas teknis terkait.' },
-      { step: 3, title: 'Petugas Meluncur', date: 'Menunggu', done: raw.status === 'Sedang Ditangani' || raw.status === 'Diproses' || raw.status === 'Selesai', desc: 'Penugasan tim inspeksi dan perbaikan lapangan.' },
-      { step: 4, title: 'Perbaikan Selesai', date: 'Menunggu', done: raw.status === 'Selesai', desc: 'Proses pengerjaan dan konfirmasi perbaikan dari warga.' }
-    ]
+    timeline: dynamicTimeline
   };
 }
 
