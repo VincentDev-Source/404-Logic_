@@ -29,7 +29,7 @@ const SAMPLE_AFTER_PHOTOS = [
   { label: 'Drainase Lancar', url: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=800&q=80' },
 ];
 
-// Neat Process & Inspection Modal Popup for City Officers
+// Neat Process & Inspection Modal Popup for City Officers with Fixed Height Flex Column
 function ProcessReportModal({ report, operator, onClose, onUpdateStatus }) {
   const [status, setStatus] = useState(report?.status || 'Diproses');
   const [afterImage, setAfterImage] = useState(report?.afterImage || SAMPLE_AFTER_PHOTOS[0].url);
@@ -65,11 +65,13 @@ function ProcessReportModal({ report, operator, onClose, onUpdateStatus }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto font-sans animate-in fade-in duration-200">
-      <div className="relative w-full max-w-2xl bg-neutral-900 border border-neutral-800 rounded-3xl shadow-2xl overflow-hidden my-6 animate-in zoom-in-95 duration-200 text-white">
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto font-sans animate-in fade-in duration-200">
+      
+      {/* Modal Dialog with Fixed Height Flex Column for 100% Scrollability */}
+      <div className="relative w-full max-w-2xl bg-neutral-900 border border-neutral-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] my-auto animate-in zoom-in-95 duration-200 text-white">
         
-        {/* Modal Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-800 bg-neutral-950">
+        {/* Sticky Modal Header (Never cut off, title always accessible!) */}
+        <div className="sticky top-0 z-20 shrink-0 flex items-center justify-between px-6 py-4 border-b border-neutral-800 bg-neutral-950">
           <div className="flex items-center space-x-3">
             <span className="px-2.5 py-1 rounded-xl bg-blue-600/20 text-blue-400 font-mono text-xs font-black border border-blue-500/30">
               #LP-2026-{String(report.id).padStart(4, '0')}
@@ -88,8 +90,8 @@ function ProcessReportModal({ report, operator, onClose, onUpdateStatus }) {
           </button>
         </div>
 
-        {/* Modal Body */}
-        <div className="p-6 space-y-5 max-h-[75vh] overflow-y-auto text-xs">
+        {/* Scrollable Modal Body */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-5 text-xs">
           
           {/* Status Banner */}
           <div className="flex items-center justify-between p-3.5 bg-neutral-950 rounded-2xl border border-neutral-800">
@@ -230,8 +232,8 @@ function ProcessReportModal({ report, operator, onClose, onUpdateStatus }) {
 
         </div>
 
-        {/* Modal Actions Footer */}
-        <div className="p-4 border-t border-neutral-800 bg-neutral-950 flex items-center justify-between">
+        {/* Sticky Modal Actions Footer */}
+        <div className="sticky bottom-0 z-20 shrink-0 p-4 border-t border-neutral-800 bg-neutral-950 flex items-center justify-between">
           <button
             type="button"
             onClick={onClose}

@@ -9,7 +9,8 @@ import {
   ShieldCheck, 
   Loader2,
   Search,
-  ChevronDown
+  ChevronDown,
+  UserCheck
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { CATEGORIES } from '../data/mockReports';
@@ -433,13 +434,15 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport, ope
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200 font-sans">
-      <div className="relative w-full max-w-2xl bg-white dark:bg-black rounded-xl border border-neutral-200 dark:border-neutral-800 shadow-2xl overflow-hidden my-6 animate-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto font-sans animate-in fade-in duration-200">
+      
+      {/* Modal Dialog with Fixed Height Flex Column for 100% Scrollability */}
+      <div className="relative w-full max-w-2xl bg-white dark:bg-black rounded-2xl border border-neutral-200 dark:border-neutral-800 shadow-2xl overflow-hidden flex flex-col max-h-[90vh] my-auto animate-in zoom-in-95 duration-200">
         
-        {/* Modal Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-200 dark:border-neutral-800">
+        {/* Sticky Modal Header (Never cut off, title always accessible!) */}
+        <div className="sticky top-0 z-20 shrink-0 flex items-center justify-between px-5 py-4 bg-white dark:bg-black border-b border-neutral-200 dark:border-neutral-800">
           <div className="flex items-center space-x-2.5">
-            <div className="w-9 h-9 rounded-lg bg-emerald-500 text-black flex items-center justify-center font-extrabold shadow-sm">
+            <div className="w-9 h-9 rounded-xl bg-emerald-500 text-black flex items-center justify-center font-extrabold shadow-sm">
               <ShieldCheck className="w-5 h-5" />
             </div>
             <div>
@@ -450,14 +453,14 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport, ope
 
           <button
             onClick={onClose}
-            className="p-1 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors"
+            className="p-1.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Modal Body Form */}
-        <form onSubmit={handleSubmit} className="p-5 space-y-4 text-xs">
+        {/* Scrollable Modal Form Body (Scroll up & down seamlessly) */}
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-5 space-y-4 text-xs">
           
           {/* Judul Laporan */}
           <div>
@@ -470,7 +473,7 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport, ope
               placeholder="Contoh: Lubang Jalan Parah di Dekat Pertigaan Lowokwaru"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-neutral-900 dark:text-white placeholder-neutral-400 text-xs focus:outline-none focus:border-emerald-500 font-medium"
+              className="w-full px-3 py-2.5 rounded-xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-neutral-900 dark:text-white placeholder-neutral-400 text-xs focus:outline-none focus:border-emerald-500 font-medium"
             />
           </div>
 
@@ -647,8 +650,8 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport, ope
             </div>
           </div>
 
-          {/* Identitas Pelapor & Mode Anonim */}
-          <div className="pt-2 border-t border-neutral-200 dark:border-neutral-800 grid grid-cols-1 sm:grid-cols-2 gap-3 items-center">
+          {/* Identitas Pelapor & Mode Anonim dengan Switch Toggle Modern */}
+          <div className="pt-3 border-t border-neutral-200 dark:border-neutral-800 grid grid-cols-1 sm:grid-cols-2 gap-3 items-center">
             <div>
               <label className="block font-bold text-neutral-800 dark:text-neutral-200 mb-1">
                 Nama Pelapor
@@ -659,54 +662,72 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport, ope
                 placeholder={isAnonymous ? 'Pelapor Anonim' : 'Contoh: Ahmad Subagyo'}
                 value={author}
                 onChange={(e) => setAuthor(e.target.value)}
-                className="w-full px-3 py-1.5 rounded-lg bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-neutral-900 dark:text-white placeholder-neutral-400 text-xs focus:outline-none focus:border-emerald-500 disabled:opacity-50 font-medium"
+                className="w-full px-3 py-2 rounded-xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-neutral-900 dark:text-white placeholder-neutral-400 text-xs focus:outline-none focus:border-emerald-500 disabled:opacity-50 font-medium"
               />
             </div>
 
-            <div className="flex items-center space-x-2 pt-4 sm:pt-0">
-              <input
-                type="checkbox"
-                id="anonymous-check"
-                checked={isAnonymous}
-                onChange={(e) => setIsAnonymous(e.target.checked)}
-                className="w-4 h-4 rounded text-emerald-500 focus:ring-emerald-500 bg-neutral-100 dark:bg-neutral-900 border-neutral-300 dark:border-neutral-700"
-              />
-              <label htmlFor="anonymous-check" className="text-xs font-bold text-neutral-700 dark:text-neutral-300 cursor-pointer">
-                Kirim sebagai Pelapor Anonim (Privasi Terjaga)
+            {/* Modern Animated Switch Toggle */}
+            <div className="flex items-center justify-between sm:justify-start space-x-3 p-2 bg-neutral-50 dark:bg-neutral-900/60 rounded-xl border border-neutral-200 dark:border-neutral-800">
+              <button
+                type="button"
+                role="switch"
+                aria-checked={isAnonymous}
+                onClick={() => setIsAnonymous(!isAnonymous)}
+                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                  isAnonymous ? 'bg-emerald-500' : 'bg-neutral-300 dark:bg-neutral-700'
+                }`}
+              >
+                <span
+                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
+                    isAnonymous ? 'translate-x-5' : 'translate-x-0'
+                  }`}
+                />
+              </button>
+
+              <label 
+                onClick={() => setIsAnonymous(!isAnonymous)}
+                className="text-xs font-bold text-neutral-800 dark:text-neutral-200 cursor-pointer flex items-center gap-1.5"
+              >
+                <span>Pelapor Anonim</span>
+                <span className="text-[10px] text-neutral-500 font-medium">(Privasi Terjaga)</span>
               </label>
             </div>
           </div>
 
-          {/* Footer Modal Action Buttons */}
-          <div className="pt-4 border-t border-neutral-200 dark:border-neutral-800 flex items-center justify-end space-x-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 rounded-lg bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-300 font-bold text-xs transition-colors"
-            >
-              Batal
-            </button>
-
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="px-5 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-xs shadow flex items-center space-x-1.5 transition-all active:scale-95 disabled:opacity-50"
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  <span>Menerbitkan Laporan...</span>
-                </>
-              ) : (
-                <>
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                  <span>Kirim Laporan Resmi</span>
-                </>
-              )}
-            </button>
-          </div>
+          {/* Hidden Submit Button to support Enter key form submission */}
+          <button type="submit" className="hidden" />
 
         </form>
+
+        {/* Sticky Modal Actions Footer */}
+        <div className="sticky bottom-0 z-20 shrink-0 px-5 py-4 bg-white dark:bg-black border-t border-neutral-200 dark:border-neutral-800 flex items-center justify-end space-x-2">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-4 py-2 rounded-xl bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-300 font-bold text-xs transition-colors"
+          >
+            Batal
+          </button>
+
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            className="px-5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-xs shadow flex items-center space-x-1.5 transition-all active:scale-95 disabled:opacity-50"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                <span>Menerbitkan Laporan...</span>
+              </>
+            ) : (
+              <>
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                <span>Kirim Laporan Resmi</span>
+              </>
+            )}
+          </button>
+        </div>
 
       </div>
     </div>
