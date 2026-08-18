@@ -22,12 +22,6 @@ export default function OpeningScreen({ onFinish }) {
     };
   }, [onFinish]);
 
-  // Initial wave curve path (closed cover)
-  const initialWave = "M0,0 L1440,0 L1440,800 Q1080,950 720,800 Q360,650 0,800 Z";
-  
-  // Transition wave curve path (morphed opening curve)
-  const targetWave = "M0,0 L1440,0 L1440,0 Q1080,0 720,0 Q360,0 0,0 Z";
-
   return (
     <AnimatePresence>
       {stage !== 'done' && (
@@ -49,8 +43,8 @@ export default function OpeningScreen({ onFinish }) {
             }}
             className="absolute inset-0 bg-[#050505] text-white flex flex-col items-center justify-center pointer-events-auto"
           >
-            {/* Ambient Cyan Glow Radial Orb */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[450px] h-[450px] bg-[#0045DF]/20 rounded-full blur-[140px] pointer-events-none animate-pulse" />
+            {/* Ambient Emerald Glow Radial Orb (100% Matching CivicPulse Emerald Theme) */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[450px] h-[450px] bg-emerald-500/20 rounded-full blur-[140px] pointer-events-none animate-pulse" />
 
             {/* Opening Screen Content */}
             <motion.div
@@ -64,21 +58,21 @@ export default function OpeningScreen({ onFinish }) {
                   initial={{ scale: 0.9, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ duration: 0.5 }}
-                  className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#0045DF] via-[#4DBFFF] to-[#6CE9ED] p-0.5 mx-auto mb-3 shadow-[0_0_30px_#4DBFFF]"
+                  className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-600 via-emerald-400 to-teal-300 p-0.5 mx-auto mb-3 shadow-[0_0_30px_#10B981]"
                 >
                   <div className="w-full h-full bg-black rounded-[14px] flex items-center justify-center">
-                    <span className="text-xl font-black text-[#6CE9ED]">CP</span>
+                    <span className="text-xl font-black text-emerald-400">CP</span>
                   </div>
                 </motion.div>
 
                 <h1 className="text-2xl sm:text-3xl font-black tracking-[0.25em] text-white uppercase">
-                  CIVIC<span className="text-[#4DBFFF]">PULSE</span>
+                  CIVIC<span className="text-emerald-400">PULSE</span>
                 </h1>
               </div>
 
               {/* Monospaced Subtitle */}
               <div className="pt-2">
-                <p className="text-[11px] font-mono font-bold tracking-widest text-[#6CE9ED]/90 uppercase animate-pulse">
+                <p className="text-[11px] font-mono font-bold tracking-widest text-emerald-400/90 uppercase animate-pulse">
                   INITIALIZING CIVIC PULSE // SDG 11...
                 </p>
               </div>
@@ -89,7 +83,7 @@ export default function OpeningScreen({ onFinish }) {
                   initial={{ width: '0%' }}
                   animate={{ width: '100%' }}
                   transition={{ duration: 1.6, ease: 'easeInOut' }}
-                  className="h-full bg-gradient-to-r from-[#0045DF] via-[#4DBFFF] to-[#6CE9ED] shadow-[0_0_10px_#4DBFFF]"
+                  className="h-full bg-gradient-to-r from-emerald-700 via-emerald-500 to-emerald-400 shadow-[0_0_10px_#10B981]"
                 />
               </div>
 
