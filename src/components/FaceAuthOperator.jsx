@@ -82,22 +82,46 @@ export default function FaceAuthOperator({ onLoginSuccess, onCancel }) {
   const startWebcam = async () => {
     setWebcamError(null);
     try {
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+      }
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' }
       });
       streamRef.current = stream;
+
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
-        await videoRef.current.play();
+        try {
+          await videoRef.current.play();
+        } catch (e) {
+          console.warn('Video play warning:', e);
+        }
       }
+
       setIsWebcamActive(true);
-      setStatusMessage({ text: 'Kamera aktif. Pemindaian otomatis berkecepatan tinggi sedang berjalan...', type: 'info' });
+      setStatusMessage({ text: 'Kamera aktif. Pemindaian biometrik otomatis sedang berjalan...', type: 'info' });
     } catch (err) {
       console.error('Webcam permission error:', err);
       setWebcamError('Akses kamera webcam tidak diizinkan atau kamera tidak ditemukan.');
       setIsWebcamActive(false);
     }
   };
+
+  // Auto-start webcam as soon as models finish loading
+  useEffect(() => {
+    if (isModelsLoaded && !isWebcamActive && !webcamError) {
+      startWebcam();
+    }
+  }, [isModelsLoaded]);
+
+  // Ensure stream is bound to videoRef whenever video element is mounted or isWebcamActive changes
+  useEffect(() => {
+    if (isWebcamActive && videoRef.current && streamRef.current) {
+      videoRef.current.srcObject = streamRef.current;
+      videoRef.current.play().catch(err => console.warn('Video play catch:', err));
+    }
+  }, [isWebcamActive, activeTab]);
 
   // Stop Webcam stream
   const stopWebcam = () => {
@@ -119,7 +143,7 @@ export default function FaceAuthOperator({ onLoginSuccess, onCancel }) {
       setAutoScanning(true);
       
       scanIntervalRef.current = setInterval(async () => {
-        if (isCheckingRef.current || !videoRef.current) return;
+        if (isCheckingRef.current || !videoRef.current || videoRef.current.paused || videoRef.current.ended) return;
         isCheckingRef.current = true;
 
         try {
@@ -151,7 +175,7 @@ export default function FaceAuthOperator({ onLoginSuccess, onCancel }) {
               setTimeout(() => {
                 stopWebcam();
                 onLoginSuccess(data.operator);
-              }, 600);
+              }, 500);
             }
           }
         } catch (err) {
@@ -159,7 +183,7 @@ export default function FaceAuthOperator({ onLoginSuccess, onCancel }) {
         } finally {
           isCheckingRef.current = false;
         }
-      }, 350);
+      }, 300);
 
     } else {
       if (scanIntervalRef.current) {
@@ -177,7 +201,7 @@ export default function FaceAuthOperator({ onLoginSuccess, onCancel }) {
   // Tab 1: Manual Scan Fallback Button
   const handleScanLogin = async () => {
     if (!videoRef.current || !isWebcamActive) {
-      setStatusMessage({ text: 'Aktifkan kamera webcam terlebih dahulu!', type: 'warning' });
+      startWebcam();
       return;
     }
 
@@ -226,7 +250,7 @@ export default function FaceAuthOperator({ onLoginSuccess, onCancel }) {
       setTimeout(() => {
         stopWebcam();
         onLoginSuccess(data.operator);
-      }, 600);
+      }, 500);
 
     } catch (err) {
       console.error('Operator face login error:', err);
@@ -272,6 +296,7 @@ export default function FaceAuthOperator({ onLoginSuccess, onCancel }) {
 
       const descriptorArray = Array.from(detection.descriptor);
 
+      // Send to Serverless API /api/auth/face-register
       const res = await fetch('/api/auth/face-register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -380,32 +405,21 @@ export default function FaceAuthOperator({ onLoginSuccess, onCancel }) {
           ) : (
             <div className="space-y-4">
               
-              {/* Webcam Viewport */}
+              {/* Webcam Viewport - Video tag ALWAYS kept in DOM for reliable srcObject binding */}
               <div className="relative w-full h-64 bg-neutral-950 rounded-2xl overflow-hidden border border-neutral-800 shadow-inner flex items-center justify-center">
                 
-                {isWebcamActive ? (
-                  <>
-                    <video
-                      ref={videoRef}
-                      className="w-full h-full object-cover transform -scale-x-100"
-                      playsInline
-                      muted
-                    />
+                {/* Live Video Feed (Always Mounted) */}
+                <video
+                  ref={videoRef}
+                  className={`w-full h-full object-cover transform -scale-x-100 ${isWebcamActive ? 'block' : 'hidden'}`}
+                  playsInline
+                  autoPlay
+                  muted
+                />
 
-                    {/* Face Scan Overlay */}
-                    <div className="absolute inset-0 border-2 border-dashed border-blue-500/50 rounded-2xl pointer-events-none flex items-center justify-center">
-                      <div className="w-48 h-48 border-2 border-emerald-500/80 rounded-full animate-pulse flex items-center justify-center">
-                        {autoScanning && (
-                          <div className="text-[10px] font-mono font-bold bg-black/80 px-2 py-1 rounded text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
-                            <Zap className="w-3 h-3 text-amber-400 animate-bounce" />
-                            Auto-Scanning...
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <div className="text-center space-y-3 p-6">
+                {/* Webcam Fallback overlay when inactive */}
+                {!isWebcamActive && (
+                  <div className="text-center space-y-3 p-6 z-10">
                     <Camera className="w-10 h-10 text-neutral-600 mx-auto" />
                     <p className="text-neutral-400 font-bold">Kamera Belum Aktif</p>
                     <button
@@ -415,6 +429,20 @@ export default function FaceAuthOperator({ onLoginSuccess, onCancel }) {
                     >
                       Buka Kamera Webcam
                     </button>
+                  </div>
+                )}
+
+                {/* Face Scan Overlay when Active */}
+                {isWebcamActive && (
+                  <div className="absolute inset-0 border-2 border-dashed border-blue-500/50 rounded-2xl pointer-events-none flex items-center justify-center">
+                    <div className="w-48 h-48 border-2 border-emerald-500/80 rounded-full animate-pulse flex items-center justify-center">
+                      {autoScanning && (
+                        <div className="text-[10px] font-mono font-bold bg-black/80 px-2 py-1 rounded text-emerald-400 border border-emerald-500/30 flex items-center gap-1 shadow-lg">
+                          <Zap className="w-3.5 h-3.5 text-amber-400 animate-bounce" />
+                          Auto-Scanning AI...
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
 
@@ -442,7 +470,7 @@ export default function FaceAuthOperator({ onLoginSuccess, onCancel }) {
                   <div className="p-3 bg-neutral-950 rounded-2xl border border-neutral-800 text-[11px] text-neutral-400 space-y-1">
                     <div className="flex items-center justify-between">
                       <span className="font-bold text-white flex items-center gap-1">
-                        <Zap className="w-3.5 h-3.5 text-amber-400" /> Auto-Scan Bebas Tombol:
+                        <Zap className="w-3.5 h-3.5 text-amber-400" /> Auto-Scan AI Hands-Free:
                       </span>
                       <span className="text-emerald-400 font-bold">Aktif ⚡</span>
                     </div>
