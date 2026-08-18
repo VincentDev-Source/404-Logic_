@@ -12,8 +12,261 @@ import {
   Search, 
   Loader2,
   FileCheck,
-  Check
+  Check,
+  X,
+  Camera,
+  Upload,
+  Calendar,
+  Eye,
+  ArrowRight,
+  Sparkles
 } from 'lucide-react';
+
+const SAMPLE_AFTER_PHOTOS = [
+  { label: 'Jalan Mulus (Perbaikan)', url: 'https://images.unsplash.com/photo-1590674899484-d5640e854abe?auto=format&fit=crop&w=800&q=80' },
+  { label: 'Area Bersih (Sampah Clean)', url: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=800&q=80' },
+  { label: 'Lampu Nyala (PJU Berfungsi)', url: 'https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?auto=format&fit=crop&w=800&q=80' },
+  { label: 'Drainase Lancar', url: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=800&q=80' },
+];
+
+// Neat Process & Inspection Modal Popup for City Officers
+function ProcessReportModal({ report, operator, onClose, onUpdateStatus }) {
+  const [status, setStatus] = useState(report?.status || 'Diproses');
+  const [afterImage, setAfterImage] = useState(report?.afterImage || SAMPLE_AFTER_PHOTOS[0].url);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  if (!report) return null;
+
+  const formattedDate = report.createdAt 
+    ? new Date(report.createdAt).toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'short' })
+    : 'Tanggal tidak tercatat';
+
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setAfterImage(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSubmit = async (targetStatus) => {
+    setIsSubmitting(true);
+    try {
+      await onUpdateStatus(report.id, targetStatus, targetStatus === 'Selesai' ? afterImage : null);
+      onClose();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto font-sans animate-in fade-in duration-200">
+      <div className="relative w-full max-w-2xl bg-neutral-900 border border-neutral-800 rounded-3xl shadow-2xl overflow-hidden my-6 animate-in zoom-in-95 duration-200 text-white">
+        
+        {/* Modal Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-800 bg-neutral-950">
+          <div className="flex items-center space-x-3">
+            <span className="px-2.5 py-1 rounded-xl bg-blue-600/20 text-blue-400 font-mono text-xs font-black border border-blue-500/30">
+              #LP-2026-{String(report.id).padStart(4, '0')}
+            </span>
+            <div>
+              <h2 className="text-base font-black text-white">Pemeriksaan & Tindak Lanjut Aduan</h2>
+              <p className="text-xs text-neutral-400 font-medium">Verifikasi Lapangan Petugas Dinas Kota</p>
+            </div>
+          </div>
+
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-xl hover:bg-neutral-800 text-neutral-400 hover:text-white transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Modal Body */}
+        <div className="p-6 space-y-5 max-h-[75vh] overflow-y-auto text-xs">
+          
+          {/* Status Banner */}
+          <div className="flex items-center justify-between p-3.5 bg-neutral-950 rounded-2xl border border-neutral-800">
+            <div className="flex items-center gap-2">
+              <Clock className="w-4 h-4 text-blue-400" />
+              <span className="text-neutral-400 font-medium">Status Saat Ini:</span>
+              <span className={`px-2.5 py-0.5 rounded-full font-bold text-xs ${
+                report.status === 'Selesai'
+                  ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                  : report.status === 'Diproses' || report.status === 'Sedang Ditangani'
+                  ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                  : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+              }`}>
+                {report.status}
+              </span>
+            </div>
+
+            <div className="text-[11px] text-emerald-400 font-bold flex items-center gap-1">
+              <UserCheck className="w-3.5 h-3.5" />
+              <span>Petugas: {operator.name}</span>
+            </div>
+          </div>
+
+          {/* Rincian Aduan Grid */}
+          <div className="space-y-3 bg-neutral-950 p-4 rounded-2xl border border-neutral-800">
+            <div>
+              <span className="text-[10px] font-extrabold uppercase text-neutral-500 tracking-wider">Judul Aduan Warga</span>
+              <h3 className="text-base font-black text-white mt-0.5">{report.title}</h3>
+            </div>
+
+            <div>
+              <span className="text-[10px] font-extrabold uppercase text-neutral-500 tracking-wider">Deskripsi Masalah</span>
+              <p className="text-xs text-neutral-300 leading-relaxed font-medium mt-0.5">{report.description}</p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-neutral-800 text-neutral-400">
+              <div className="flex items-start gap-2">
+                <Calendar className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
+                <div>
+                  <span className="text-[10px] font-bold text-neutral-500 block">Waktu Masuk Aduan</span>
+                  <span className="text-xs font-semibold text-neutral-200">{formattedDate}</span>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-2">
+                <MapPin className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                <div>
+                  <span className="text-[10px] font-bold text-neutral-500 block">Lokasi & GPS Presisi</span>
+                  <span className="text-xs font-semibold text-neutral-200 line-clamp-2">{report.location || 'Tidak tercatat'}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Dokumentasi Foto Sebelum vs Sesudah */}
+          <div className="space-y-3">
+            <h4 className="text-xs font-extrabold uppercase text-white tracking-wider flex items-center gap-1.5">
+              <Camera className="w-4 h-4 text-blue-400" />
+              Dokumentasi Foto Lapangan (Sebelum & Sesudah)
+            </h4>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              
+              {/* Foto Sebelum */}
+              <div className="space-y-1.5">
+                <span className="text-[11px] font-bold text-amber-400 block flex items-center gap-1">
+                  <AlertCircle className="w-3.5 h-3.5" /> Foto Bukti Aduan (Sebelum)
+                </span>
+                <div className="h-40 rounded-2xl overflow-hidden border border-neutral-800 bg-neutral-950">
+                  <img src={report.imageUrl || report.image} alt="Sebelum" className="w-full h-full object-cover" />
+                </div>
+              </div>
+
+              {/* Foto Sesudah (Upload Petugas) */}
+              <div className="space-y-1.5">
+                <span className="text-[11px] font-bold text-emerald-400 block flex items-center gap-1">
+                  <CheckCircle2 className="w-3.5 h-3.5" /> Foto Hasil Perbaikan (Sesudah)
+                </span>
+                <div className="h-40 rounded-2xl overflow-hidden border border-neutral-800 bg-neutral-950 relative group">
+                  {afterImage ? (
+                    <img src={afterImage} alt="Sesudah" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex flex-col items-center justify-center text-neutral-500 space-y-1 p-2 text-center">
+                      <Upload className="w-6 h-6" />
+                      <span className="text-[11px] font-bold">Unggah foto hasil pekerjaan</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+            </div>
+
+            {/* Input Foto Petugas */}
+            <div className="p-4 bg-neutral-950 rounded-2xl border border-neutral-800 space-y-2">
+              <label className="block text-xs font-bold text-slate-300">
+                Pilih atau Unggah Foto Hasil Perbaikan Petugas *
+              </label>
+
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  placeholder="URL Foto atau unggah berkas foto dari galeri HP/Laptop..."
+                  value={afterImage}
+                  onChange={(e) => setAfterImage(e.target.value)}
+                  className="flex-1 px-3 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-white placeholder-neutral-500 text-xs focus:outline-none focus:border-blue-500 font-medium"
+                />
+
+                <label className="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs cursor-pointer flex items-center gap-1.5 transition-all shadow">
+                  <Upload className="w-3.5 h-3.5" />
+                  <span>Unggah</span>
+                  <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
+                </label>
+              </div>
+
+              {/* Sample Quick Select Photos for Officers */}
+              <div className="grid grid-cols-4 gap-2 pt-1">
+                {SAMPLE_AFTER_PHOTOS.map((sample, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => setAfterImage(sample.url)}
+                    className={`relative h-12 rounded-xl overflow-hidden border transition-all ${
+                      afterImage === sample.url
+                        ? 'border-emerald-500 ring-2 ring-emerald-500/30 scale-105'
+                        : 'border-neutral-800 opacity-60 hover:opacity-100'
+                    }`}
+                  >
+                    <img src={sample.url} alt={sample.label} className="w-full h-full object-cover" />
+                    <span className="absolute bottom-0 inset-x-0 bg-black/80 text-[8px] font-bold text-white text-center py-0.5 truncate px-1">
+                      {sample.label}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+        {/* Modal Actions Footer */}
+        <div className="p-4 border-t border-neutral-800 bg-neutral-950 flex items-center justify-between">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-4 py-2.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-300 font-bold text-xs transition-colors"
+          >
+            Tutup Pratinjau
+          </button>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => handleSubmit('Diproses')}
+              disabled={isSubmitting}
+              className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs flex items-center gap-1.5 transition-all active:scale-95 shadow"
+            >
+              {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileCheck className="w-4 h-4" />}
+              <span>Tandai Diproses</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleSubmit('Selesai')}
+              disabled={isSubmitting || !afterImage}
+              className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-xs flex items-center gap-1.5 transition-all active:scale-95 shadow disabled:opacity-50"
+            >
+              {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin text-black" /> : <Check className="w-4 h-4" />}
+              <span>Simpan Foto & Tandai Selesai</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
+}
 
 export default function OperatorDashboard({ operator, onLogout }) {
   const [reports, setReports] = useState([]);
@@ -23,6 +276,9 @@ export default function OperatorDashboard({ operator, onLogout }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [updatingId, setUpdatingId] = useState(null);
   const [actionSuccessMsg, setActionSuccessMsg] = useState(null);
+
+  // Inspection Modal State
+  const [selectedInspectReport, setSelectedInspectReport] = useState(null);
 
   // Fetch all reports for operator management
   const fetchReports = useCallback(async () => {
@@ -47,8 +303,8 @@ export default function OperatorDashboard({ operator, onLogout }) {
     fetchReports();
   }, [fetchReports]);
 
-  // Update report status (Diproses / Selesai)
-  const handleUpdateStatus = async (reportId, newStatus) => {
+  // Update report status (Diproses / Selesai) with afterImage
+  const handleUpdateStatus = async (reportId, newStatus, afterImg = null) => {
     setUpdatingId(reportId);
     try {
       const res = await fetch('/api/operator/reports', {
@@ -58,6 +314,7 @@ export default function OperatorDashboard({ operator, onLogout }) {
           id: reportId,
           status: newStatus,
           verifiedBy: operator.name,
+          afterImage: afterImg,
         }),
       });
 
@@ -68,7 +325,12 @@ export default function OperatorDashboard({ operator, onLogout }) {
       }
 
       setReports((prev) =>
-        prev.map((r) => (r.id === reportId ? { ...r, status: newStatus, verifiedBy: operator.name } : r))
+        prev.map((r) => (r.id === reportId ? { 
+          ...r, 
+          status: newStatus, 
+          verifiedBy: operator.name,
+          afterImage: afterImg || r.afterImage 
+        } : r))
       );
 
       setActionSuccessMsg(`Aduan #${reportId} berhasil diubah menjadi "${newStatus}" oleh ${operator.name}`);
@@ -103,6 +365,16 @@ export default function OperatorDashboard({ operator, onLogout }) {
   return (
     <div className="min-h-screen bg-neutral-950 text-white font-sans">
       
+      {/* Detail Inspection & Process Modal */}
+      {selectedInspectReport && (
+        <ProcessReportModal
+          report={selectedInspectReport}
+          operator={operator}
+          onClose={() => setSelectedInspectReport(null)}
+          onUpdateStatus={handleUpdateStatus}
+        />
+      )}
+
       {/* Top Operator Header */}
       <header className="sticky top-0 z-30 bg-neutral-900/90 backdrop-blur-md border-b border-neutral-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -310,7 +582,7 @@ export default function OperatorDashboard({ operator, onLogout }) {
                       )}
                     </div>
 
-                    <h3 className="text-sm font-black text-white line-clamp-2 leading-snug">
+                    <h3 className="text-sm font-black text-white line-clamp-2 leading-snug cursor-pointer hover:text-blue-400 transition-colors" onClick={() => setSelectedInspectReport(report)}>
                       {report.title}
                     </h3>
 
@@ -334,27 +606,15 @@ export default function OperatorDashboard({ operator, onLogout }) {
                   {/* Operator Action Buttons */}
                   <div className="pt-3 border-t border-neutral-800 grid grid-cols-2 gap-2">
                     <button
-                      onClick={() => handleUpdateStatus(report.id, 'Diproses')}
-                      disabled={isProcessing || isCompleted || isUpdatingThis}
-                      className={`py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1 transition-all active:scale-95 ${
-                        isProcessing
-                          ? 'bg-blue-600/30 text-blue-400 border border-blue-500/40 cursor-default'
-                          : isCompleted
-                          ? 'bg-neutral-800 text-neutral-600 opacity-50 cursor-not-allowed'
-                          : 'bg-blue-600 hover:bg-blue-500 text-white shadow-md'
-                      }`}
+                      onClick={() => setSelectedInspectReport(report)}
+                      className="py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-extrabold flex items-center justify-center gap-1.5 transition-all active:scale-95 shadow-md"
                     >
-                      {isUpdatingThis ? (
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      ) : (
-                        <FileCheck className="w-3.5 h-3.5" />
-                      )}
+                      <Eye className="w-3.5 h-3.5" />
                       <span>Proses Aduan</span>
                     </button>
 
                     <button
-                      onClick={() => handleUpdateStatus(report.id, 'Selesai')}
-                      disabled={isCompleted || isUpdatingThis}
+                      onClick={() => setSelectedInspectReport(report)}
                       className={`py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1 transition-all active:scale-95 ${
                         isCompleted
                           ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 cursor-default'

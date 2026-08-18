@@ -12,7 +12,9 @@ import {
   Flame,
   CheckCircle2,
   Sparkles,
-  Star
+  Star,
+  Camera,
+  ArrowRight
 } from 'lucide-react';
 import { CATEGORIES } from '../data/mockReports';
 
@@ -154,6 +156,7 @@ export default function ReportFeed({
             const CatIcon = catBadge.icon;
             const statusBadge = getStatusBadge(report.status);
             const StatusIcon = statusBadge.icon;
+            const hasAfterImage = Boolean(report.afterImage);
 
             return (
               <div 
@@ -161,16 +164,42 @@ export default function ReportFeed({
                 style={{ animationDelay: `${(idx % 6) * 0.08}s` }}
                 className="bg-white dark:bg-black border border-neutral-200 dark:border-neutral-800 rounded-xl overflow-hidden flex flex-col justify-between hover:border-emerald-500/60 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group animate-fade-in-up"
               >
-                {/* Image Container */}
+                {/* Image Container (Before vs After) */}
                 <div className="relative h-44 w-full overflow-hidden bg-neutral-100 dark:bg-neutral-900">
-                  <img
-                    src={report.image}
-                    alt={report.title}
-                    className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500 ease-out"
-                  />
+                  {hasAfterImage ? (
+                    <div className="grid grid-cols-2 h-full w-full divide-x divide-neutral-800">
+                      <div className="relative h-full w-full overflow-hidden">
+                        <img
+                          src={report.image}
+                          alt="Sebelum"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                        <span className="absolute bottom-1 left-1 px-1.5 py-0.5 rounded bg-black/80 text-amber-400 text-[9px] font-bold">
+                          Sebelum
+                        </span>
+                      </div>
+
+                      <div className="relative h-full w-full overflow-hidden">
+                        <img
+                          src={report.afterImage}
+                          alt="Sesudah"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                        <span className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-emerald-500 text-black text-[9px] font-extrabold">
+                          Hasil Petugas
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    <img
+                      src={report.image}
+                      alt={report.title}
+                      className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500 ease-out"
+                    />
+                  )}
                   
                   {/* Category Badge */}
-                  <div className="absolute top-2.5 left-2.5">
+                  <div className="absolute top-2.5 left-2.5 z-10">
                     <span className="px-2.5 py-1 rounded-md text-[10px] font-bold bg-black/80 text-white backdrop-blur-md flex items-center gap-1 border border-neutral-800 shadow">
                       <CatIcon className="w-3 h-3 text-emerald-400" />
                       {report.category}
@@ -178,9 +207,9 @@ export default function ReportFeed({
                   </div>
 
                   {/* Top Right Action Overlay (Zoom + Delete) */}
-                  <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                  <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
                     <button
-                      onClick={() => setPreviewImage(report.image)}
+                      onClick={() => setPreviewImage(report.afterImage || report.image)}
                       className="p-1.5 rounded-md bg-black/80 hover:bg-black text-white backdrop-blur-md border border-neutral-800 active:scale-95 transition-all"
                       title="Pratinjau Foto"
                     >
@@ -197,7 +226,7 @@ export default function ReportFeed({
                   </div>
 
                   {/* Status Badge */}
-                  <div className="absolute bottom-2.5 right-2.5">
+                  <div className="absolute bottom-2.5 right-2.5 z-10">
                     <span className={`px-2 py-0.5 rounded text-[10px] font-bold border flex items-center gap-1 backdrop-blur-md shadow ${statusBadge.class}`}>
                       <StatusIcon className="w-3 h-3" />
                       {statusBadge.label}
@@ -277,6 +306,13 @@ export default function ReportFeed({
                         <span>{report.isAnonymous ? 'Pelapor Anonim' : report.author}</span>
                       </div>
                     </div>
+
+                    {report.verifiedBy && (
+                      <div className="text-[10px] text-emerald-500 font-bold flex items-center gap-1 pt-0.5">
+                        <CheckCircle2 className="w-3 h-3" />
+                        <span>Diverifikasi oleh: {report.verifiedBy}</span>
+                      </div>
+                    )}
                   </div>
 
                   {/* Card Actions Footer */}

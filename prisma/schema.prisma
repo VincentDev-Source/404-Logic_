@@ -23,6 +23,7 @@ model Report {
   status         String   @default("Menunggu")
   location       String?
   imageUrl       String?
+  afterImage     String?
   upvotes        Int      @default(0)
   verifiedBy     String?
   rating         Int?

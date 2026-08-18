@@ -15,7 +15,7 @@ export default async function handler(req, res) {
 
   if (req.method === 'PATCH') {
     try {
-      const { id, status, verifiedBy } = req.body || {};
+      const { id, status, verifiedBy, afterImage } = req.body || {};
 
       if (!id || !status) {
         return res.status(400).json({ error: 'ID laporan dan status baru wajib dikirimkan!' });
@@ -23,13 +23,19 @@ export default async function handler(req, res) {
 
       const numId = typeof id === 'number' ? id : parseInt(String(id).replace(/\D/g, ''), 10);
 
+      const updateData = {
+        status,
+        verifiedBy: verifiedBy || 'Petugas Resmi',
+        updatedAt: new Date(),
+      };
+
+      if (afterImage !== undefined && afterImage !== null) {
+        updateData.afterImage = String(afterImage);
+      }
+
       const updatedReport = await prisma.report.update({
         where: { id: numId },
-        data: {
-          status,
-          verifiedBy: verifiedBy || 'Petugas Resmi',
-          updatedAt: new Date(),
-        },
+        data: updateData,
       });
 
       return res.status(200).json({
