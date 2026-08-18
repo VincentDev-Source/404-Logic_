@@ -517,20 +517,7 @@ export default function FaceAuthOperator({ onLoginSuccess, onCancel }) {
                 </div>
               )}
 
-              {/* Tab 1: Scan Login Form */}
-              {activeTab === 'login' && (
-                <div className="space-y-3">
-                  <div className="p-3 bg-neutral-950 rounded-2xl border border-neutral-800 text-[11px] text-neutral-400 space-y-1">
-                    <div className="flex items-center justify-between">
-                      <span className="font-bold text-white flex items-center gap-1">
-                        <Zap className="w-3.5 h-3.5 text-amber-400" /> Auto-Scan AI Hands-Free:
-                      </span>
-                      <span className="text-emerald-400 font-bold">Aktif ⚡</span>
-                    </div>
-                    <p>Arahkan wajah Anda ke kamera. Pemindaian AI berjalan otomatis tanpa perlu menekan tombol apapun.</p>
-                  </div>
-                </div>
-              )}
+
 
               {/* Tab 2: Operator Registration Form (Auto-login fully disabled to prevent accidental verifications!) */}
               {activeTab === 'register' && (
