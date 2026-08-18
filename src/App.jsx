@@ -18,6 +18,7 @@ import OperatorDashboard from './components/OperatorDashboard';
 import Footer from './components/Footer';
 import CurvedNavbar from './components/CurvedNavbar';
 import EarthquakeAlert from './components/EarthquakeAlert';
+import CityNewsWidget from './components/CityNewsWidget';
 import { CheckCircle2, X, AlertTriangle, RefreshCw, Loader2 } from 'lucide-react';
 
 // Normalize database records to match frontend component requirements
@@ -588,6 +589,9 @@ export default function App() {
                 
                 {/* Real-Time Earthquake Early Warning System Widget (BMKG TEWS Open Data - SDG 11.5) */}
                 <EarthquakeAlert />
+
+                {/* Geo-Targeted Local News & Disaster Mitigation Widget (SDG 11) */}
+                <CityNewsWidget />
 
                 {/* Citizen Reports Feed */}
                 <ReportFeed
