@@ -32,7 +32,7 @@ export default function ReportFeed({
 }) {
   const [previewImage, setPreviewImage] = useState(null);
 
-  // Simple category badge helper (Monochrome / Subtle Emerald Accent)
+  // Category badge helper (Monochrome with single Emerald icon highlight)
   const getCategoryBadge = (categoryName) => {
     switch (categoryName) {
       case 'Jalan Rusak':
@@ -48,26 +48,26 @@ export default function ReportFeed({
     }
   };
 
-  // Simple status badge helper
+  // Status badge helper (Clean Black & White / Emerald accent)
   const getStatusBadge = (status) => {
     switch (status) {
       case 'Selesai':
         return { 
           label: 'Selesai', 
           icon: CheckCircle2, 
-          class: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30' 
+          class: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30' 
         };
       case 'Sedang Ditangani':
         return { 
           label: 'Sedang Ditangani', 
           icon: Clock, 
-          class: 'bg-sky-500/10 text-sky-700 dark:text-sky-400 border-sky-500/30' 
+          class: 'bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 border-neutral-300 dark:border-neutral-700' 
         };
       default:
         return { 
           label: 'Menunggu Verifikasi', 
           icon: AlertCircle, 
-          class: 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/30' 
+          class: 'bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 border-neutral-300 dark:border-neutral-700' 
         };
     }
   };
@@ -76,20 +76,20 @@ export default function ReportFeed({
     <div className="space-y-5">
       
       {/* Filter Bar & View Toggle */}
-      <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-col md:flex-row items-center justify-between gap-3 shadow-sm transition-colors">
+      <div className="bg-white dark:bg-neutral-900 p-4 rounded-xl border border-neutral-200 dark:border-neutral-800 flex flex-col md:flex-row items-center justify-between gap-3 shadow-sm transition-colors">
         
         {/* Category Filters Pill */}
         <div className="flex items-center gap-1.5 overflow-x-auto w-full md:w-auto pb-1 md:pb-0 scrollbar-none">
-          <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-1 mr-1 whitespace-nowrap">
+          <span className="text-xs font-bold text-neutral-500 dark:text-neutral-400 flex items-center gap-1 mr-1 whitespace-nowrap">
             <Filter className="w-3.5 h-3.5" /> Filter:
           </span>
 
           <button
             onClick={() => setSelectedCategory('semua')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-extrabold whitespace-nowrap transition-all ${
               selectedCategory === 'semua'
-                ? 'bg-emerald-600 text-white shadow-sm'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                ? 'bg-emerald-500 text-black shadow-sm'
+                : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700'
             }`}
           >
             Semua ({reports.length})
@@ -99,10 +99,10 @@ export default function ReportFeed({
             <button
               key={cat.id}
               onClick={() => setSelectedCategory(cat.id)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all border ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all border ${
                 selectedCategory === cat.id
-                  ? 'bg-emerald-600 text-white border-emerald-600'
-                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'
+                  ? 'bg-emerald-500 text-black border-emerald-500'
+                  : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 border-neutral-200 dark:border-neutral-700 hover:bg-neutral-200 dark:hover:bg-neutral-700'
               }`}
             >
               {cat.name}
@@ -116,7 +116,7 @@ export default function ReportFeed({
           <select
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
-            className="bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs rounded-lg px-3 py-1.5 focus:outline-none focus:border-emerald-500"
+            className="bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-900 dark:text-neutral-100 text-xs rounded-lg px-3 py-1.5 focus:outline-none focus:border-emerald-500 font-semibold"
           >
             {STATUS_OPTIONS.map((status) => (
               <option key={status.id} value={status.id}>
@@ -125,14 +125,14 @@ export default function ReportFeed({
             ))}
           </select>
 
-          {/* Toggle Dual View Switch */}
-          <div className="bg-slate-100 dark:bg-slate-800 p-1 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center">
+          {/* Dual View Toggle */}
+          <div className="bg-neutral-100 dark:bg-neutral-800 p-1 rounded-lg border border-neutral-200 dark:border-neutral-700 flex items-center">
             <button
               onClick={() => setViewMode('feed')}
-              className={`px-2.5 py-1 rounded text-xs font-semibold transition-all flex items-center gap-1 ${
+              className={`px-2.5 py-1 rounded text-xs font-extrabold transition-all flex items-center gap-1 ${
                 viewMode === 'feed'
-                  ? 'bg-emerald-600 text-white shadow-sm'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                  ? 'bg-emerald-500 text-black shadow-sm'
+                  : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white'
               }`}
             >
               <Layers className="w-3.5 h-3.5" />
@@ -141,10 +141,10 @@ export default function ReportFeed({
 
             <button
               onClick={() => setViewMode('map')}
-              className={`px-2.5 py-1 rounded text-xs font-semibold transition-all flex items-center gap-1 ${
+              className={`px-2.5 py-1 rounded text-xs font-extrabold transition-all flex items-center gap-1 ${
                 viewMode === 'map'
-                  ? 'bg-emerald-600 text-white shadow-sm'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                  ? 'bg-emerald-500 text-black shadow-sm'
+                  : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white'
               }`}
             >
               <MapPin className="w-3.5 h-3.5" />
@@ -158,12 +158,12 @@ export default function ReportFeed({
 
       {/* Reports Feed Grid */}
       {reports.length === 0 ? (
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-12 text-center space-y-3">
-          <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 mx-auto flex items-center justify-center text-slate-400">
+        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-12 text-center space-y-3">
+          <div className="w-12 h-12 rounded-full bg-neutral-100 dark:bg-neutral-800 mx-auto flex items-center justify-center text-neutral-400">
             <Filter className="w-6 h-6" />
           </div>
-          <h3 className="text-sm font-bold text-slate-900 dark:text-white">Tidak Ada Laporan Ditemukan</h3>
-          <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
+          <h3 className="text-sm font-bold text-neutral-900 dark:text-white">Tidak Ada Laporan Ditemukan</h3>
+          <p className="text-xs text-neutral-500 dark:text-neutral-400 max-w-sm mx-auto">
             Coba sesuaikan kata kunci pencarian atau reset filter kategori & status.
           </p>
         </div>
@@ -178,10 +178,10 @@ export default function ReportFeed({
             return (
               <div 
                 key={report.id}
-                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden flex flex-col justify-between hover:shadow-md transition-all duration-200 group"
+                className="bg-white dark:bg-black border border-neutral-200 dark:border-neutral-800 rounded-xl overflow-hidden flex flex-col justify-between hover:border-emerald-500/50 hover:shadow-md transition-all duration-200 group"
               >
                 {/* Image Container */}
-                <div className="relative h-44 w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
+                <div className="relative h-44 w-full overflow-hidden bg-neutral-100 dark:bg-neutral-900">
                   <img
                     src={report.image}
                     alt={report.title}
@@ -190,7 +190,7 @@ export default function ReportFeed({
                   
                   {/* Category Badge */}
                   <div className="absolute top-2.5 left-2.5">
-                    <span className="px-2.5 py-1 rounded-md text-[10px] font-semibold bg-slate-900/80 text-white backdrop-blur-md flex items-center gap-1">
+                    <span className="px-2.5 py-1 rounded-md text-[10px] font-bold bg-black/80 text-white backdrop-blur-md flex items-center gap-1 border border-neutral-800">
                       <CatIcon className="w-3 h-3 text-emerald-400" />
                       {report.category}
                     </span>
@@ -199,7 +199,7 @@ export default function ReportFeed({
                   {/* Zoom Image Button */}
                   <button
                     onClick={() => setPreviewImage(report.image)}
-                    className="absolute top-2.5 right-2.5 p-1.5 rounded-md bg-slate-900/80 hover:bg-slate-900 text-white backdrop-blur-md transition-all opacity-0 group-hover:opacity-100"
+                    className="absolute top-2.5 right-2.5 p-1.5 rounded-md bg-black/80 hover:bg-black text-white backdrop-blur-md transition-all opacity-0 group-hover:opacity-100 border border-neutral-800"
                     title="Pratinjau Foto"
                   >
                     <Maximize2 className="w-3.5 h-3.5" />
@@ -207,14 +207,14 @@ export default function ReportFeed({
 
                   {/* Ticket ID */}
                   <div className="absolute bottom-2.5 left-2.5">
-                    <span className="px-2 py-0.5 rounded bg-slate-900/90 text-emerald-400 font-mono text-[10px] font-bold">
+                    <span className="px-2 py-0.5 rounded bg-black/90 text-emerald-400 font-mono text-[10px] font-extrabold border border-neutral-800">
                       #{report.id}
                     </span>
                   </div>
 
                   {/* Status Badge */}
                   <div className="absolute bottom-2.5 right-2.5">
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-semibold border flex items-center gap-1 backdrop-blur-md ${statusBadge.class}`}>
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold border flex items-center gap-1 backdrop-blur-md ${statusBadge.class}`}>
                       <StatusIcon className="w-3 h-3" />
                       {statusBadge.label}
                     </span>
@@ -224,50 +224,50 @@ export default function ReportFeed({
                 {/* Card Body */}
                 <div className="p-4 space-y-3 flex-1 flex flex-col justify-between">
                   <div>
-                    <h3 className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors line-clamp-2">
+                    <h3 className="text-sm font-bold text-neutral-900 dark:text-white group-hover:text-emerald-500 transition-colors line-clamp-2">
                       {report.title}
                     </h3>
-                    <p className="text-xs text-slate-600 dark:text-slate-400 mt-1.5 line-clamp-2 leading-relaxed">
+                    <p className="text-xs text-neutral-600 dark:text-neutral-400 mt-1.5 line-clamp-2 leading-relaxed">
                       {report.description}
                     </p>
                   </div>
 
                   {/* Info Tags */}
-                  <div className="space-y-1.5 pt-2 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-500 dark:text-slate-400">
-                    <div className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
-                      <MapPin className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                  <div className="space-y-1.5 pt-2 border-t border-neutral-100 dark:border-neutral-800 text-[11px] text-neutral-500 dark:text-neutral-400">
+                    <div className="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-300">
+                      <MapPin className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
                       <span className="truncate">{report.location}</span>
                     </div>
 
-                    <div className="flex items-center justify-between text-slate-500 dark:text-slate-400">
+                    <div className="flex items-center justify-between text-neutral-500 dark:text-neutral-400">
                       <div className="flex items-center gap-1">
-                        <Clock className="w-3 h-3 text-slate-400" />
+                        <Clock className="w-3 h-3 text-neutral-400" />
                         <span>{report.date}</span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <UserCheck className="w-3 h-3 text-slate-400" />
+                        <UserCheck className="w-3 h-3 text-neutral-400" />
                         <span>{report.isAnonymous ? 'Pelapor Anonim' : report.author}</span>
                       </div>
                     </div>
                   </div>
 
                   {/* Card Actions */}
-                  <div className="pt-2.5 flex items-center justify-between gap-2 border-t border-slate-100 dark:border-slate-800">
+                  <div className="pt-2.5 flex items-center justify-between gap-2 border-t border-neutral-100 dark:border-neutral-800">
                     <button
                       onClick={() => onUpvote(report.id)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all ${
                         report.upvotedByUser
-                          ? 'bg-emerald-600 text-white shadow-sm'
-                          : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                          ? 'bg-emerald-500 text-black shadow-sm'
+                          : 'bg-neutral-100 dark:bg-neutral-900 text-neutral-800 dark:text-neutral-200 hover:bg-neutral-200 dark:hover:bg-neutral-800 border border-neutral-200 dark:border-neutral-800'
                       }`}
                     >
-                      <ThumbsUp className={`w-3.5 h-3.5 ${report.upvotedByUser ? 'fill-white' : ''}`} />
+                      <ThumbsUp className={`w-3.5 h-3.5 ${report.upvotedByUser ? 'fill-black' : ''}`} />
                       <span>{report.upvotes} Dukungan</span>
                     </button>
 
                     <button
                       onClick={() => onTrackTicket(report.id)}
-                      className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 flex items-center gap-1 transition-all"
+                      className="px-3 py-1.5 rounded-lg text-xs font-bold bg-neutral-100 dark:bg-neutral-900 text-neutral-900 dark:text-white hover:text-emerald-500 dark:hover:text-emerald-400 border border-neutral-200 dark:border-neutral-800 flex items-center gap-1 transition-all"
                     >
                       <Ticket className="w-3.5 h-3.5" />
                       <span>Lacak</span>
@@ -283,18 +283,18 @@ export default function ReportFeed({
 
       {/* Image Preview Modal */}
       {previewImage && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="relative max-w-3xl w-full bg-white dark:bg-slate-900 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-2xl">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-800">
-              <span className="text-xs font-bold text-slate-900 dark:text-white">Pratinjau Foto Bukti</span>
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="relative max-w-3xl w-full bg-white dark:bg-black rounded-xl overflow-hidden border border-neutral-200 dark:border-neutral-800 shadow-2xl">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-200 dark:border-neutral-800">
+              <span className="text-xs font-bold text-neutral-900 dark:text-white">Pratinjau Foto Bukti</span>
               <button
                 onClick={() => setPreviewImage(null)}
-                className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                className="p-1 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400 hover:text-neutral-900 dark:hover:text-white"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
-            <div className="p-2 max-h-[75vh] flex items-center justify-center bg-slate-100 dark:bg-slate-950">
+            <div className="p-2 max-h-[75vh] flex items-center justify-center bg-neutral-100 dark:bg-neutral-900">
               <img src={previewImage} alt="Preview" className="max-h-[70vh] object-contain rounded" />
             </div>
           </div>

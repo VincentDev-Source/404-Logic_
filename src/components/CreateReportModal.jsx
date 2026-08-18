@@ -77,6 +77,7 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport }) {
         author: isAnonymous ? 'Warga Anonim' : (author.trim() || 'Warga Peduli'),
         isAnonymous,
         image: imageUrl || SAMPLE_PHOTOS[0].url,
+        imageUrl: imageUrl || SAMPLE_PHOTOS[0].url,
       };
 
       onSubmitReport(newReportData);
@@ -88,23 +89,23 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport }) {
       setDescription('');
       setAuthor('');
       setIsAnonymous(false);
-    }, 1000);
+    }, 800);
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-      <div className="relative w-full max-w-xl bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden my-6">
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+      <div className="relative w-full max-w-xl bg-white dark:bg-black rounded-xl border border-neutral-200 dark:border-neutral-800 shadow-2xl overflow-hidden my-6">
         
         {/* Modal Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-800">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-200 dark:border-neutral-800">
           <div>
-            <h2 className="text-base font-bold text-slate-900 dark:text-white">Buat Laporan Fasilitas Baru</h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400">Partisipasi warga untuk SDG 11 Kota Berkelanjutan</p>
+            <h2 className="text-base font-black text-neutral-900 dark:text-white">Buat Laporan Fasilitas Baru</h2>
+            <p className="text-xs text-neutral-500 dark:text-neutral-400 font-medium">Partisipasi warga untuk SDG 11 Kota Berkelanjutan</p>
           </div>
 
           <button
             onClick={onClose}
-            className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-900 dark:hover:text-white"
+            className="p-1 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400 hover:text-neutral-900 dark:hover:text-white"
           >
             <X className="w-4 h-4" />
           </button>
@@ -115,7 +116,7 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport }) {
           
           {/* Judul Laporan */}
           <div>
-            <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+            <label className="block font-bold text-neutral-800 dark:text-neutral-200 mb-1">
               Judul Laporan *
             </label>
             <input
@@ -124,20 +125,20 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport }) {
               placeholder="Contoh: Lubang Jalan Rusak Rawan Kecelakaan..."
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 text-xs focus:outline-none focus:border-emerald-500"
+              className="w-full px-3 py-2 rounded-lg bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-neutral-900 dark:text-white placeholder-neutral-400 text-xs focus:outline-none focus:border-emerald-500 font-medium"
             />
           </div>
 
           {/* Kategori & Kota */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+              <label className="block font-bold text-neutral-800 dark:text-neutral-200 mb-1">
                 Kategori Fasilitas *
               </label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 text-xs focus:outline-none focus:border-emerald-500"
+                className="w-full px-3 py-2 rounded-lg bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-neutral-900 dark:text-white text-xs focus:outline-none focus:border-emerald-500 font-medium"
               >
                 {CATEGORIES.filter(c => c.id !== 'semua').map((cat) => (
                   <option key={cat.id} value={cat.name}>
@@ -148,13 +149,13 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport }) {
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+              <label className="block font-bold text-neutral-800 dark:text-neutral-200 mb-1">
                 Kota / Wilayah *
               </label>
               <select
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 text-xs focus:outline-none focus:border-emerald-500"
+                className="w-full px-3 py-2 rounded-lg bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-neutral-900 dark:text-white text-xs focus:outline-none focus:border-emerald-500 font-medium"
               >
                 <option value="Jakarta">Jakarta</option>
                 <option value="Surabaya">Surabaya</option>
@@ -170,14 +171,14 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport }) {
           {/* Lokasi Alamat & Tombol GPS */}
           <div>
             <div className="flex items-center justify-between mb-1">
-              <label className="font-semibold text-slate-700 dark:text-slate-300">
+              <label className="font-bold text-neutral-800 dark:text-neutral-200">
                 Lokasi / Titik Alamat Lengkap *
               </label>
               <button
                 type="button"
                 onClick={handleSimulateGPS}
                 disabled={isLocating}
-                className="text-[11px] text-emerald-600 dark:text-emerald-400 hover:underline font-semibold flex items-center gap-1"
+                className="text-[11px] text-emerald-600 dark:text-emerald-400 hover:underline font-bold flex items-center gap-1"
               >
                 {isLocating ? (
                   <>
@@ -199,24 +200,24 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport }) {
                 placeholder="Jl. Sudirman No. 45..."
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                className="w-full pl-8 pr-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 text-xs focus:outline-none focus:border-emerald-500"
+                className="w-full pl-8 pr-3 py-2 rounded-lg bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-neutral-900 dark:text-white placeholder-neutral-400 text-xs focus:outline-none focus:border-emerald-500 font-medium"
               />
-              <MapPin className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" />
+              <MapPin className="w-3.5 h-3.5 text-neutral-400 absolute left-2.5 top-2.5" />
             </div>
           </div>
 
           {/* Upload Foto */}
           <div>
-            <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+            <label className="block font-bold text-neutral-800 dark:text-neutral-200 mb-1">
               Bukti Foto Kendala Fasilitas
             </label>
 
-            <div className="border border-dashed border-slate-300 dark:border-slate-700 rounded-lg p-3 text-center bg-slate-50 dark:bg-slate-950">
+            <div className="border border-dashed border-neutral-300 dark:border-neutral-700 rounded-lg p-3 text-center bg-neutral-50 dark:bg-neutral-900">
               {imageUrl ? (
                 <div className="relative h-32 w-full rounded overflow-hidden group">
                   <img src={imageUrl} alt="Preview" className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                    <label className="px-2.5 py-1 bg-emerald-600 text-white text-[11px] font-bold rounded cursor-pointer">
+                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                    <label className="px-3 py-1 bg-emerald-500 text-black text-[11px] font-bold rounded cursor-pointer">
                       Ganti Foto
                       <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
                     </label>
@@ -224,24 +225,24 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport }) {
                 </div>
               ) : (
                 <label className="cursor-pointer block py-3 space-y-1">
-                  <Upload className="w-6 h-6 text-emerald-600 dark:text-emerald-400 mx-auto" />
-                  <p className="text-[11px] text-slate-600 dark:text-slate-300 font-semibold">Klik untuk unggah foto</p>
+                  <Upload className="w-6 h-6 text-emerald-500 mx-auto" />
+                  <p className="text-[11px] text-neutral-600 dark:text-neutral-300 font-bold">Klik untuk unggah foto</p>
                   <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
                 </label>
               )}
             </div>
 
             <div className="mt-1.5 flex items-center gap-1.5 overflow-x-auto">
-              <span className="text-[10px] text-slate-400 shrink-0">Sampel foto:</span>
+              <span className="text-[10px] text-neutral-400 shrink-0 font-medium">Sampel foto:</span>
               {SAMPLE_PHOTOS.map((sample, idx) => (
                 <button
                   key={idx}
                   type="button"
                   onClick={() => setImageUrl(sample.url)}
-                  className={`text-[10px] px-2 py-0.5 rounded border font-medium whitespace-nowrap ${
+                  className={`text-[10px] px-2 py-0.5 rounded border font-bold whitespace-nowrap ${
                     imageUrl === sample.url
-                      ? 'bg-emerald-600 text-white border-emerald-600'
-                      : 'bg-slate-100 dark:bg-slate-950 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800'
+                      ? 'bg-emerald-500 text-black border-emerald-500'
+                      : 'bg-neutral-100 dark:bg-neutral-900 text-neutral-600 dark:text-neutral-400 border-neutral-200 dark:border-neutral-800'
                   }`}
                 >
                   {sample.label}
@@ -252,7 +253,7 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport }) {
 
           {/* Deskripsi */}
           <div>
-            <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+            <label className="block font-bold text-neutral-800 dark:text-neutral-200 mb-1">
               Deskripsi Detail Kendala *
             </label>
             <textarea
@@ -261,26 +262,26 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport }) {
               placeholder="Jelaskan kondisi spesifik atau potensi bahaya..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 text-xs focus:outline-none focus:border-emerald-500"
+              className="w-full px-3 py-2 rounded-lg bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-neutral-900 dark:text-white placeholder-neutral-400 text-xs focus:outline-none focus:border-emerald-500 font-medium"
             />
           </div>
 
           {/* Privasi Anonim */}
-          <div className="bg-slate-50 dark:bg-slate-950 p-3 rounded-lg border border-slate-200 dark:border-slate-800 space-y-2">
+          <div className="bg-neutral-100 dark:bg-neutral-900 p-3 rounded-lg border border-neutral-200 dark:border-neutral-800 space-y-2">
             <div className="flex items-center justify-between">
-              <span className="font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+              <span className="font-bold text-neutral-800 dark:text-neutral-200 flex items-center gap-1">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
                 Lapor sebagai Anonim
               </span>
               <button
                 type="button"
                 onClick={() => setIsAnonymous(!isAnonymous)}
                 className={`w-9 h-5 rounded-full relative transition-colors ${
-                  isAnonymous ? 'bg-emerald-600' : 'bg-slate-300 dark:bg-slate-700'
+                  isAnonymous ? 'bg-emerald-500' : 'bg-neutral-300 dark:bg-neutral-700'
                 }`}
               >
-                <span className={`w-3.5 h-3.5 bg-white rounded-full absolute top-0.75 transition-transform ${
-                  isAnonymous ? 'left-4.5' : 'left-0.75'
+                <span className={`w-3.5 h-3.5 bg-black dark:bg-white rounded-full absolute top-0.75 transition-transform ${
+                  isAnonymous ? 'left-4.5 bg-black' : 'left-0.75'
                 }`} />
               </button>
             </div>
@@ -291,17 +292,17 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport }) {
                 placeholder="Nama Lengkap Pelapor (opsional)..."
                 value={author}
                 onChange={(e) => setAuthor(e.target.value)}
-                className="w-full px-2.5 py-1.5 rounded bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 text-xs focus:outline-none focus:border-emerald-500"
+                className="w-full px-2.5 py-1.5 rounded bg-white dark:bg-black border border-neutral-200 dark:border-neutral-800 text-neutral-900 dark:text-white text-xs focus:outline-none focus:border-emerald-500 font-medium"
               />
             )}
           </div>
 
           {/* Form Actions */}
-          <div className="pt-2 flex items-center justify-end space-x-2 border-t border-slate-100 dark:border-slate-800">
+          <div className="pt-2 flex items-center justify-end space-x-2 border-t border-neutral-100 dark:border-neutral-800">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-lg font-semibold text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+              className="px-4 py-2 rounded-lg font-bold text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800"
             >
               Batal
             </button>
@@ -309,7 +310,7 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport }) {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold shadow flex items-center gap-1.5 transition-all"
+              className="px-5 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold shadow flex items-center gap-1.5 transition-all"
             >
               {isSubmitting ? (
                 <>

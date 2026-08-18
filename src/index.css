@@ -3,21 +3,22 @@
 @tailwind utilities;
 
 @layer base {
-  /* Default Theme Variables */
   :root {
-    --bg-main: #f8fafc;
+    --bg-main: #ffffff;
     --bg-card: #ffffff;
-    --border-color: #e2e8f0;
-    --text-primary: #0f172a;
-    --text-secondary: #64748b;
+    --border-color: #e5e5e5;
+    --text-primary: #0a0a0a;
+    --text-secondary: #737373;
+    --accent: #10b981;
   }
 
   .dark {
-    --bg-main: #090d16;
-    --bg-card: #0f172a;
-    --border-color: #1e293b;
-    --text-primary: #f8fafc;
-    --text-secondary: #94a3b8;
+    --bg-main: #000000;
+    --bg-card: #0a0a0a;
+    --border-color: #262626;
+    --text-primary: #ffffff;
+    --text-secondary: #a3a3a3;
+    --accent: #10b981;
   }
 
   body {
@@ -25,24 +26,6 @@
     background-color: var(--bg-main);
     color: var(--text-primary);
   }
-}
-
-/* Minimalist Glass Cards & Panels */
-.minimal-card {
-  @apply rounded-2xl transition-all duration-200 border;
-}
-
-/* Light Theme Panel */
-.bg-theme-main {
-  background-color: var(--bg-main);
-}
-
-.bg-theme-card {
-  background-color: var(--bg-card);
-}
-
-.border-theme {
-  border-color: var(--border-color);
 }
 
 /* Custom Minimal Scrollbar */
@@ -56,12 +39,12 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #d4d4d4;
   border-radius: 9999px;
 }
 
 .dark ::-webkit-scrollbar-thumb {
-  background: #334155;
+  background: #262626;
 }
 
 ::-webkit-scrollbar-thumb:hover {

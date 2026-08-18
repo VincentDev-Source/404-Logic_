@@ -46,24 +46,24 @@ export default function TicketTrackerModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-      <div className="relative w-full max-w-2xl bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden my-6">
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+      <div className="relative w-full max-w-2xl bg-white dark:bg-black rounded-xl border border-neutral-200 dark:border-neutral-800 shadow-2xl overflow-hidden my-6">
         
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-800">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-200 dark:border-neutral-800">
           <div className="flex items-center space-x-2.5">
-            <div className="w-9 h-9 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+            <div className="w-9 h-9 rounded-lg bg-emerald-500 text-black flex items-center justify-center font-extrabold">
               <Ticket className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-slate-900 dark:text-white">Lacak Status Tiket Aduan</h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Pantau perkembangan penanganan dinas terkait secara real-time</p>
+              <h2 className="text-base font-black text-neutral-900 dark:text-white">Lacak Status Tiket Aduan</h2>
+              <p className="text-xs text-neutral-500 dark:text-neutral-400 font-medium">Pantau perkembangan penanganan dinas terkait secara real-time</p>
             </div>
           </div>
 
           <button
             onClick={onClose}
-            className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-900 dark:hover:text-white"
+            className="p-1 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400 hover:text-neutral-900 dark:hover:text-white"
           >
             <X className="w-4 h-4" />
           </button>
@@ -79,12 +79,12 @@ export default function TicketTrackerModal({
               placeholder="Masukkan Nomor Tiket (misal: LP-2026-1001)..."
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              className="w-full pl-9 pr-20 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 text-xs focus:outline-none focus:border-emerald-500"
+              className="w-full pl-9 pr-24 py-2 rounded-lg bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-neutral-900 dark:text-white placeholder-neutral-400 text-xs focus:outline-none focus:border-emerald-500 font-medium"
             />
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
+            <Search className="w-3.5 h-3.5 text-neutral-400 absolute left-3 top-2.5" />
             <button
               type="submit"
-              className="absolute right-1 top-1 px-3 py-1 rounded bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px]"
+              className="absolute right-1 top-1 px-3 py-1 rounded bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-[11px]"
             >
               Cari Tiket
             </button>
@@ -92,7 +92,7 @@ export default function TicketTrackerModal({
 
           {/* Quick Ticket Selector Pills */}
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-[11px] justify-center">
-            <span className="text-slate-400 shrink-0 font-medium">Contoh:</span>
+            <span className="text-neutral-400 shrink-0 font-medium">Contoh:</span>
             {reports.slice(0, 5).map((r) => (
               <button
                 key={r.id}
@@ -100,10 +100,10 @@ export default function TicketTrackerModal({
                   setSearchInput(r.id);
                   setSelectedReport(r);
                 }}
-                className={`px-2 py-0.5 rounded border font-mono font-semibold transition-all ${
+                className={`px-2.5 py-0.5 rounded font-mono font-bold transition-all ${
                   selectedReport?.id === r.id
-                    ? 'bg-emerald-600 text-white border-emerald-600'
-                    : 'bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800'
+                    ? 'bg-emerald-500 text-black'
+                    : 'bg-neutral-100 dark:bg-neutral-900 text-neutral-600 dark:text-neutral-400 border border-neutral-200 dark:border-neutral-800'
                 }`}
               >
                 #{r.id}
@@ -111,146 +111,128 @@ export default function TicketTrackerModal({
             ))}
           </div>
 
-          {/* Ticket Details */}
-          {!selectedReport ? (
-            <div className="bg-slate-50 dark:bg-slate-950 p-6 rounded-lg text-center space-y-2 border border-slate-200 dark:border-slate-800">
-              <AlertCircle className="w-8 h-8 text-amber-500 mx-auto" />
-              <h3 className="text-sm font-bold text-slate-900 dark:text-white">Tiket Tidak Ditemukan</h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Nomor tiket "{searchInput}" tidak ada di database. Silakan periksa kembali.
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-5">
+          {/* Detailed Ticket Tracker Display */}
+          {selectedReport ? (
+            <div className="space-y-4 pt-2 border-t border-neutral-200 dark:border-neutral-800">
               
-              {/* Ticket Card Info */}
-              <div className="bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-200 dark:border-slate-800 space-y-3">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              {/* Ticket Overview Card */}
+              <div className="bg-neutral-100 dark:bg-neutral-900 p-4 rounded-xl border border-neutral-200 dark:border-neutral-800 space-y-2">
+                <div className="flex items-start justify-between">
                   <div>
-                    <div className="flex items-center gap-1.5">
-                      <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-mono text-[11px] font-bold border border-emerald-500/20">
-                        #{selectedReport.id}
-                      </span>
-                      <span className="px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[11px] font-medium">
-                        {selectedReport.category}
-                      </span>
-                    </div>
-                    <h3 className="text-base font-bold text-slate-900 dark:text-white mt-1.5">
+                    <span className="px-2 py-0.5 rounded bg-emerald-500 text-black font-mono font-extrabold text-[11px]">
+                      #{selectedReport.id}
+                    </span>
+                    <h3 className="text-sm font-black text-neutral-900 dark:text-white mt-1">
                       {selectedReport.title}
                     </h3>
                   </div>
 
-                  <div className="text-left sm:text-right">
-                    <span className="text-[10px] text-slate-400 block">Estimasi:</span>
-                    <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
-                      {selectedReport.estimatedFixTime}
-                    </span>
-                  </div>
+                  <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-neutral-200 dark:bg-neutral-800 text-neutral-900 dark:text-white border border-neutral-300 dark:border-neutral-700 flex items-center gap-1">
+                    <Clock className="w-3.5 h-3.5 text-emerald-500" />
+                    {selectedReport.status}
+                  </span>
                 </div>
 
-                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed bg-white dark:bg-slate-900 p-2.5 rounded-lg border border-slate-200 dark:border-slate-800">
+                <p className="text-neutral-600 dark:text-neutral-400 text-xs leading-relaxed font-medium">
                   {selectedReport.description}
                 </p>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] text-slate-500 dark:text-slate-400 pt-1">
-                  <div className="flex items-center gap-1.5">
-                    <Building2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                    <span>Instansi: <strong className="text-slate-700 dark:text-slate-200">{selectedReport.agency}</strong></span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2 text-[11px] text-neutral-500 dark:text-neutral-400 font-medium">
+                  <div className="flex items-center gap-1">
+                    <MapPin className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                    <span className="truncate">{selectedReport.location}</span>
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    <MapPin className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                    <span>Lokasi: <strong className="text-slate-700 dark:text-slate-200">{selectedReport.location}</strong></span>
+                  <div className="flex items-center gap-1">
+                    <Building2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                    <span className="truncate">{selectedReport.agency}</span>
                   </div>
                 </div>
               </div>
 
-              {/* Progress Timeline Stepper */}
-              <div className="bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-200 dark:border-slate-800 space-y-4">
-                <h4 className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
-                  <Clock className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                  <span>Tahapan Progres Penanganan (4 Steps)</span>
+              {/* Progress Timeline */}
+              <div className="space-y-3">
+                <h4 className="font-black text-neutral-900 dark:text-white text-xs uppercase tracking-wider">
+                  Timeline Proses Penanganan Dinas
                 </h4>
 
-                <div className="relative border-l-2 border-slate-300 dark:border-slate-800 ml-3 pl-5 space-y-6">
-                  {selectedReport.timeline.map((step, idx) => {
-                    const isDone = step.done;
-                    return (
-                      <div key={idx} className="relative">
-                        <div className={`absolute -left-[27px] top-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
-                          isDone 
-                            ? 'bg-emerald-600 text-white' 
-                            : 'bg-slate-200 dark:bg-slate-800 text-slate-400 border border-slate-300 dark:border-slate-700'
-                        }`}>
-                          {isDone ? <CheckCircle2 className="w-3.5 h-3.5" /> : step.step}
-                        </div>
-
-                        <div className="space-y-0.5">
-                          <div className="flex items-center justify-between">
-                            <h5 className={`font-bold ${isDone ? 'text-slate-900 dark:text-white' : 'text-slate-400'}`}>
-                              Tahap {step.step}: {step.title}
-                            </h5>
-                            <span className="text-[10px] font-mono text-slate-400">
-                              {step.date}
-                            </span>
-                          </div>
-                          <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-normal">
-                            {step.desc}
-                          </p>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Photo Comparison Section */}
-              <div className="bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-200 dark:border-slate-800 space-y-3">
-                <div className="flex items-center justify-between">
-                  <h4 className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
-                    <Camera className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                    <span>Perbandingan Foto Sebelum vs Sesudah</span>
-                  </h4>
-                  <span className="text-[10px] text-slate-400">Verifikasi Visual</span>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300">Sebelum (Laporan Warga)</span>
-                    <div className="h-36 rounded-lg overflow-hidden bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-                      <img 
-                        src={selectedReport.beforeImage || selectedReport.image} 
-                        alt="Sebelum" 
-                        className="w-full h-full object-cover" 
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-1">
-                    <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400">Sesudah (Hasil Perbaikan)</span>
-                    <div className="h-36 rounded-lg overflow-hidden bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center">
-                      {selectedReport.afterImage ? (
-                        <img 
-                          src={selectedReport.afterImage} 
-                          alt="Sesudah" 
-                          className="w-full h-full object-cover" 
-                        />
-                      ) : (
-                        <div className="text-center p-3 space-y-1">
-                          <Clock className="w-6 h-6 text-slate-400 animate-spin mx-auto" />
-                          <p className="text-[11px] font-semibold text-slate-600 dark:text-slate-300">Dalam Proses Pengerjaan</p>
-                          <p className="text-[10px] text-slate-400">Foto akan diperbarui jika selesai.</p>
-                        </div>
+                <div className="space-y-3 pl-2">
+                  {selectedReport.timeline?.map((step, idx) => (
+                    <div key={idx} className="flex items-start space-x-3 relative">
+                      {/* Timeline Line */}
+                      {idx !== selectedReport.timeline.length - 1 && (
+                        <div className={`absolute left-2.5 top-6 bottom-0 w-0.5 ${
+                          step.done ? 'bg-emerald-500' : 'bg-neutral-200 dark:bg-neutral-800'
+                        }`} />
                       )}
+
+                      {/* Timeline Dot */}
+                      <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 z-10 ${
+                        step.done 
+                          ? 'bg-emerald-500 text-black font-extrabold' 
+                          : 'bg-neutral-200 dark:bg-neutral-800 text-neutral-400'
+                      }`}>
+                        {step.done ? <CheckCircle2 className="w-3.5 h-3.5" /> : <span className="text-[10px] font-bold">{step.step}</span>}
+                      </div>
+
+                      <div className="flex-1 pb-2">
+                        <div className="flex items-center justify-between">
+                          <h5 className={`font-bold text-xs ${step.done ? 'text-neutral-900 dark:text-white' : 'text-neutral-400'}`}>
+                            {step.title}
+                          </h5>
+                          <span className="text-[10px] text-neutral-400 font-medium">{step.date}</span>
+                        </div>
+                        <p className="text-[11px] text-neutral-500 dark:text-neutral-400 mt-0.5 font-medium">
+                          {step.desc}
+                        </p>
+                      </div>
                     </div>
-                  </div>
+                  ))}
                 </div>
               </div>
 
+              {/* Before & After Photo Comparison */}
+              {selectedReport.beforeImage && (
+                <div className="pt-2 border-t border-neutral-200 dark:border-neutral-800 space-y-2">
+                  <div className="flex items-center gap-1.5 text-xs font-black text-neutral-900 dark:text-white">
+                    <Camera className="w-3.5 h-3.5 text-emerald-500" />
+                    <span>Dokumentasi Foto Lapangan</span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <span className="text-[10px] font-bold text-neutral-500 block">Sebelum Perbaikan</span>
+                      <div className="h-28 rounded-lg overflow-hidden border border-neutral-200 dark:border-neutral-800">
+                        <img src={selectedReport.beforeImage} alt="Sebelum" className="w-full h-full object-cover" />
+                      </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <span className="text-[10px] font-bold text-neutral-500 block">Hasil Perbaikan</span>
+                      <div className="h-28 rounded-lg overflow-hidden border border-neutral-200 dark:border-neutral-800 bg-neutral-100 dark:bg-neutral-900 flex items-center justify-center text-center p-2">
+                        {selectedReport.afterImage ? (
+                          <img src={selectedReport.afterImage} alt="Sesudah" className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="space-y-1 text-neutral-400">
+                            <Clock className="w-5 h-5 mx-auto" />
+                            <p className="text-[10px] font-bold">Dalam Pengerjaan</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+            </div>
+          ) : (
+            <div className="py-12 text-center space-y-2">
+              <AlertCircle className="w-8 h-8 text-neutral-400 mx-auto" />
+              <p className="font-bold text-neutral-900 dark:text-white text-xs">Tiket Tidak Ditemukan</p>
+              <p className="text-neutral-500 text-[11px]">Pastikan format nomor tiket benar (contoh: #LP-2026-1001).</p>
             </div>
           )}
 
         </div>
-
       </div>
     </div>
   );

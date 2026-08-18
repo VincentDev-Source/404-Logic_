@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import Navbar from './components/Navbar';
 import HeroStats from './components/HeroStats';
 import ReportFeed from './components/ReportFeed';
@@ -7,18 +7,66 @@ import CreateReportModal from './components/CreateReportModal';
 import TicketTrackerModal from './components/TicketTrackerModal';
 import AnalyticsDashboard from './components/AnalyticsDashboard';
 import Footer from './components/Footer';
-import { getStoredReports, saveStoredReports, generateTicketId } from './utils/storage';
-import { CheckCircle2, X } from 'lucide-react';
+import { CheckCircle2, X, AlertTriangle, RefreshCw, Loader2 } from 'lucide-react';
+
+// Helper function to normalize database report records to match frontend expectations
+function normalizeReport(raw) {
+  const id = raw.id;
+  const numId = typeof id === 'number' ? id : parseInt(String(id).replace(/\D/g, ''), 10) || 1;
+  const idStr = typeof id === 'number' ? `LP-2026-${String(id).padStart(4, '0')}` : String(id);
+
+  // Generate consistent pseudo-coordinates for map visualization based on numeric ID
+  const mapX = raw.coordinates?.mapX ?? ((numId * 37) % 65 + 15);
+  const mapY = raw.coordinates?.mapY ?? ((numId * 53) % 55 + 20);
+
+  const createdAtDate = raw.createdAt ? new Date(raw.createdAt) : new Date();
+  const formattedDate = raw.date || `${createdAtDate.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' })}, ${createdAtDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}`;
+
+  return {
+    id: idStr,
+    rawId: numId,
+    title: raw.title || 'Laporan Tanpa Judul',
+    category: raw.category || 'Lainnya',
+    categoryKey: (raw.category || '').toLowerCase().replace('/', '_').replace(/\s+/g, '_'),
+    severity: raw.severity || 'Sedang',
+    status: raw.status || 'Menunggu',
+    statusKey: raw.status === 'Selesai' ? 'selesai' : raw.status === 'Sedang Ditangani' ? 'diproses' : 'menunggu',
+    location: raw.location || 'Lokasi tidak disebutkan',
+    city: raw.city || 'Jakarta',
+    district: raw.district || 'Kecamatan Terkait',
+    coordinates: raw.coordinates || { lat: -6.2088, lng: 106.8456, mapX, mapY },
+    description: raw.description || '',
+    author: raw.author || 'Warga Peduli',
+    isAnonymous: raw.isAnonymous ?? false,
+    date: formattedDate,
+    upvotes: raw.upvotes ?? 0,
+    upvotedByUser: Boolean(raw.upvotedByUser),
+    agency: raw.agency || 'Dinas Terkait',
+    estimatedFixTime: raw.estimatedFixTime || 'Dalam Penanganan',
+    image: raw.imageUrl || raw.image || 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=800&q=80',
+    beforeImage: raw.imageUrl || raw.image || 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=800&q=80',
+    afterImage: raw.afterImage || null,
+    timeline: raw.timeline || [
+      { step: 1, title: 'Laporan Diterima', date: formattedDate, done: true, desc: 'Laporan terdaftar secara resmi di sistem CivicPulse.' },
+      { step: 2, title: 'Verifikasi Dinas', date: 'Dalam Antrean', done: raw.status !== 'Menunggu', desc: 'Pengungahan berkas ke instansi dinas teknis terkait.' },
+      { step: 3, title: 'Petugas Meluncur', date: 'Menunggu', done: raw.status === 'Sedang Ditangani' || raw.status === 'Selesai', desc: 'Penugasan tim inspeksi dan perbaikan lapangan.' },
+      { step: 4, title: 'Perbaikan Selesai', date: 'Menunggu', done: raw.status === 'Selesai', desc: 'Proses pengerjaan dan konfirmasi perbaikan dari warga.' }
+    ]
+  };
+}
 
 export default function App() {
-  const [reports, setReports] = useState(() => getStoredReports());
+  const [reports, setReports] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
   const [activeTab, setActiveTab] = useState('feed'); // 'feed' | 'map' | 'analytics'
   const [selectedCategory, setSelectedCategory] = useState('semua');
   const [selectedStatus, setSelectedStatus] = useState('semua');
   const [searchQuery, setSearchQuery] = useState('');
   const [quickTicketInput, setQuickTicketInput] = useState('');
   const [viewMode, setViewMode] = useState('feed'); // 'feed' | 'map'
-  
+
   // Theme mode: 'dark' | 'light'
   const [theme, setTheme] = useState(() => {
     const saved = localStorage.getItem('civicpulse_theme');
@@ -35,18 +83,13 @@ export default function App() {
     }
   }, [theme]);
 
-  // Modals
+  // Modals state
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isTrackerModalOpen, setIsTrackerModalOpen] = useState(false);
   const [activeTicketId, setActiveTicketId] = useState('');
 
-  // Custom Toast notification
+  // Toast notification state
   const [toastMessage, setToastMessage] = useState(null);
-
-  // Sync state changes to LocalStorage
-  useEffect(() => {
-    saveStoredReports(reports);
-  }, [reports]);
 
   // Show Toast notification helper
   const showToast = (title, message, type = 'success') => {
@@ -55,6 +98,30 @@ export default function App() {
       setToastMessage(null);
     }, 4000);
   };
+
+  // Fetch reports from backend API (/api/reports)
+  const fetchReports = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const res = await fetch('/api/reports');
+      if (!res.ok) {
+        throw new Error(`Gagal memuat data (HTTP ${res.status})`);
+      }
+      const data = await res.json();
+      const normalizedData = Array.isArray(data) ? data.map(normalizeReport) : [];
+      setReports(normalizedData);
+    } catch (err) {
+      console.error('Error fetching reports from /api/reports:', err);
+      setError('Gagal memuat data laporan dari database PostgreSQL. Silakan periksa koneksi internet atau server.');
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchReports();
+  }, [fetchReports]);
 
   // Filter reports based on search, category, and status
   const filteredReports = useMemo(() => {
@@ -69,9 +136,9 @@ export default function App() {
         const query = searchQuery.toLowerCase().trim();
         const matchesTitle = report.title.toLowerCase().includes(query);
         const matchesDesc = report.description.toLowerCase().includes(query);
-        const matchesId = report.id.toLowerCase().includes(query);
-        const matchesLoc = report.location.toLowerCase().includes(query);
-        const matchesCity = report.city.toLowerCase().includes(query);
+        const matchesId = String(report.id).toLowerCase().includes(query);
+        const matchesLoc = (report.location || '').toLowerCase().includes(query);
+        const matchesCity = (report.city || '').toLowerCase().includes(query);
         return matchesTitle || matchesDesc || matchesId || matchesLoc || matchesCity;
       }
 
@@ -86,17 +153,19 @@ export default function App() {
     ? ((resolvedCount / totalReportsCount) * 100).toFixed(1) 
     : '94.2';
 
-  // Handle upvoting
-  const handleUpvote = (reportId) => {
+  // Handle upvoting with API patch call
+  const handleUpvote = async (reportId) => {
+    const target = reports.find((r) => r.id === reportId || String(r.rawId) === String(reportId));
+    if (!target) return;
+
+    const isUpvoted = target.upvotedByUser;
+    const targetDbId = target.rawId || target.id;
+
+    // Optimistic UI update
     setReports((prevReports) =>
       prevReports.map((report) => {
-        if (report.id === reportId) {
-          const isUpvoted = report.upvotedByUser;
-          const newUpvotes = isUpvoted ? report.upvotes - 1 : report.upvotes + 1;
-          showToast(
-            isUpvoted ? 'Dukungan Dibatalkan' : 'Dukungan Berhasil Ditambahkan',
-            `Laporan #${report.id} kini memiliki ${newUpvotes} dukungan warga.`
-          );
+        if (report.id === reportId || String(report.rawId) === String(reportId)) {
+          const newUpvotes = isUpvoted ? Math.max(0, report.upvotes - 1) : report.upvotes + 1;
           return {
             ...report,
             upvotes: newUpvotes,
@@ -106,6 +175,24 @@ export default function App() {
         return report;
       })
     );
+
+    showToast(
+      isUpvoted ? 'Dukungan Dibatalkan' : 'Dukungan Berhasil Ditambahkan',
+      `Laporan #${target.id} kini memiliki ${isUpvoted ? target.upvotes - 1 : target.upvotes + 1} dukungan warga.`
+    );
+
+    try {
+      await fetch('/api/reports', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: targetDbId,
+          action: isUpvoted ? 'downvote' : 'upvote',
+        }),
+      });
+    } catch (err) {
+      console.error('Failed to sync upvote with server:', err);
+    }
   };
 
   // Handle open ticket tracker
@@ -120,74 +207,44 @@ export default function App() {
     setIsTrackerModalOpen(true);
   };
 
-  // Handle new report creation
-  const handleCreateReport = (newReportData) => {
-    const newId = generateTicketId();
-    const newReport = {
-      id: newId,
-      title: newReportData.title,
-      category: newReportData.category,
-      categoryKey: newReportData.category.toLowerCase().replace('/', '_').replace(' ', '_'),
-      severity: 'Sedang',
-      status: 'Menunggu Verifikasi',
-      statusKey: 'menunggu',
-      location: newReportData.location,
-      city: newReportData.city,
-      district: 'Kecamatan Terkait',
-      coordinates: { 
-        lat: -6.2088, 
-        lng: 106.8456, 
-        mapX: Math.floor(20 + Math.random() * 60), 
-        mapY: Math.floor(20 + Math.random() * 60) 
-      },
-      description: newReportData.description,
-      author: newReportData.author,
-      isAnonymous: newReportData.isAnonymous,
-      date: new Date().toISOString().replace('T', ' ').substring(0, 16),
-      upvotes: 1,
-      upvotedByUser: true,
-      agency: 'Dinas Terkait (Dalam Verifikasi)',
-      estimatedFixTime: 'Respon Maks. 24 Jam',
-      image: newReportData.image,
-      beforeImage: newReportData.image,
-      afterImage: null,
-      timeline: [
-        { 
-          step: 1, 
-          title: 'Laporan Diterima', 
-          date: 'Baru saja', 
-          done: true, 
-          desc: 'Laporan terdaftar secara resmi di sistem CivicPulse.' 
-        },
-        { 
-          step: 2, 
-          title: 'Verifikasi Dinas', 
-          date: 'Dalam Antrean', 
-          done: false, 
-          desc: 'Pengungahan berkas ke instansi dinas teknis terkait.' 
-        },
-        { 
-          step: 3, 
-          title: 'Petugas Meluncur', 
-          date: 'Menunggu', 
-          done: false, 
-          desc: 'Penugasan tim inspeksi dan perbaikan lapangan.' 
-        },
-        { 
-          step: 4, 
-          title: 'Perbaikan Selesai', 
-          date: 'Menunggu', 
-          done: false, 
-          desc: 'Proses pengerjaan dan konfirmasi perbaikan dari warga.' 
-        }
-      ]
-    };
+  // Handle new report creation sending POST to /api/reports
+  const handleCreateReport = async (newReportData) => {
+    try {
+      const res = await fetch('/api/reports', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: newReportData.title,
+          category: newReportData.category,
+          description: newReportData.description,
+          location: newReportData.location,
+          imageUrl: newReportData.imageUrl || newReportData.image,
+          status: 'Menunggu',
+        }),
+      });
 
-    setReports([newReport, ...reports]);
-    showToast(
-      'Laporan Berhasil Diterbitkan 🎉',
-      `Nomor Tiket Anda: #${newId}. Simpan nomor tiket ini untuk memantau progres.`
-    );
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Gagal menyimpan laporan ke database server');
+      }
+
+      const createdReportFromDb = await res.json();
+      const normalized = normalizeReport({
+        ...createdReportFromDb,
+        author: newReportData.author,
+        isAnonymous: newReportData.isAnonymous,
+        city: newReportData.city,
+      });
+
+      setReports((prev) => [normalized, ...prev]);
+      showToast(
+        'Laporan Berhasil Diterbitkan 🎉',
+        `Nomor Tiket Anda: #${normalized.id}. Laporan telah tersimpan ke database PostgreSQL.`
+      );
+    } catch (err) {
+      console.error('Error creating report via API:', err);
+      showToast('Gagal Membuat Laporan', err.message || 'Terjadi kesalahan sistem.', 'error');
+    }
   };
 
   return (
@@ -196,8 +253,12 @@ export default function App() {
       {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed top-20 right-4 z-50 max-w-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 shadow-lg flex items-start gap-2.5 animate-in slide-in-from-top-3 duration-200 text-xs">
-          <div className="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-            <CheckCircle2 className="w-4 h-4" />
+          <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
+            toastMessage.type === 'error' 
+              ? 'bg-red-500/10 text-red-600 dark:text-red-400' 
+              : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+          }`}>
+            {toastMessage.type === 'error' ? <AlertTriangle className="w-4 h-4" /> : <CheckCircle2 className="w-4 h-4" />}
           </div>
           <div className="flex-1 pr-2">
             <h4 className="font-bold text-slate-900 dark:text-white">{toastMessage.title}</h4>
@@ -241,27 +302,50 @@ export default function App() {
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
           
-          {/* Main View Router */}
-          {activeTab === 'analytics' ? (
-            <AnalyticsDashboard reports={reports} theme={theme} />
-          ) : viewMode === 'map' || activeTab === 'map' ? (
-            <InteractiveMap
-              reports={filteredReports}
-              onUpvote={handleUpvote}
-              onTrackTicket={handleTrackTicket}
-            />
+          {/* Loading Indicator */}
+          {isLoading ? (
+            <div className="py-20 flex flex-col items-center justify-center space-y-3">
+              <Loader2 className="w-10 h-10 text-emerald-600 dark:text-emerald-400 animate-spin" />
+              <p className="text-slate-600 dark:text-slate-400 font-medium text-xs">
+                Mengambil data laporan dari database PostgreSQL Vercel...
+              </p>
+            </div>
+          ) : error ? (
+            /* Error State Fallback UI */
+            <div className="p-6 my-6 bg-red-500/10 border border-red-500/20 rounded-2xl text-center flex flex-col items-center justify-center space-y-3">
+              <AlertTriangle className="w-8 h-8 text-red-500" />
+              <p className="text-red-600 dark:text-red-400 font-semibold text-xs">{error}</p>
+              <button
+                onClick={fetchReports}
+                className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white font-bold rounded-lg text-xs flex items-center gap-2 transition-all shadow-md"
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+                <span>Muat Ulang Data</span>
+              </button>
+            </div>
           ) : (
-            <ReportFeed
-              reports={filteredReports}
-              onUpvote={handleUpvote}
-              onTrackTicket={handleTrackTicket}
-              selectedCategory={selectedCategory}
-              setSelectedCategory={setSelectedCategory}
-              selectedStatus={selectedStatus}
-              setSelectedStatus={setSelectedStatus}
-              viewMode={viewMode}
-              setViewMode={setViewMode}
-            />
+            /* Main View Router */
+            activeTab === 'analytics' ? (
+              <AnalyticsDashboard reports={reports} theme={theme} />
+            ) : viewMode === 'map' || activeTab === 'map' ? (
+              <InteractiveMap
+                reports={filteredReports}
+                onUpvote={handleUpvote}
+                onTrackTicket={handleTrackTicket}
+              />
+            ) : (
+              <ReportFeed
+                reports={filteredReports}
+                onUpvote={handleUpvote}
+                onTrackTicket={handleTrackTicket}
+                selectedCategory={selectedCategory}
+                setSelectedCategory={setSelectedCategory}
+                selectedStatus={selectedStatus}
+                setSelectedStatus={setSelectedStatus}
+                viewMode={viewMode}
+                setViewMode={setViewMode}
+              />
+            )
           )}
 
         </div>
