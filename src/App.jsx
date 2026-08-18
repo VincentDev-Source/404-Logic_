@@ -7,6 +7,7 @@ import InteractiveMap from './components/InteractiveMap';
 import CreateReportModal from './components/CreateReportModal';
 import TicketTrackerModal from './components/TicketTrackerModal';
 import AnalyticsDashboard from './components/AnalyticsDashboard';
+import OpeningScreen from './components/OpeningScreen';
 import LoadingScreen from './components/LoadingScreen';
 import SplashScreen from './components/SplashScreen';
 import ConfirmModal from './components/ConfirmModal';
@@ -458,10 +459,10 @@ export default function App() {
   return (
     <div className="min-h-screen flex flex-col bg-white dark:bg-black text-neutral-900 dark:text-white transition-colors duration-300">
       
-      {/* Futuristic Animated Loading Screen Container */}
+      {/* Animated Wavy Curtain Opening Screen */}
       <AnimatePresence mode="wait">
         {showSplash && (
-          <LoadingScreen onFinish={() => setShowSplash(false)} />
+          <OpeningScreen onFinish={() => setShowSplash(false)} />
         )}
       </AnimatePresence>
 
