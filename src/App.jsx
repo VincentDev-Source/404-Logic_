@@ -67,6 +67,7 @@ function normalizeReport(raw) {
     author: raw.author || 'Warga Peduli',
     isAnonymous: raw.isAnonymous ?? false,
     verifiedBy: raw.verifiedBy || null,
+    officerNotes: raw.officerNotes || null,
     rating: raw.rating || null,
     ratingFeedback: raw.ratingFeedback || null,
     date: formattedDate,

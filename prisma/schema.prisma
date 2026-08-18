@@ -24,6 +24,7 @@ model Report {
   location       String?
   imageUrl       String?
   afterImage     String?
+  officerNotes   String?
   upvotes        Int      @default(0)
   verifiedBy     String?
   rating         Int?

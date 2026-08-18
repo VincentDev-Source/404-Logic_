@@ -15,7 +15,7 @@ export default async function handler(req, res) {
 
   if (req.method === 'PATCH') {
     try {
-      const { id, status, verifiedBy, afterImage } = req.body || {};
+      const { id, status, verifiedBy, afterImage, officerNotes } = req.body || {};
 
       if (!id || !status) {
         return res.status(400).json({ error: 'ID laporan dan status baru wajib dikirimkan!' });
@@ -31,6 +31,10 @@ export default async function handler(req, res) {
 
       if (afterImage !== undefined && afterImage !== null) {
         updateData.afterImage = String(afterImage);
+      }
+
+      if (officerNotes !== undefined && officerNotes !== null) {
+        updateData.officerNotes = String(officerNotes);
       }
 
       const updatedReport = await prisma.report.update({

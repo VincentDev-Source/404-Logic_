@@ -19,7 +19,9 @@ import {
   Calendar,
   Eye,
   ArrowRight,
-  Sparkles
+  Sparkles,
+  FileText,
+  Edit3
 } from 'lucide-react';
 
 const SAMPLE_AFTER_PHOTOS = [
@@ -27,11 +29,15 @@ const SAMPLE_AFTER_PHOTOS = [
   { label: 'Area Bersih (Sampah Clean)', url: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=800&q=80' },
   { label: 'Lampu Nyala (PJU Berfungsi)', url: 'https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?auto=format&fit=crop&w=800&q=80' },
   { label: 'Drainase Lancar', url: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=800&q=80' },
+  { label: 'Pintu Air Perbaikan', url: 'https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?auto=format&fit=crop&w=800&q=80' },
+  { label: 'Taman Rapi (Hijau)', url: 'https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?auto=format&fit=crop&w=800&q=80' },
 ];
 
-// Neat Process & Inspection Modal Popup for City Officers with Fixed Height Flex Column
+// Complex Process & Inspection Modal Suite for City Officers
 function ProcessReportModal({ report, operator, onClose, onUpdateStatus }) {
   const [status, setStatus] = useState(report?.status || 'Diproses');
+  const [verifiedBy, setVerifiedBy] = useState(report?.verifiedBy || operator.name);
+  const [officerNotes, setOfficerNotes] = useState(report?.officerNotes || '');
   const [afterImage, setAfterImage] = useState(report?.afterImage || SAMPLE_AFTER_PHOTOS[0].url);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -55,7 +61,13 @@ function ProcessReportModal({ report, operator, onClose, onUpdateStatus }) {
   const handleSubmit = async (targetStatus) => {
     setIsSubmitting(true);
     try {
-      await onUpdateStatus(report.id, targetStatus, targetStatus === 'Selesai' ? afterImage : null);
+      await onUpdateStatus(
+        report.id, 
+        targetStatus || status, 
+        afterImage, 
+        verifiedBy.trim() || operator.name,
+        officerNotes.trim()
+      );
       onClose();
     } catch (err) {
       console.error(err);
@@ -77,8 +89,8 @@ function ProcessReportModal({ report, operator, onClose, onUpdateStatus }) {
               #LP-2026-{String(report.id).padStart(4, '0')}
             </span>
             <div>
-              <h2 className="text-base font-black text-white">Pemeriksaan & Tindak Lanjut Aduan</h2>
-              <p className="text-xs text-neutral-400 font-medium">Verifikasi Lapangan Petugas Dinas Kota</p>
+              <h2 className="text-base font-black text-white">Pemeriksaan & Tindak Lanjut Kompleks Petugas</h2>
+              <p className="text-xs text-neutral-400 font-medium">Verifikasi Lapangan & Pengelolaan Foto Perbaikan</p>
             </div>
           </div>
 
@@ -93,25 +105,48 @@ function ProcessReportModal({ report, operator, onClose, onUpdateStatus }) {
         {/* Scrollable Modal Body */}
         <div className="flex-1 overflow-y-auto p-6 space-y-5 text-xs">
           
-          {/* Status Banner */}
-          <div className="flex items-center justify-between p-3.5 bg-neutral-950 rounded-2xl border border-neutral-800">
-            <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4 text-blue-400" />
-              <span className="text-neutral-400 font-medium">Status Saat Ini:</span>
-              <span className={`px-2.5 py-0.5 rounded-full font-bold text-xs ${
-                report.status === 'Selesai'
-                  ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                  : report.status === 'Diproses' || report.status === 'Sedang Ditangani'
-                  ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
-                  : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-              }`}>
-                {report.status}
-              </span>
-            </div>
+          {/* Status Selection Switcher Pills */}
+          <div className="space-y-1.5 bg-neutral-950 p-4 rounded-2xl border border-neutral-800">
+            <label className="block text-[11px] font-extrabold uppercase text-neutral-400 tracking-wider">
+              Pilih Status Penanganan Aduan *
+            </label>
+            
+            <div className="grid grid-cols-3 gap-2 p-1 bg-neutral-900 rounded-xl border border-neutral-800">
+              <button
+                type="button"
+                onClick={() => setStatus('Menunggu')}
+                className={`py-2 rounded-lg font-extrabold text-xs transition-all ${
+                  status === 'Menunggu'
+                    ? 'bg-amber-500 text-black shadow'
+                    : 'text-amber-400 hover:bg-neutral-800'
+                }`}
+              >
+                Menunggu
+              </button>
 
-            <div className="text-[11px] text-emerald-400 font-bold flex items-center gap-1">
-              <UserCheck className="w-3.5 h-3.5" />
-              <span>Petugas: {operator.name}</span>
+              <button
+                type="button"
+                onClick={() => setStatus('Diproses')}
+                className={`py-2 rounded-lg font-extrabold text-xs transition-all ${
+                  status === 'Diproses' || status === 'Sedang Ditangani'
+                    ? 'bg-blue-600 text-white shadow'
+                    : 'text-blue-400 hover:bg-neutral-800'
+                }`}
+              >
+                Diproses
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setStatus('Selesai')}
+                className={`py-2 rounded-lg font-extrabold text-xs transition-all ${
+                  status === 'Selesai'
+                    ? 'bg-emerald-500 text-black shadow'
+                    : 'text-emerald-400 hover:bg-neutral-800'
+                }`}
+              >
+                Selesai
+              </button>
             </div>
           </div>
 
@@ -143,6 +178,36 @@ function ProcessReportModal({ report, operator, onClose, onUpdateStatus }) {
                   <span className="text-xs font-semibold text-neutral-200 line-clamp-2">{report.location || 'Tidak tercatat'}</span>
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* Input Nama Petugas & Catatan Teknis Penanganan */}
+          <div className="space-y-3 bg-neutral-950 p-4 rounded-2xl border border-neutral-800">
+            <div>
+              <label className="block text-xs font-bold text-neutral-300 mb-1">
+                Nama Petugas Verifikator / Tim Lapangan *
+              </label>
+              <input
+                type="text"
+                required
+                placeholder="Nama Petugas Penanggung Jawab..."
+                value={verifiedBy}
+                onChange={(e) => setVerifiedBy(e.target.value)}
+                className="w-full px-3 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-white placeholder-neutral-500 text-xs focus:outline-none focus:border-blue-500 font-medium"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-neutral-300 mb-1">
+                Catatan Teknis Penanganan Petugas
+              </label>
+              <textarea
+                rows={2}
+                placeholder="Tuliskan tindakan perbaikan yang telah/sedang dilakukan (e.g. Tim Bina Marga telah melakukan penambalan aspal setebal 5cm)..."
+                value={officerNotes}
+                onChange={(e) => setOfficerNotes(e.target.value)}
+                className="w-full px-3 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-white placeholder-neutral-500 text-xs focus:outline-none focus:border-blue-500 font-medium"
+              />
             </div>
           </div>
 
@@ -199,15 +264,15 @@ function ProcessReportModal({ report, operator, onClose, onUpdateStatus }) {
                   className="flex-1 px-3 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-white placeholder-neutral-500 text-xs focus:outline-none focus:border-blue-500 font-medium"
                 />
 
-                <label className="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs cursor-pointer flex items-center gap-1.5 transition-all shadow">
+                <label className="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs cursor-pointer flex items-center gap-1.5 transition-all shadow shrink-0">
                   <Upload className="w-3.5 h-3.5" />
-                  <span>Unggah</span>
+                  <span>Unggah Berkas</span>
                   <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
                 </label>
               </div>
 
               {/* Sample Quick Select Photos for Officers */}
-              <div className="grid grid-cols-4 gap-2 pt-1">
+              <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 pt-1">
                 {SAMPLE_AFTER_PHOTOS.map((sample, idx) => (
                   <button
                     key={idx}
@@ -239,30 +304,22 @@ function ProcessReportModal({ report, operator, onClose, onUpdateStatus }) {
             onClick={onClose}
             className="px-4 py-2.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-300 font-bold text-xs transition-colors"
           >
-            Tutup Pratinjau
+            Batal
           </button>
 
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => handleSubmit('Diproses')}
-              disabled={isSubmitting}
-              className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs flex items-center gap-1.5 transition-all active:scale-95 shadow"
-            >
-              {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileCheck className="w-4 h-4" />}
-              <span>Tandai Diproses</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleSubmit('Selesai')}
-              disabled={isSubmitting || !afterImage}
-              className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-xs flex items-center gap-1.5 transition-all active:scale-95 shadow disabled:opacity-50"
-            >
-              {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin text-black" /> : <Check className="w-4 h-4" />}
-              <span>Simpan Foto & Tandai Selesai</span>
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={() => handleSubmit(status)}
+            disabled={isSubmitting}
+            className="px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-xs flex items-center gap-1.5 transition-all active:scale-95 shadow disabled:opacity-50"
+          >
+            {isSubmitting ? (
+              <Loader2 className="w-4 h-4 animate-spin text-black" />
+            ) : (
+              <Check className="w-4 h-4" />
+            )}
+            <span>Simpan Perubahan & Foto ({status})</span>
+          </button>
         </div>
 
       </div>
@@ -305,8 +362,8 @@ export default function OperatorDashboard({ operator, onLogout }) {
     fetchReports();
   }, [fetchReports]);
 
-  // Update report status (Diproses / Selesai) with afterImage
-  const handleUpdateStatus = async (reportId, newStatus, afterImg = null) => {
+  // Update report status (Menunggu / Diproses / Selesai) with afterImage & officerNotes
+  const handleUpdateStatus = async (reportId, newStatus, afterImg = null, verifier = null, notes = null) => {
     setUpdatingId(reportId);
     try {
       const res = await fetch('/api/operator/reports', {
@@ -315,8 +372,9 @@ export default function OperatorDashboard({ operator, onLogout }) {
         body: JSON.stringify({
           id: reportId,
           status: newStatus,
-          verifiedBy: operator.name,
+          verifiedBy: verifier || operator.name,
           afterImage: afterImg,
+          officerNotes: notes,
         }),
       });
 
@@ -330,12 +388,13 @@ export default function OperatorDashboard({ operator, onLogout }) {
         prev.map((r) => (r.id === reportId ? { 
           ...r, 
           status: newStatus, 
-          verifiedBy: operator.name,
-          afterImage: afterImg || r.afterImage 
+          verifiedBy: verifier || operator.name,
+          afterImage: afterImg || r.afterImage,
+          officerNotes: notes || r.officerNotes,
         } : r))
       );
 
-      setActionSuccessMsg(`Aduan #${reportId} berhasil diubah menjadi "${newStatus}" oleh ${operator.name}`);
+      setActionSuccessMsg(`Aduan #${reportId} berhasil diperbarui (Status: "${newStatus}") oleh ${verifier || operator.name}`);
       setTimeout(() => setActionSuccessMsg(null), 4000);
     } catch (err) {
       console.error('Update status error:', err);
@@ -560,7 +619,8 @@ export default function OperatorDashboard({ operator, onLogout }) {
               return (
                 <div
                   key={report.id}
-                  className="bg-neutral-900 border border-neutral-800 rounded-2xl p-4 flex flex-col justify-between space-y-3 shadow-lg hover:border-neutral-700 transition-colors"
+                  onClick={() => setSelectedInspectReport(report)}
+                  className="bg-neutral-900 border border-neutral-800 rounded-2xl p-4 flex flex-col justify-between space-y-3 shadow-lg hover:border-blue-500/60 transition-all cursor-pointer group"
                 >
                   <div className="space-y-2">
                     {/* Header Badge */}
@@ -584,7 +644,7 @@ export default function OperatorDashboard({ operator, onLogout }) {
                       )}
                     </div>
 
-                    <h3 className="text-sm font-black text-white line-clamp-2 leading-snug cursor-pointer hover:text-blue-400 transition-colors" onClick={() => setSelectedInspectReport(report)}>
+                    <h3 className="text-sm font-black text-white group-hover:text-blue-400 transition-colors line-clamp-2 leading-snug">
                       {report.title}
                     </h3>
 
@@ -605,30 +665,30 @@ export default function OperatorDashboard({ operator, onLogout }) {
                     )}
                   </div>
 
-                  {/* Operator Action Buttons */}
+                  {/* Operator Action Buttons (Always Clickable on ALL Cards!) */}
                   <div className="pt-3 border-t border-neutral-800 grid grid-cols-2 gap-2">
                     <button
-                      onClick={() => setSelectedInspectReport(report)}
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedInspectReport(report);
+                      }}
                       className="py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-extrabold flex items-center justify-center gap-1.5 transition-all active:scale-95 shadow-md"
                     >
                       <Eye className="w-3.5 h-3.5" />
-                      <span>Proses Aduan</span>
+                      <span>Inspeksi Details</span>
                     </button>
 
                     <button
-                      onClick={() => setSelectedInspectReport(report)}
-                      className={`py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1 transition-all active:scale-95 ${
-                        isCompleted
-                          ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 cursor-default'
-                          : 'bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold shadow-md'
-                      }`}
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedInspectReport(report);
+                      }}
+                      className="py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-xs flex items-center justify-center gap-1 transition-all active:scale-95 shadow-md"
                     >
-                      {isUpdatingThis ? (
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      ) : (
-                        <Check className="w-3.5 h-3.5" />
-                      )}
-                      <span>Tandai Selesai</span>
+                      <Edit3 className="w-3.5 h-3.5" />
+                      <span>Edit Foto Hasil</span>
                     </button>
                   </div>
 
