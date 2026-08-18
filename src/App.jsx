@@ -16,6 +16,7 @@ import FaceAuth from './components/FaceAuth';
 import FaceAuthOperator from './components/FaceAuthOperator';
 import OperatorDashboard from './components/OperatorDashboard';
 import Footer from './components/Footer';
+import CurvedNavbar from './components/CurvedNavbar';
 import { CheckCircle2, X, AlertTriangle, RefreshCw, Loader2 } from 'lucide-react';
 
 // Normalize database records to match frontend component requirements
@@ -528,7 +529,7 @@ export default function App() {
       {/* Main Content Area */}
       <main className="flex-grow">
         
-        {/* Hero & Highlight Impact Metrics */}
+        {/* Hero Impact Metrics (Always rendered) */}
         <HeroStats
           reports={reports}
           searchQuery={searchQuery}
@@ -536,7 +537,7 @@ export default function App() {
           onOpenCreateModal={() => setIsCreateModalOpen(true)}
         />
 
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pb-24 sm:pb-16">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pb-28 sm:pb-16">
           
           {/* Loading Indicator */}
           {isLoading ? (
@@ -563,7 +564,7 @@ export default function App() {
             /* Main View Router */
             activeTab === 'analytics' ? (
               <AnalyticsDashboard reports={reports} theme={theme} />
-            ) : viewMode === 'map' || activeTab === 'map' ? (
+            ) : activeTab === 'map' ? (
               <InteractiveMap
                 reports={filteredReports}
                 onUpvote={handleUpvote}
@@ -595,6 +596,30 @@ export default function App() {
 
         </div>
       </main>
+
+      {/* Global Curved Floating Bottom Navbar (For Smartphone Viewports) */}
+      <div className="sm:hidden">
+        <CurvedNavbar
+          activeTab={
+            activeTab === 'feed'
+              ? 'home'
+              : activeTab === 'map'
+              ? 'search'
+              : activeTab === 'analytics'
+              ? 'like'
+              : 'home'
+          }
+          onTabChange={(tabId) => {
+            if (tabId === 'home') setActiveTab('feed');
+            else if (tabId === 'search') setActiveTab('map');
+            else if (tabId === 'like') setActiveTab('analytics');
+          }}
+          onOpenCreateModal={() => setIsCreateModalOpen(true)}
+          onOpenTrackerModal={() => setIsTrackerModalOpen(true)}
+          onOpenOperatorPortal={() => setIsOperatorPortal(true)}
+          onLockFaceAuth={handleLockFaceAuth}
+        />
+      </div>
 
       {/* Footer */}
       <Footer
