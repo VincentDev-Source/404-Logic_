@@ -171,8 +171,8 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport, ope
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-      <div className="relative w-full max-w-xl bg-white dark:bg-black rounded-xl border border-neutral-200 dark:border-neutral-800 shadow-2xl overflow-hidden my-6">
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200">
+      <div className="relative w-full max-w-xl bg-white dark:bg-black rounded-xl border border-neutral-200 dark:border-neutral-800 shadow-2xl overflow-hidden my-6 animate-in zoom-in-95 duration-200">
         
         {/* Modal Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-200 dark:border-neutral-800">
@@ -317,7 +317,7 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport, ope
                   key={idx}
                   type="button"
                   onClick={() => setImageUrl(sample.url)}
-                  className={`text-[10px] px-2 py-0.5 rounded border font-bold whitespace-nowrap ${
+                  className={`text-[10px] px-2 py-0.5 rounded border font-bold whitespace-nowrap active:scale-95 transition-all ${
                     imageUrl === sample.url
                       ? 'bg-emerald-500 text-black border-emerald-500'
                       : 'bg-neutral-100 dark:bg-neutral-900 text-neutral-600 dark:text-neutral-400 border-neutral-200 dark:border-neutral-800'
@@ -380,7 +380,7 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport, ope
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-lg font-bold text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+              className="px-4 py-2 rounded-lg font-bold text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
             >
               Batal
             </button>
@@ -388,7 +388,7 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport, ope
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-5 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold shadow flex items-center gap-1.5 transition-all"
+              className="px-5 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 active:scale-95 text-black font-extrabold shadow flex items-center gap-1.5 transition-all"
             >
               {isSubmitting ? (
                 <>

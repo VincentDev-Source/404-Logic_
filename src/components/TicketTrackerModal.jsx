@@ -46,13 +46,13 @@ export default function TicketTrackerModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-      <div className="relative w-full max-w-2xl bg-white dark:bg-black rounded-xl border border-neutral-200 dark:border-neutral-800 shadow-2xl overflow-hidden my-6">
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200">
+      <div className="relative w-full max-w-2xl bg-white dark:bg-black rounded-xl border border-neutral-200 dark:border-neutral-800 shadow-2xl overflow-hidden my-6 animate-in zoom-in-95 duration-200">
         
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-200 dark:border-neutral-800">
           <div className="flex items-center space-x-2.5">
-            <div className="w-9 h-9 rounded-lg bg-emerald-500 text-black flex items-center justify-center font-extrabold">
+            <div className="w-9 h-9 rounded-lg bg-emerald-500 text-black flex items-center justify-center font-extrabold shadow-sm">
               <Ticket className="w-4 h-4" />
             </div>
             <div>
@@ -84,7 +84,7 @@ export default function TicketTrackerModal({
             <Search className="w-3.5 h-3.5 text-neutral-400 absolute left-3 top-2.5" />
             <button
               type="submit"
-              className="absolute right-1 top-1 px-3 py-1 rounded bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-[11px]"
+              className="absolute right-1 top-1 px-3 py-1 rounded bg-emerald-500 hover:bg-emerald-400 active:scale-95 text-black font-extrabold text-[11px] transition-all"
             >
               Cari Tiket
             </button>
@@ -100,7 +100,7 @@ export default function TicketTrackerModal({
                   setSearchInput(r.id);
                   setSelectedReport(r);
                 }}
-                className={`px-2.5 py-0.5 rounded font-mono font-bold transition-all ${
+                className={`px-2.5 py-0.5 rounded font-mono font-bold transition-all active:scale-95 ${
                   selectedReport?.id === r.id
                     ? 'bg-emerald-500 text-black'
                     : 'bg-neutral-100 dark:bg-neutral-900 text-neutral-600 dark:text-neutral-400 border border-neutral-200 dark:border-neutral-800'
@@ -113,7 +113,7 @@ export default function TicketTrackerModal({
 
           {/* Detailed Ticket Tracker Display */}
           {selectedReport ? (
-            <div className="space-y-4 pt-2 border-t border-neutral-200 dark:border-neutral-800">
+            <div className="space-y-4 pt-2 border-t border-neutral-200 dark:border-neutral-800 animate-fade-in-up">
               
               {/* Ticket Overview Card */}
               <div className="bg-neutral-100 dark:bg-neutral-900 p-4 rounded-xl border border-neutral-200 dark:border-neutral-800 space-y-2">

@@ -30,6 +30,54 @@
   }
 }
 
+/* Custom Animation Keyframes */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes radarPulse {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+  70% {
+    transform: scale(1.4);
+    box-shadow: 0 0 0 14px rgba(16, 185, 129, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
+@keyframes floatSlow {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-radar-pulse {
+  animation: radarPulse 2.2s infinite ease-in-out;
+}
+
+.animate-float-slow {
+  animation: floatSlow 3.5s infinite ease-in-out;
+}
+
 /* Custom Leaflet Map Dark/Light styling */
 .leaflet-container {
   width: 100%;
@@ -42,12 +90,23 @@
   background: var(--bg-card) !important;
   color: var(--text-primary) !important;
   border: 1px solid var(--border-color);
-  border-radius: 12px !important;
+  border-radius: 14px !important;
   padding: 4px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4) !important;
 }
 
 .leaflet-popup-tip {
   background: var(--bg-card) !important;
+}
+
+/* Custom Leaflet Teardrop Pins & Glow Effects */
+.custom-leaflet-pin-wrapper {
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.custom-leaflet-pin-wrapper:hover {
+  transform: scale(1.25) translateY(-4px);
+  z-index: 1000 !important;
 }
 
 /* Custom Minimal Scrollbar */

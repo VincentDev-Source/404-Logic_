@@ -52,7 +52,7 @@ export default function AnalyticsDashboard({ reports, theme }) {
     <div className="space-y-6">
       
       {/* Header Banner */}
-      <div className="bg-white dark:bg-neutral-900 p-5 rounded-xl border border-neutral-200 dark:border-neutral-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-sm transition-colors">
+      <div className="bg-white dark:bg-neutral-900 p-5 rounded-xl border border-neutral-200 dark:border-neutral-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-sm transition-colors animate-fade-in-up">
         <div>
           <h2 className="text-xl font-black text-neutral-900 dark:text-white">
             Statistik & Insights Partisipasi Publik
@@ -78,7 +78,7 @@ export default function AnalyticsDashboard({ reports, theme }) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         
         {/* Bar Chart */}
-        <div className="bg-white dark:bg-neutral-900 p-5 rounded-xl border border-neutral-200 dark:border-neutral-800 space-y-3 transition-colors">
+        <div className="bg-white dark:bg-neutral-900 p-5 rounded-xl border border-neutral-200 dark:border-neutral-800 space-y-3 transition-colors animate-fade-in-up">
           <div className="flex items-center gap-2">
             <BarChart3 className="w-4 h-4 text-emerald-500" />
             <h3 className="text-xs font-black text-neutral-900 dark:text-white">Kategori Aduan Masuk Bulan Ini</h3>
@@ -106,7 +106,7 @@ export default function AnalyticsDashboard({ reports, theme }) {
         </div>
 
         {/* Pie/Donut Chart */}
-        <div className="bg-white dark:bg-neutral-900 p-5 rounded-xl border border-neutral-200 dark:border-neutral-800 space-y-3 transition-colors">
+        <div className="bg-white dark:bg-neutral-900 p-5 rounded-xl border border-neutral-200 dark:border-neutral-800 space-y-3 transition-colors animate-fade-in-up">
           <div className="flex items-center gap-2">
             <PieChartIcon className="w-4 h-4 text-emerald-500" />
             <h3 className="text-xs font-black text-neutral-900 dark:text-white">Rasio Status Penyelesaian Aduan</h3>
@@ -148,7 +148,7 @@ export default function AnalyticsDashboard({ reports, theme }) {
       </div>
 
       {/* Leaderboard Table */}
-      <div className="bg-white dark:bg-neutral-900 p-5 rounded-xl border border-neutral-200 dark:border-neutral-800 space-y-3 transition-colors">
+      <div className="bg-white dark:bg-neutral-900 p-5 rounded-xl border border-neutral-200 dark:border-neutral-800 space-y-3 transition-colors animate-fade-in-up">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Trophy className="w-4 h-4 text-emerald-500" />

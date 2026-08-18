@@ -24,21 +24,21 @@ export default function HeroStats({
         {/* Main Hero Header */}
         <div className="text-center max-w-3xl mx-auto space-y-3">
           
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-emerald-600 dark:text-emerald-400 text-xs font-bold">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-emerald-600 dark:text-emerald-400 text-xs font-bold animate-float-slow shadow-sm">
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
             <span>SDG 11: Kota & Komunitas Berkelanjutan</span>
           </div>
 
-          <h1 className="text-2xl sm:text-4xl font-black tracking-tight text-neutral-900 dark:text-white leading-tight">
+          <h1 className="text-2xl sm:text-4xl font-black tracking-tight text-neutral-900 dark:text-white leading-tight animate-fade-in-up">
             Partisipasi Publik & Pemantauan Fasilitas Kota
           </h1>
 
-          <p className="text-neutral-600 dark:text-neutral-400 text-xs sm:text-sm max-w-2xl mx-auto leading-relaxed">
+          <p className="text-neutral-600 dark:text-neutral-400 text-xs sm:text-sm max-w-2xl mx-auto leading-relaxed animate-fade-in-up">
             Platform pengaduan warga untuk melaporkan infrastruktur publik, jalan rusak, dan pemantauan tindak lanjut dinas secara real-time.
           </p>
 
           {/* Search & Action Bar */}
-          <div className="pt-2 max-w-xl mx-auto flex flex-col sm:flex-row items-center gap-2">
+          <div className="pt-2 max-w-xl mx-auto flex flex-col sm:flex-row items-center gap-2 animate-fade-in-up">
             <div className="relative w-full">
               <input
                 type="text"
@@ -60,7 +60,7 @@ export default function HeroStats({
 
             <button
               onClick={onOpenCreateModal}
-              className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-xs shadow flex items-center justify-center gap-1.5 transition-all whitespace-nowrap"
+              className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 active:scale-95 text-black font-extrabold text-xs shadow flex items-center justify-center gap-1.5 transition-all whitespace-nowrap"
             >
               <span>Buat Aduan</span>
               <ArrowUpRight className="w-3.5 h-3.5" />
@@ -68,11 +68,11 @@ export default function HeroStats({
           </div>
         </div>
 
-        {/* 4 Clean Monochrome Metric Cards with Single Emerald Accent */}
+        {/* 4 Clean Metric Cards with Staggered Entrance & Hover Elevation */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mt-8">
           
           {/* Card 1: Total Aduan */}
-          <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-4 transition-colors">
+          <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-4 transition-all duration-300 hover:border-emerald-500/50 hover:shadow-lg hover:-translate-y-1 animate-fade-in-up">
             <div className="flex items-center justify-between mb-2">
               <span className="text-[11px] font-bold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Total Aduan</span>
               <FileText className="w-4 h-4 text-emerald-500" />
@@ -90,7 +90,7 @@ export default function HeroStats({
           </div>
 
           {/* Card 2: Persentase Selesai */}
-          <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-4 transition-colors">
+          <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-4 transition-all duration-300 hover:border-emerald-500/50 hover:shadow-lg hover:-translate-y-1 animate-fade-in-up">
             <div className="flex items-center justify-between mb-2">
               <span className="text-[11px] font-bold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Tingkat Selesai</span>
               <CheckCircle2 className="w-4 h-4 text-emerald-500" />
@@ -107,7 +107,7 @@ export default function HeroStats({
           </div>
 
           {/* Card 3: Rata-rata Respon */}
-          <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-4 transition-colors">
+          <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-4 transition-all duration-300 hover:border-emerald-500/50 hover:shadow-lg hover:-translate-y-1 animate-fade-in-up">
             <div className="flex items-center justify-between mb-2">
               <span className="text-[11px] font-bold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Rata-rata Respon</span>
               <Clock className="w-4 h-4 text-emerald-500" />
@@ -122,7 +122,7 @@ export default function HeroStats({
           </div>
 
           {/* Card 4: Indeks Kepuasan */}
-          <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-4 transition-colors">
+          <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-4 transition-all duration-300 hover:border-emerald-500/50 hover:shadow-lg hover:-translate-y-1 animate-fade-in-up">
             <div className="flex items-center justify-between mb-2">
               <span className="text-[11px] font-bold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Indeks Kepuasan</span>
               <Smile className="w-4 h-4 text-emerald-500" />

@@ -8,7 +8,8 @@ import {
   Compass, 
   Trash2,
   Navigation,
-  Loader2
+  Loader2,
+  Maximize2
 } from 'lucide-react';
 import { CATEGORIES } from '../data/mockReports';
 
@@ -32,7 +33,7 @@ export default function InteractiveMap({
   const [selectedReport, setSelectedReport] = useState(null);
   const [filterCategory, setFilterCategory] = useState('semua');
   const [isLocatingUser, setIsLocatingUser] = useState(false);
-  const [clickedLocationInfo, setClickedLocationInfo] = useState(null);
+  const [previewImage, setPreviewImage] = useState(null);
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const markersRef = useRef([]);
@@ -71,19 +72,20 @@ export default function InteractiveMap({
               <div style="
                 background-color: #10b981;
                 color: #000000;
-                width: 28px;
-                height: 28px;
+                width: 32px;
+                height: 32px;
                 border-radius: 50%;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                font-size: 14px;
-                box-shadow: 0 0 15px #10b981;
-                border: 2px solid #ffffff;
+                font-size: 16px;
+                box-shadow: 0 0 20px #10b981;
+                border: 3px solid #ffffff;
+                animation: radarPulse 2s infinite ease-in-out;
               ">📌</div>
             `,
-            iconSize: [28, 28],
-            iconAnchor: [14, 14]
+            iconSize: [32, 32],
+            iconAnchor: [16, 16]
           })
         }).addTo(map);
 
@@ -95,9 +97,9 @@ export default function InteractiveMap({
           const address = data?.display_name || `Koordinat GPS: Lat ${lat.toFixed(5)}, Lng ${lng.toFixed(5)}`;
 
           clickMarker.bindPopup(`
-            <div style="font-family: sans-serif; padding: 4px; max-width: 200px;">
-              <div style="font-size: 10px; font-weight: 800; color: #10b981; margin-bottom: 2px;">📍 TITIK KOORDINAT DIPILIH</div>
-              <div style="font-size: 11px; opacity: 0.9; margin-bottom: 4px;">${address}</div>
+            <div style="font-family: sans-serif; padding: 6px; max-width: 210px;">
+              <div style="font-size: 10px; font-weight: 800; color: #10b981; margin-bottom: 2px;">📍 TITIK LOKASI DIPILIH</div>
+              <div style="font-size: 11px; font-weight: 600; line-clamp: 2; opacity: 0.9;">${address}</div>
             </div>
           `).openPopup();
         } catch (err) {
@@ -135,31 +137,77 @@ export default function InteractiveMap({
     markersRef.current.forEach(m => map.removeLayer(m));
     markersRef.current = [];
 
-    // Custom Emerald Pin Icon
-    const createCustomIcon = (isSelected) => {
+    // Category emoji badge helper
+    const getCategoryEmoji = (cat) => {
+      switch (cat) {
+        case 'Jalan Rusak': return '🛣️';
+        case 'Sampah/Limbah': return '🗑️';
+        case 'Lampu Jalan': return '💡';
+        case 'Banjir/Drainase': return '🌊';
+        default: return '📍';
+      }
+    };
+
+    // Ultra-Modern Teardrop Leaflet Marker Pin with Radar Pulse Ring
+    const createCustomIcon = (report, isSelected) => {
+      const emoji = getCategoryEmoji(report.category);
+      const isResolved = report.status === 'Selesai';
+      const isProcessing = report.status === 'Sedang Ditangani';
+
+      const badgeBg = isSelected 
+        ? '#10b981' 
+        : isResolved 
+        ? '#10b981' 
+        : isProcessing 
+        ? '#f59e0b' 
+        : isDark ? '#ffffff' : '#000000';
+
+      const textColor = isSelected || isResolved ? '#000000' : isDark ? '#000000' : '#ffffff';
+
       return L.divIcon({
-        className: 'custom-leaflet-pin',
+        className: 'custom-leaflet-pin-wrapper',
         html: `
-          <div style="
-            background-color: ${isSelected ? '#10b981' : isDark ? '#ffffff' : '#000000'};
-            color: ${isSelected ? '#000000' : isDark ? '#000000' : '#ffffff'};
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-            border: 2px solid #10b981;
-            transition: transform 0.2s;
-          ">
-            📍
+          <div style="position: relative; width: 42px; height: 48px; display: flex; align-items: center; justify-content: center;">
+            
+            <!-- Pulsating Radar Ring -->
+            <div style="
+              position: absolute;
+              top: 6px;
+              left: 6px;
+              width: 30px;
+              height: 30px;
+              border-radius: 50%;
+              background: rgba(16, 185, 129, 0.4);
+              animation: radarPulse 2.2s infinite ease-in-out;
+              pointer-events: none;
+            "></div>
+
+            <!-- Main Teardrop Badge Pin -->
+            <div style="
+              position: relative;
+              background-color: ${badgeBg};
+              color: ${textColor};
+              width: 36px;
+              height: 36px;
+              border-radius: 50% 50% 50% 0;
+              transform: rotate(-45deg);
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+              border: 2.5 solid #10b981;
+              cursor: pointer;
+            ">
+              <span style="transform: rotate(45deg); font-size: 17px; display: block; line-height: 1;">
+                ${emoji}
+              </span>
+            </div>
+
           </div>
         `,
-        iconSize: [32, 32],
-        iconAnchor: [16, 16],
-        popupAnchor: [0, -16]
+        iconSize: [42, 48],
+        iconAnchor: [21, 44],
+        popupAnchor: [0, -40]
       });
     };
 
@@ -171,14 +219,17 @@ export default function InteractiveMap({
       bounds.push([lat, lng]);
 
       const isSelected = selectedReport?.id === report.id;
-      const marker = L.marker([lat, lng], { icon: createCustomIcon(isSelected) }).addTo(map);
+      const marker = L.marker([lat, lng], { icon: createCustomIcon(report, isSelected) }).addTo(map);
 
-      // Popup Content
+      // Popup Preview Content
       const popupHtml = `
-        <div style="font-family: sans-serif; padding: 4px; max-width: 220px;">
-          <div style="font-size: 10px; font-weight: 800; color: #10b981; margin-bottom: 2px;">#${report.id} • ${report.category}</div>
-          <div style="font-size: 12px; font-weight: 700; margin-bottom: 4px; line-clamp: 2;">${report.title}</div>
-          <div style="font-size: 11px; opacity: 0.8; margin-bottom: 6px;">${report.location}</div>
+        <div style="font-family: sans-serif; padding: 6px; max-width: 220px;">
+          <div style="display: flex; items-center; justify-content: space-between; gap: 4px; margin-bottom: 3px;">
+            <span style="font-size: 10px; font-weight: 900; color: #10b981;">#${report.id}</span>
+            <span style="font-size: 9px; font-weight: 800; padding: 1px 5px; border-radius: 4px; background: rgba(16,185,129,0.15); color: #10b981;">${report.category}</span>
+          </div>
+          <div style="font-size: 12px; font-weight: 800; margin-bottom: 4px; line-clamp: 2;">${report.title}</div>
+          <div style="font-size: 11px; opacity: 0.8; margin-bottom: 4px; line-clamp: 1;">📍 ${report.location}</div>
         </div>
       `;
       marker.bindPopup(popupHtml);
@@ -250,15 +301,16 @@ export default function InteractiveMap({
           html: `
             <div style="
               background-color: #3b82f6;
-              width: 22px;
-              height: 22px;
+              width: 24px;
+              height: 24px;
               border-radius: 50%;
               border: 3px solid #ffffff;
-              box-shadow: 0 0 15px #3b82f6;
+              box-shadow: 0 0 20px #3b82f6;
+              animation: radarPulse 2s infinite ease-in-out;
             "></div>
           `,
-          iconSize: [22, 22],
-          iconAnchor: [11, 11]
+          iconSize: [24, 24],
+          iconAnchor: [12, 12]
         })
       }).addTo(mapInstanceRef.current);
 
@@ -293,13 +345,18 @@ export default function InteractiveMap({
       {/* Map Control Bar */}
       <div className="bg-white dark:bg-neutral-900 p-4 rounded-xl border border-neutral-200 dark:border-neutral-800 flex flex-wrap items-center justify-between gap-3 shadow-sm transition-colors">
         
-        <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 rounded-lg bg-neutral-100 dark:bg-black border border-neutral-200 dark:border-neutral-800 flex items-center justify-center text-emerald-500">
-            <Compass className="w-4 h-4" />
+        <div className="flex items-center space-x-2.5">
+          <div className="w-9 h-9 rounded-xl bg-emerald-500/10 dark:bg-black border border-emerald-500/30 flex items-center justify-center text-emerald-500 animate-pulse">
+            <Compass className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-xs font-black text-neutral-900 dark:text-white">Peta OpenStreetMap & Real GPS Marker</h3>
-            <p className="text-[11px] text-neutral-500 dark:text-neutral-400 font-medium">Klik di mana saja pada peta untuk menandai titik lokasi baru</p>
+            <h3 className="text-xs font-black text-neutral-900 dark:text-white flex items-center gap-1.5">
+              Peta OpenStreetMap Dunia & Marker Radar
+              <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-500 font-mono text-[10px] font-extrabold border border-emerald-500/20">
+                LIVE GPS
+              </span>
+            </h3>
+            <p className="text-[11px] text-neutral-500 dark:text-neutral-400 font-medium">Klik di mana saja pada peta untuk menandai titik aduan baru</p>
           </div>
         </div>
 
@@ -309,12 +366,12 @@ export default function InteractiveMap({
           <button
             onClick={handleLocateUserOnMap}
             disabled={isLocatingUser}
-            className="px-3 py-1 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-xs flex items-center gap-1.5 transition-all shrink-0 shadow"
+            className="px-3.5 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 active:scale-95 text-black font-extrabold text-xs flex items-center gap-1.5 transition-all shrink-0 shadow-md"
           >
             {isLocatingUser ? (
               <>
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                <span>Deteksi Lokasi...</span>
+                <span>Mendeteksi Lokasi...</span>
               </>
             ) : (
               <>
@@ -326,20 +383,20 @@ export default function InteractiveMap({
 
           <button
             onClick={() => setFilterCategory('semua')}
-            className={`px-3 py-1 rounded-lg text-xs font-extrabold whitespace-nowrap transition-all ${
+            className={`px-3 py-1.5 rounded-xl text-xs font-extrabold whitespace-nowrap transition-all active:scale-95 ${
               filterCategory === 'semua'
                 ? 'bg-neutral-900 dark:bg-white text-white dark:text-black shadow-sm'
                 : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 border border-neutral-200 dark:border-neutral-700'
             }`}
           >
-            Semua Marker ({reports.length})
+            Semua ({reports.length})
           </button>
 
           {CATEGORIES.filter(c => c.id !== 'semua').map((c) => (
             <button
               key={c.id}
               onClick={() => setFilterCategory(c.id)}
-              className={`px-3 py-1 rounded-lg text-xs font-bold whitespace-nowrap border transition-all ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap border transition-all active:scale-95 ${
                 filterCategory === c.id
                   ? 'bg-neutral-900 dark:bg-white text-white dark:text-black border-neutral-900 dark:border-white'
                   : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 border-neutral-200 dark:border-neutral-700'
@@ -353,46 +410,82 @@ export default function InteractiveMap({
       </div>
 
       {/* Real Leaflet Map Container */}
-      <div className="relative w-full h-[520px] rounded-xl overflow-hidden border border-neutral-200 dark:border-neutral-800 shadow-md transition-colors z-10">
-        <div ref={mapRef} className="w-full h-full min-h-[520px]" />
+      <div className="relative w-full h-[540px] rounded-2xl overflow-hidden border border-neutral-200 dark:border-neutral-800 shadow-xl transition-colors z-10">
+        <div ref={mapRef} className="w-full h-full min-h-[540px]" />
 
-        {/* Selected Report Drawer Overlay */}
+        {/* High-Aesthetic Glassmorphism Bottom Drawer Overlay Card */}
         {selectedReport && (
-          <div className="absolute bottom-4 left-4 right-4 max-w-md mx-auto bg-white dark:bg-black border border-neutral-200 dark:border-neutral-800 rounded-xl p-4 shadow-2xl z-[1000] space-y-3">
-            <div className="flex items-start justify-between">
-              <div>
-                <span className="px-2 py-0.5 rounded bg-emerald-500 text-black font-mono text-[10px] font-extrabold">
-                  #{selectedReport.id}
-                </span>
-                <h4 className="text-xs font-black text-neutral-900 dark:text-white mt-1 line-clamp-1">
+          <div className="absolute bottom-4 left-4 right-4 max-w-lg mx-auto bg-white/95 dark:bg-black/90 backdrop-blur-md border border-neutral-200 dark:border-neutral-800 rounded-2xl p-4 shadow-2xl z-[1000] space-y-3 animate-fade-in-up">
+            
+            <div className="flex items-start gap-3">
+              {/* Photo Thumbnail */}
+              <div 
+                onClick={() => setPreviewImage(selectedReport.image)}
+                className="relative w-20 h-20 rounded-xl overflow-hidden bg-neutral-100 dark:bg-neutral-900 shrink-0 border border-neutral-200 dark:border-neutral-800 cursor-pointer group"
+              >
+                <img 
+                  src={selectedReport.image} 
+                  alt={selectedReport.title} 
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                />
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity text-white">
+                  <Maximize2 className="w-3.5 h-3.5" />
+                </div>
+              </div>
+
+              {/* Content Detail */}
+              <div className="flex-1 min-w-0 space-y-1">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <span className="px-2 py-0.5 rounded bg-emerald-500 text-black font-mono text-[10px] font-extrabold">
+                      #{selectedReport.id}
+                    </span>
+                    <span className="px-2 py-0.5 rounded bg-neutral-100 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 font-bold text-[10px] border border-neutral-200 dark:border-neutral-700">
+                      {selectedReport.category}
+                    </span>
+                  </div>
+
+                  <button
+                    onClick={() => setSelectedReport(null)}
+                    className="p-1 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400 hover:text-neutral-900 dark:hover:text-white"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+
+                <h4 className="text-xs font-black text-neutral-900 dark:text-white line-clamp-1 leading-snug">
                   {selectedReport.title}
                 </h4>
+
+                <p className="text-[11px] text-neutral-600 dark:text-neutral-400 line-clamp-2 leading-relaxed font-medium">
+                  {selectedReport.description}
+                </p>
+
+                <div className="text-[10px] font-bold text-neutral-500 dark:text-neutral-400 flex items-center gap-1 pt-0.5">
+                  <MapPin className="w-3 h-3 text-emerald-500 shrink-0" />
+                  <span className="truncate">{selectedReport.location}</span>
+                </div>
               </div>
-              <button
-                onClick={() => setSelectedReport(null)}
-                className="p-1 rounded hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400"
-              >
-                <X className="w-4 h-4" />
-              </button>
             </div>
 
-            <p className="text-[11px] text-neutral-600 dark:text-neutral-400 line-clamp-2 leading-relaxed font-medium">
-              {selectedReport.description}
-            </p>
-
+            {/* Bottom Actions Bar */}
             <div className="flex items-center justify-between pt-2 border-t border-neutral-100 dark:border-neutral-800">
               <div className="flex items-center gap-1.5">
                 <button
                   onClick={() => onUpvote(selectedReport.id)}
-                  className="px-3 py-1 rounded bg-neutral-100 dark:bg-neutral-900 text-neutral-900 dark:text-white hover:text-emerald-500 font-bold text-xs flex items-center gap-1 border border-neutral-200 dark:border-neutral-800"
+                  className={`px-3 py-1.5 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition-all active:scale-95 ${
+                    selectedReport.upvotedByUser
+                      ? 'bg-emerald-500 text-black shadow-sm'
+                      : 'bg-neutral-100 dark:bg-neutral-900 text-neutral-900 dark:text-white hover:text-emerald-500 border border-neutral-200 dark:border-neutral-800'
+                  }`}
                 >
                   <ThumbsUp className="w-3.5 h-3.5" />
-                  <span>{selectedReport.upvotes}</span>
+                  <span>{selectedReport.upvotes} Dukungan</span>
                 </button>
 
                 <button
                   onClick={() => handleConfirmDeleteOnMap(selectedReport.id)}
-                  className="p-1.5 rounded bg-red-600 hover:bg-red-500 text-white font-bold text-xs"
+                  className="p-2 rounded-xl bg-red-600/90 hover:bg-red-500 text-white font-bold text-xs active:scale-95 transition-all"
                   title="Hapus Aduan"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
@@ -401,16 +494,38 @@ export default function InteractiveMap({
 
               <button
                 onClick={() => onTrackTicket(selectedReport.id)}
-                className="px-3 py-1 rounded bg-emerald-500 text-black font-bold text-xs flex items-center gap-1"
+                className="px-4 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-xs flex items-center gap-1.5 shadow-md active:scale-95 transition-all"
               >
                 <Ticket className="w-3.5 h-3.5" />
                 <span>Detail Tiket</span>
               </button>
             </div>
+
           </div>
         )}
 
       </div>
+
+      {/* Image Preview Modal */}
+      {previewImage && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="relative max-w-3xl w-full bg-white dark:bg-black rounded-xl overflow-hidden border border-neutral-200 dark:border-neutral-800 shadow-2xl">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-200 dark:border-neutral-800">
+              <span className="text-xs font-bold text-neutral-900 dark:text-white">Pratinjau Foto Bukti</span>
+              <button
+                onClick={() => setPreviewImage(null)}
+                className="p-1 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400 hover:text-neutral-900 dark:hover:text-white"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="p-2 max-h-[75vh] flex items-center justify-center bg-neutral-100 dark:bg-neutral-900">
+              <img src={previewImage} alt="Preview" className="max-h-[70vh] object-contain rounded" />
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
