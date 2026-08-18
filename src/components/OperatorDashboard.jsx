@@ -22,7 +22,8 @@ import {
   Sparkles,
   FileText,
   Edit3,
-  Lock
+  Lock,
+  Menu
 } from 'lucide-react';
 
 const SAMPLE_AFTER_PHOTOS = [
@@ -359,6 +360,7 @@ export default function OperatorDashboard({ operator, onLogout }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [updatingId, setUpdatingId] = useState(null);
   const [actionSuccessMsg, setActionSuccessMsg] = useState(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Inspection Modal State
   const [selectedInspectReport, setSelectedInspectReport] = useState(null);
@@ -466,40 +468,136 @@ export default function OperatorDashboard({ operator, onLogout }) {
           <div className="flex items-center justify-between h-16">
             
             {/* Operator Brand Badge */}
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-extrabold shadow-lg shadow-blue-600/30">
-                <Building2 className="w-5 h-5" />
+            <div className="flex items-center space-x-2.5 sm:space-x-3 min-w-0 pr-2">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-extrabold shadow-lg shadow-blue-600/30 shrink-0">
+                <Building2 className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
-              <div>
-                <h1 className="text-base font-black tracking-tight text-white flex items-center gap-2">
-                  Portal Manajemen Petugas Kota
-                  <span className="px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 font-mono text-[10px] font-bold border border-blue-500/30">
+              <div className="min-w-0">
+                <h1 className="text-xs sm:text-base font-black tracking-tight text-white flex items-center gap-1.5 leading-tight">
+                  Portal Petugas Kota
+                  <span className="px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-400 font-mono text-[9px] sm:text-[10px] font-bold border border-blue-500/30 shrink-0">
                     SDG 11
                   </span>
                 </h1>
-                <p className="text-[11px] text-neutral-400 font-medium">Verifikasi & Penanganan Aduan Fasilitas Publik</p>
+                <p className="text-[10px] sm:text-[11px] text-neutral-400 font-medium truncate">Verifikasi & Penanganan Aduan</p>
               </div>
             </div>
 
-            {/* Officer Profile & Logout Button */}
-            <div className="flex items-center space-x-3">
+            {/* Officer Profile & Interactive Hamburger Trigger */}
+            <div className="flex items-center space-x-2">
+              
+              {/* Desktop Profile Info */}
               <div className="hidden sm:flex items-center space-x-2 bg-neutral-800 border border-neutral-700 px-3.5 py-1.5 rounded-xl text-xs font-bold">
                 <UserCheck className="w-4 h-4 text-emerald-400" />
                 <span>Petugas: <span className="text-emerald-400 font-extrabold">{operator.name}</span></span>
                 <span className="text-[10px] px-1.5 py-0.5 rounded bg-neutral-700 text-neutral-300 uppercase font-mono">{operator.role}</span>
               </div>
 
+              {/* Desktop Logout Button */}
               <button
                 onClick={onLogout}
-                className="px-3.5 py-1.5 rounded-xl bg-red-600/90 hover:bg-red-500 active:scale-95 text-white font-extrabold text-xs flex items-center gap-1.5 transition-all shadow-md"
+                className="hidden sm:flex px-3.5 py-1.5 rounded-xl bg-red-600/90 hover:bg-red-500 active:scale-95 text-white font-extrabold text-xs items-center gap-1.5 transition-all shadow-md"
                 title="Keluar / Kunci Portal Petugas"
               >
                 <LogOut className="w-4 h-4" />
-                <span className="hidden sm:inline">Logout Petugas</span>
+                <span>Logout Petugas</span>
+              </button>
+
+              {/* Mobile Interactive Hamburger Menu Button */}
+              <button
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="sm:hidden p-2 rounded-xl bg-neutral-800 border border-neutral-700 text-white flex items-center justify-center transition-all active:scale-95"
+                aria-label="Toggle Mobile Menu"
+              >
+                {isMobileMenuOpen ? <X className="w-5 h-5 text-red-400" /> : <Menu className="w-5 h-5 text-blue-400" />}
               </button>
             </div>
 
           </div>
+
+          {/* Interactive Mobile Hamburger Drawer Overlay */}
+          {isMobileMenuOpen && (
+            <div className="sm:hidden border-t border-neutral-800 bg-neutral-900 px-4 py-4 space-y-4 animate-in slide-in-from-top-2 duration-200">
+              
+              {/* Officer Profile Card in Mobile Menu */}
+              <div className="p-3 rounded-2xl bg-neutral-950 border border-neutral-800 flex items-center justify-between">
+                <div className="flex items-center space-x-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">
+                    <UserCheck className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-black text-white">{operator.name}</h4>
+                    <span className="text-[9px] font-mono text-neutral-400 uppercase">{operator.role}</span>
+                  </div>
+                </div>
+                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                  Aktif
+                </span>
+              </div>
+
+              {/* Status Filter Buttons in Mobile Menu */}
+              <div className="space-y-1.5">
+                <span className="text-[10px] font-mono uppercase text-neutral-400 font-bold block px-1">
+                  Filter Status Aduan
+                </span>
+                <div className="grid grid-cols-2 gap-2 text-xs font-bold">
+                  <button
+                    onClick={() => { setFilterStatus('semua'); setIsMobileMenuOpen(false); }}
+                    className={`p-2.5 rounded-xl border text-center transition-all ${
+                      filterStatus === 'semua'
+                        ? 'bg-blue-600 text-white border-blue-500'
+                        : 'bg-neutral-950 text-neutral-400 border-neutral-800'
+                    }`}
+                  >
+                    Semua ({reports.length})
+                  </button>
+                  <button
+                    onClick={() => { setFilterStatus('Menunggu'); setIsMobileMenuOpen(false); }}
+                    className={`p-2.5 rounded-xl border text-center transition-all ${
+                      filterStatus === 'Menunggu'
+                        ? 'bg-amber-600 text-white border-amber-500'
+                        : 'bg-neutral-950 text-neutral-400 border-neutral-800'
+                    }`}
+                  >
+                    Menunggu ({countPending})
+                  </button>
+                  <button
+                    onClick={() => { setFilterStatus('Diproses'); setIsMobileMenuOpen(false); }}
+                    className={`p-2.5 rounded-xl border text-center transition-all ${
+                      filterStatus === 'Diproses'
+                        ? 'bg-blue-600 text-white border-blue-500'
+                        : 'bg-neutral-950 text-neutral-400 border-neutral-800'
+                    }`}
+                  >
+                    Diproses ({countProcessing})
+                  </button>
+                  <button
+                    onClick={() => { setFilterStatus('Selesai'); setIsMobileMenuOpen(false); }}
+                    className={`p-2.5 rounded-xl border text-center transition-all ${
+                      filterStatus === 'Selesai'
+                        ? 'bg-emerald-600 text-white border-emerald-500'
+                        : 'bg-neutral-950 text-neutral-400 border-neutral-800'
+                    }`}
+                  >
+                    Selesai ({countCompleted})
+                  </button>
+                </div>
+              </div>
+
+              {/* Mobile Logout Button */}
+              <div className="pt-2">
+                <button
+                  onClick={() => { setIsMobileMenuOpen(false); onLogout(); }}
+                  className="w-full py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-extrabold text-xs flex items-center justify-center gap-2 transition-all shadow-md active:scale-95"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Logout / Kunci Portal Petugas</span>
+                </button>
+              </div>
+
+            </div>
+          )}
+
         </div>
       </header>
 

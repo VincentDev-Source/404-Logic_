@@ -356,25 +356,27 @@ export default function FaceAuthOperator({ onLoginSuccess, onCancel }) {
       <div className="relative w-full max-w-xl bg-neutral-900 border border-neutral-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col my-auto text-white animate-in zoom-in-95 duration-200">
         
         {/* Top Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-800 bg-neutral-950">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center font-extrabold shadow-lg shadow-blue-600/30">
-              <Building2 className="w-5 h-5" />
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 sm:py-4 border-b border-neutral-800 bg-neutral-950">
+          <div className="flex items-center space-x-2.5 sm:space-x-3 min-w-0 pr-2">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center font-extrabold shadow-lg shadow-blue-600/30 shrink-0">
+              <Building2 className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <div>
-              <h2 className="text-base font-black tracking-tight text-white flex items-center gap-2">
-                Otentikasi Wajah Petugas
-                <span className="px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 font-mono text-[10px] font-bold border border-blue-500/30">
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <h2 className="text-xs sm:text-base font-black tracking-tight text-white leading-tight">
+                  Otentikasi Wajah Petugas
+                </h2>
+                <span className="px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-400 font-mono text-[9px] sm:text-[10px] font-bold border border-blue-500/30 whitespace-nowrap shrink-0">
                   SDG 11
                 </span>
-              </h2>
-              <p className="text-xs text-neutral-400 font-medium">Sistem Biometrik AI 128-Dimensional Vector</p>
+              </div>
+              <p className="text-[10px] sm:text-xs text-neutral-400 font-medium truncate">Sistem Biometrik AI 128-D</p>
             </div>
           </div>
 
           <button
             onClick={onCancel}
-            className="p-1.5 rounded-xl hover:bg-neutral-800 text-neutral-400 hover:text-white transition-colors"
+            className="p-1.5 rounded-xl hover:bg-neutral-800 text-neutral-400 hover:text-white transition-colors shrink-0"
           >
             ✕
           </button>
