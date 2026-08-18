@@ -17,6 +17,7 @@ import FaceAuthOperator from './components/FaceAuthOperator';
 import OperatorDashboard from './components/OperatorDashboard';
 import Footer from './components/Footer';
 import CurvedNavbar from './components/CurvedNavbar';
+import { INITIAL_REPORTS } from './data/mockReports';
 import { CheckCircle2, X, AlertTriangle, RefreshCw, Loader2 } from 'lucide-react';
 
 // Normalize database records to match frontend component requirements
@@ -233,11 +234,23 @@ export default function App() {
         throw new Error(`Gagal memuat data (HTTP ${res.status})`);
       }
       const data = await res.json();
-      const normalizedData = Array.isArray(data) ? data.map(normalizeReport) : [];
+      
+      let normalizedData = Array.isArray(data) ? data.map(normalizeReport) : [];
+      
+      // Fallback to rich initial mock reports if database returns empty array
+      if (normalizedData.length === 0 && Array.isArray(INITIAL_REPORTS)) {
+        normalizedData = INITIAL_REPORTS.map(normalizeReport);
+      }
+
       setReports(normalizedData);
     } catch (err) {
       console.error('Error fetching reports from /api/reports:', err);
-      setError('Gagal memuat data laporan dari database PostgreSQL. Silakan periksa koneksi internet atau server.');
+      // Fallback to INITIAL_REPORTS on network or server error
+      if (Array.isArray(INITIAL_REPORTS)) {
+        setReports(INITIAL_REPORTS.map(normalizeReport));
+      } else {
+        setError('Gagal memuat data laporan dari database PostgreSQL. Silakan periksa koneksi internet atau server.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -529,42 +542,37 @@ export default function App() {
       {/* Main Content Area */}
       <main className="flex-grow">
         
-        {/* Hero Impact Metrics (Always rendered) */}
-        <HeroStats
-          reports={reports}
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          onOpenCreateModal={() => setIsCreateModalOpen(true)}
-        />
-
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pb-28 sm:pb-16">
-          
-          {/* Loading Indicator */}
-          {isLoading ? (
-            <div className="py-20 flex flex-col items-center justify-center space-y-3">
-              <Loader2 className="w-10 h-10 text-emerald-500 animate-spin" />
-              <p className="text-neutral-600 dark:text-neutral-400 font-bold text-xs">
-                Mengambil data aduan dari database PostgreSQL...
-              </p>
-            </div>
-          ) : error ? (
-            /* Error State Fallback UI */
-            <div className="p-6 my-6 bg-red-500/10 border border-red-500/20 rounded-2xl text-center flex flex-col items-center justify-center space-y-3">
-              <AlertTriangle className="w-8 h-8 text-red-500" />
-              <p className="text-red-600 dark:text-red-400 font-bold text-xs">{error}</p>
-              <button
-                onClick={fetchReports}
-                className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white font-bold rounded-lg text-xs flex items-center gap-2 transition-all shadow-md"
-              >
-                <RefreshCw className="w-3.5 h-3.5" />
-                <span>Muat Ulang Data</span>
-              </button>
-            </div>
-          ) : (
-            /* Main View Router */
-            activeTab === 'analytics' ? (
+        {/* Loading Indicator */}
+        {isLoading ? (
+          <div className="py-20 flex flex-col items-center justify-center space-y-3">
+            <Loader2 className="w-10 h-10 text-emerald-500 animate-spin" />
+            <p className="text-neutral-600 dark:text-neutral-400 font-bold text-xs">
+              Mengambil data aduan dari database PostgreSQL...
+            </p>
+          </div>
+        ) : error ? (
+          /* Error State Fallback UI */
+          <div className="p-6 my-6 max-w-xl mx-auto bg-red-500/10 border border-red-500/20 rounded-2xl text-center flex flex-col items-center justify-center space-y-3">
+            <AlertTriangle className="w-8 h-8 text-red-500" />
+            <p className="text-red-600 dark:text-red-400 font-bold text-xs">{error}</p>
+            <button
+              onClick={fetchReports}
+              className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white font-bold rounded-lg text-xs flex items-center gap-2 transition-all shadow-md"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              <span>Muat Ulang Data</span>
+            </button>
+          </div>
+        ) : (
+          /* Dedicated Tab View Router */
+          activeTab === 'analytics' ? (
+            /* ANALITIK TAB VIEW (Full dedicated Analytics Dashboard, no HeroStats clutter above) */
+            <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-4 pb-28 sm:pb-16">
               <AnalyticsDashboard reports={reports} theme={theme} />
-            ) : activeTab === 'map' ? (
+            </div>
+          ) : activeTab === 'map' ? (
+            /* PETA TAB VIEW (Full dedicated Radar Map view directly at top of screen) */
+            <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-4 pb-28 sm:pb-16">
               <InteractiveMap
                 reports={filteredReports}
                 onUpvote={handleUpvote}
@@ -575,26 +583,38 @@ export default function App() {
                 openAlert={openAlert}
                 theme={theme}
               />
-            ) : (
-              <ReportFeed
-                reports={filteredReports}
-                onUpvote={handleUpvote}
-                onTrackTicket={handleTrackTicket}
-                onDeleteReport={handleDeleteReport}
-                onRateReport={handleRateReport}
-                openConfirm={openConfirm}
-                openAlert={openAlert}
-                selectedCategory={selectedCategory}
-                setSelectedCategory={setSelectedCategory}
-                selectedStatus={selectedStatus}
-                setSelectedStatus={setSelectedStatus}
-                viewMode={viewMode}
-                setViewMode={setViewMode}
+            </div>
+          ) : (
+            /* BERANDA TAB VIEW (Hero Impact Stats + Citizen Reports Feed) */
+            <>
+              <HeroStats
+                reports={reports}
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+                onOpenCreateModal={() => setIsCreateModalOpen(true)}
               />
-            )
-          )}
 
-        </div>
+              <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pb-28 sm:pb-16">
+                <ReportFeed
+                  reports={filteredReports}
+                  onUpvote={handleUpvote}
+                  onTrackTicket={handleTrackTicket}
+                  onDeleteReport={handleDeleteReport}
+                  onRateReport={handleRateReport}
+                  openConfirm={openConfirm}
+                  openAlert={openAlert}
+                  selectedCategory={selectedCategory}
+                  setSelectedCategory={setSelectedCategory}
+                  selectedStatus={selectedStatus}
+                  setSelectedStatus={setSelectedStatus}
+                  viewMode={viewMode}
+                  setViewMode={setViewMode}
+                />
+              </div>
+            </>
+          )
+        )}
+
       </main>
 
       {/* Global Curved Floating Bottom Navbar (For Smartphone Viewports) */}
