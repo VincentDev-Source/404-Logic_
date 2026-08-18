@@ -32,9 +32,11 @@ export default function InteractiveMap({
   const [selectedReport, setSelectedReport] = useState(null);
   const [filterCategory, setFilterCategory] = useState('semua');
   const [isLocatingUser, setIsLocatingUser] = useState(false);
+  const [clickedLocationInfo, setClickedLocationInfo] = useState(null);
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const markersRef = useRef([]);
+  const tempClickMarkerRef = useRef(null);
 
   const isDark = theme === 'dark';
 
@@ -53,12 +55,62 @@ export default function InteractiveMap({
         zoom: 10,
         zoomControl: true,
       });
+
+      // Enable Click-to-Pick pin placement anywhere on map
+      map.on('click', async (e) => {
+        const { lat, lng } = e.latlng;
+
+        if (tempClickMarkerRef.current) {
+          map.removeLayer(tempClickMarkerRef.current);
+        }
+
+        const clickMarker = L.marker([lat, lng], {
+          icon: L.divIcon({
+            className: 'click-pin-pulse',
+            html: `
+              <div style="
+                background-color: #10b981;
+                color: #000000;
+                width: 28px;
+                height: 28px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 14px;
+                box-shadow: 0 0 15px #10b981;
+                border: 2px solid #ffffff;
+              ">📌</div>
+            `,
+            iconSize: [28, 28],
+            iconAnchor: [14, 14]
+          })
+        }).addTo(map);
+
+        tempClickMarkerRef.current = clickMarker;
+
+        try {
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+          const data = await res.json();
+          const address = data?.display_name || `Koordinat GPS: Lat ${lat.toFixed(5)}, Lng ${lng.toFixed(5)}`;
+
+          clickMarker.bindPopup(`
+            <div style="font-family: sans-serif; padding: 4px; max-width: 200px;">
+              <div style="font-size: 10px; font-weight: 800; color: #10b981; margin-bottom: 2px;">📍 TITIK KOORDINAT DIPILIH</div>
+              <div style="font-size: 11px; opacity: 0.9; margin-bottom: 4px;">${address}</div>
+            </div>
+          `).openPopup();
+        } catch (err) {
+          clickMarker.bindPopup(`<b>Titik GPS Dipilih:</b><br/>Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`).openPopup();
+        }
+      });
+
       mapInstanceRef.current = map;
     }
 
     const map = mapInstanceRef.current;
 
-    // Choose map tile provider based on Light/Dark theme
+    // Choose map tile provider based on Light/Dark theme (Native high contrast without CSS invert filters)
     const tileUrl = isDark
       ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
       : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
@@ -148,56 +200,72 @@ export default function InteractiveMap({
 
   }, [filteredReports, isDark, selectedReport]);
 
-  // Jump to user's real browser GPS location
-  const handleLocateUserOnMap = () => {
-    if (!navigator.geolocation) {
-      if (openAlert) {
-        openAlert({ title: 'GPS Tidak Didukung', message: 'Browser Anda tidak mendukung fitur Geolocation GPS.', type: 'error' });
+  // Seamless Multi-Tier GPS Fallback (Browser GPS -> IP Geolocation -> Default City)
+  const handleLocateUserOnMap = async () => {
+    setIsLocatingUser(true);
+
+    const tryBrowserGeo = () => {
+      return new Promise((resolve) => {
+        if (!navigator.geolocation) {
+          resolve(null);
+          return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+          (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+          () => resolve(null),
+          { enableHighAccuracy: false, timeout: 6000, maximumAge: 60000 }
+        );
+      });
+    };
+
+    let targetCoords = await tryBrowserGeo();
+
+    if (!targetCoords) {
+      // IP-based Geolocation Fallback
+      try {
+        const res = await fetch('https://ipapi.co/json/').catch(() => null);
+        if (res && res.ok) {
+          const data = await res.json();
+          if (data && data.latitude && data.longitude) {
+            targetCoords = { lat: data.latitude, lng: data.longitude, city: data.city };
+          }
+        }
+      } catch (err) {
+        console.warn('IP Geolocation fallback failed:', err);
       }
-      return;
     }
 
-    setIsLocatingUser(true);
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const lat = position.coords.latitude;
-        const lng = position.coords.longitude;
+    if (!targetCoords) {
+      targetCoords = { lat: -6.2088, lng: 106.8456, city: 'Jakarta' };
+    }
 
-        if (mapInstanceRef.current) {
-          mapInstanceRef.current.flyTo([lat, lng], 15, { duration: 1.5 });
+    if (mapInstanceRef.current && targetCoords) {
+      const { lat, lng } = targetCoords;
+      mapInstanceRef.current.flyTo([lat, lng], 14, { duration: 1.5 });
 
-          // Temporary user location marker
-          const userMarker = L.marker([lat, lng], {
-            icon: L.divIcon({
-              className: 'user-gps-pulse',
-              html: `
-                <div style="
-                  background-color: #3b82f6;
-                  width: 20px;
-                  height: 20px;
-                  border-radius: 50%;
-                  border: 3px solid #ffffff;
-                  box-shadow: 0 0 15px #3b82f6;
-                "></div>
-              `,
-              iconSize: [20, 20],
-              iconAnchor: [10, 10]
-            })
-          }).addTo(mapInstanceRef.current);
+      const userMarker = L.marker([lat, lng], {
+        icon: L.divIcon({
+          className: 'user-gps-pulse',
+          html: `
+            <div style="
+              background-color: #3b82f6;
+              width: 22px;
+              height: 22px;
+              border-radius: 50%;
+              border: 3px solid #ffffff;
+              box-shadow: 0 0 15px #3b82f6;
+            "></div>
+          `,
+          iconSize: [22, 22],
+          iconAnchor: [11, 11]
+        })
+      }).addTo(mapInstanceRef.current);
 
-          userMarker.bindPopup('<b>Lokasi Real GPS Anda Saat Ini</b>').openPopup();
-        }
-        setIsLocatingUser(false);
-      },
-      (err) => {
-        console.error('GPS error:', err);
-        if (openAlert) {
-          openAlert({ title: 'Gagal Memuat GPS', message: 'Akses lokasi GPS Anda ditolak atau gagal didapatkan.', type: 'error' });
-        }
-        setIsLocatingUser(false);
-      },
-      { enableHighAccuracy: true, timeout: 10000 }
-    );
+      userMarker.bindPopup(`<b>Lokasi Terdeteksi (${targetCoords.city || 'Pengguna'})</b><br/>Lat: ${lat.toFixed(4)}, Lng: ${lng.toFixed(4)}`).openPopup();
+    }
+
+    setIsLocatingUser(false);
   };
 
   const handleConfirmDeleteOnMap = (reportId) => {
@@ -230,8 +298,8 @@ export default function InteractiveMap({
             <Compass className="w-4 h-4" />
           </div>
           <div>
-            <h3 className="text-xs font-black text-neutral-900 dark:text-white">Peta OpenStreetMap Dunia & Real GPS Marker</h3>
-            <p className="text-[11px] text-neutral-500 dark:text-neutral-400 font-medium">Visualisasi titik aduan warga di peta dunia nyata</p>
+            <h3 className="text-xs font-black text-neutral-900 dark:text-white">Peta OpenStreetMap & Real GPS Marker</h3>
+            <p className="text-[11px] text-neutral-500 dark:text-neutral-400 font-medium">Klik di mana saja pada peta untuk menandai titik lokasi baru</p>
           </div>
         </div>
 
@@ -246,12 +314,12 @@ export default function InteractiveMap({
             {isLocatingUser ? (
               <>
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                <span>Mencari GPS...</span>
+                <span>Deteksi Lokasi...</span>
               </>
             ) : (
               <>
                 <Navigation className="w-3.5 h-3.5" />
-                <span>Ke Lokasi GPS Saya</span>
+                <span>Deteksi Lokasi Saya</span>
               </>
             )}
           </button>

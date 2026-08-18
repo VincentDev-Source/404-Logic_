@@ -33,50 +33,82 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport, ope
 
   if (!isOpen) return null;
 
-  // Real Browser GPS Geolocation + OpenStreetMap Reverse Geocoding
-  const handleFetchRealGPS = () => {
-    if (!navigator.geolocation) {
-      if (openAlert) {
-        openAlert({ title: 'GPS Tidak Didukung', message: 'Browser Anda tidak mendukung fitur lokasi GPS.', type: 'error' });
+  // Helper for IP-based Geolocation Fallback (Works on Desktop PCs, Laptops, Mobiles without error popups)
+  const fetchIPLocationFallback = async () => {
+    try {
+      const res = await fetch('https://ipapi.co/json/').catch(() => null);
+      if (res && res.ok) {
+        const data = await res.json();
+        if (data && data.latitude && data.longitude) {
+          const lat = data.latitude;
+          const lng = data.longitude;
+          const userCity = data.city || data.region || 'Jakarta';
+          setCoordinates({ lat, lng });
+          setCity(userCity);
+          setLocation(`Area ${userCity}, ${data.region || 'Indonesia'} (GPS: ${lat.toFixed(6)}, ${lng.toFixed(6)})`);
+          return true;
+        }
       }
-      return;
+    } catch (err) {
+      console.warn('IP Geolocation fallback warning:', err);
     }
+    return false;
+  };
 
+  // Seamless Multi-Tier GPS Handler (Never throws error popups)
+  const handleFetchRealGPS = () => {
     setIsLocating(true);
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const lat = position.coords.latitude;
-        const lng = position.coords.longitude;
-        setCoordinates({ lat, lng });
 
-        try {
-          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
-          const data = await res.json();
-          if (data && data.display_name) {
-            setLocation(`${data.display_name} (GPS: ${lat.toFixed(6)}, ${lng.toFixed(6)})`);
-            const cityFound = data.address?.city || data.address?.town || data.address?.regency || data.address?.county || data.address?.state || 'Jakarta';
-            setCity(cityFound);
-          } else {
-            setLocation(`Titik GPS Real: Lat ${lat.toFixed(6)}, Lng ${lng.toFixed(6)} (GPS: ${lat.toFixed(6)}, ${lng.toFixed(6)})`);
-          }
-        } catch (err) {
-          console.error('Reverse geocoding error:', err);
-          setLocation(`Titik GPS Real: Lat ${lat.toFixed(6)}, Lng ${lng.toFixed(6)} (GPS: ${lat.toFixed(6)}, ${lng.toFixed(6)})`);
-        } finally {
-          setIsLocating(false);
+    const tryBrowserGeolocation = () => {
+      return new Promise((resolve) => {
+        if (!navigator.geolocation) {
+          resolve(false);
+          return;
         }
-      },
-      (error) => {
-        console.error('Geolocation error:', error);
-        if (openAlert) {
-          openAlert({ title: 'Izin Lokasi GPS Ditolak', message: 'Gagal mendeteksi lokasi GPS. Pastikan telah memberikan izin akses lokasi pada browser Anda.', type: 'warning' });
+
+        navigator.geolocation.getCurrentPosition(
+          async (position) => {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            setCoordinates({ lat, lng });
+
+            try {
+              const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+              const data = await res.json();
+              if (data && data.display_name) {
+                setLocation(`${data.display_name} (GPS: ${lat.toFixed(6)}, ${lng.toFixed(6)})`);
+                const cityFound = data.address?.city || data.address?.town || data.address?.regency || data.address?.county || data.address?.state || 'Jakarta';
+                setCity(cityFound);
+              } else {
+                setLocation(`Titik GPS Real: Lat ${lat.toFixed(6)}, Lng ${lng.toFixed(6)} (GPS: ${lat.toFixed(6)}, ${lng.toFixed(6)})`);
+              }
+            } catch (err) {
+              setLocation(`Titik GPS Real: Lat ${lat.toFixed(6)}, Lng ${lng.toFixed(6)} (GPS: ${lat.toFixed(6)}, ${lng.toFixed(6)})`);
+            }
+            resolve(true);
+          },
+          (err) => {
+            console.warn('Browser GPS position error, switching to IP Geolocation:', err);
+            resolve(false);
+          },
+          { enableHighAccuracy: false, timeout: 6000, maximumAge: 60000 }
+        );
+      });
+    };
+
+    (async () => {
+      const browserSuccess = await tryBrowserGeolocation();
+      if (!browserSuccess) {
+        const ipSuccess = await fetchIPLocationFallback();
+        if (!ipSuccess) {
+          // Default City Fallback
+          setLocation('Jl. MH Thamrin No. 28, Jakarta Pusat (GPS: -6.208800, 106.845600)');
+          setCity('Jakarta');
+          setCoordinates({ lat: -6.2088, lng: 106.8456 });
         }
-        setLocation('Jl. MH Thamrin No. 28, Jakarta Pusat (GPS: -6.208800, 106.845600)');
-        setCity('Jakarta');
-        setIsLocating(false);
-      },
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
-    );
+      }
+      setIsLocating(false);
+    })();
   };
 
   const handleFileChange = (e) => {
@@ -229,12 +261,12 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport, ope
                 {isLocating ? (
                   <>
                     <Loader2 className="w-3 h-3 animate-spin text-emerald-500" />
-                    <span>Mendeteksi Real GPS...</span>
+                    <span>Mendeteksi Lokasi...</span>
                   </>
                 ) : (
                   <>
                     <Navigation className="w-3 h-3 text-emerald-500" />
-                    <span>Gunakan Real GPS Browser</span>
+                    <span>Deteksi Lokasi GPS Otomatis</span>
                   </>
                 )}
               </button>
