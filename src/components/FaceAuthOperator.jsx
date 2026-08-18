@@ -13,7 +13,8 @@ import {
   Building2,
   Lock,
   Sparkles,
-  User
+  User,
+  KeyRound
 } from 'lucide-react';
 
 const MODEL_URL = 'https://cdn.jsdelivr.net/gh/cgarciagl/face-api.js@0.22.2/weights';
@@ -27,6 +28,7 @@ export default function FaceAuthOperator({ onLoginSuccess, onCancel }) {
   const [webcamError, setWebcamError] = useState(null);
   
   const [operatorName, setOperatorName] = useState('');
+  const [authPassword, setAuthPassword] = useState('');
   const [statusMessage, setStatusMessage] = useState({ text: '', type: 'info' });
   const [isProcessing, setIsProcessing] = useState(false);
   const [faceDistance, setFaceDistance] = useState(null);
@@ -166,9 +168,15 @@ export default function FaceAuthOperator({ onLoginSuccess, onCancel }) {
 
   // Tab 2: Daftarkan Petugas Baru (Pendaftaran)
   const handleRegisterOperator = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
+    
     if (!operatorName.trim()) {
       setStatusMessage({ text: 'Masukkan Nama Lengkap Petugas terlebih dahulu!', type: 'warning' });
+      return;
+    }
+
+    if (!authPassword.trim()) {
+      setStatusMessage({ text: 'Masukkan Sandi Keamanan Otorisasi Petugas ("404logic")!', type: 'warning' });
       return;
     }
 
@@ -178,7 +186,7 @@ export default function FaceAuthOperator({ onLoginSuccess, onCancel }) {
     }
 
     setIsProcessing(true);
-    setStatusMessage({ text: 'Mengekstrak vektor biometrik 128-D & mengunggah ke PostgreSQL...', type: 'info' });
+    setStatusMessage({ text: 'Memverifikasi sandi & mengunggah vektor biometrik 128-D ke PostgreSQL...', type: 'info' });
 
     try {
       const detection = await faceapi
@@ -201,6 +209,7 @@ export default function FaceAuthOperator({ onLoginSuccess, onCancel }) {
         body: JSON.stringify({
           name: operatorName.trim(),
           role: 'OPERATOR',
+          password: authPassword.trim(),
           faceDescriptor: descriptorArray,
         }),
       });
@@ -208,7 +217,7 @@ export default function FaceAuthOperator({ onLoginSuccess, onCancel }) {
       const data = await res.json();
 
       if (!res.ok || !data.success) {
-        throw new Error(data.error || 'Gagal menyimpam data petugas ke database');
+        throw new Error(data.error || 'Gagal menyimpan data petugas ke database');
       }
 
       setStatusMessage({ 
@@ -217,6 +226,7 @@ export default function FaceAuthOperator({ onLoginSuccess, onCancel }) {
       });
 
       setOperatorName('');
+      setAuthPassword('');
     } catch (err) {
       console.error('Operator face registration error:', err);
       setStatusMessage({ text: err.message || 'Terjadi kesalahan saat pendaftaran petugas.', type: 'error' });
@@ -263,6 +273,7 @@ export default function FaceAuthOperator({ onLoginSuccess, onCancel }) {
         {/* Tab Selection */}
         <div className="grid grid-cols-2 p-1 bg-slate-950 rounded-2xl border border-slate-800 text-xs font-extrabold">
           <button
+            type="button"
             onClick={() => setActiveTab('login')}
             className={`py-2.5 rounded-xl transition-all flex items-center justify-center gap-2 ${
               activeTab === 'login'
@@ -275,6 +286,7 @@ export default function FaceAuthOperator({ onLoginSuccess, onCancel }) {
           </button>
 
           <button
+            type="button"
             onClick={() => setActiveTab('register')}
             className={`py-2.5 rounded-xl transition-all flex items-center justify-center gap-2 ${
               activeTab === 'register'
@@ -300,22 +312,42 @@ export default function FaceAuthOperator({ onLoginSuccess, onCancel }) {
           /* Main Content */
           <div className="space-y-4">
             
-            {/* Tab 2 Form Registration Name Input */}
+            {/* Tab 2 Form Registration Name & Security Password Input */}
             {activeTab === 'register' && (
-              <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1">
-                  Nama Lengkap Petugas *
-                </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    required
-                    placeholder="Contoh: Ir. Hendra Saputra, M.T."
-                    value={operatorName}
-                    onChange={(e) => setOperatorName(e.target.value)}
-                    className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-blue-500 font-medium"
-                  />
-                  <User className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
+              <div className="space-y-3 bg-slate-950 p-4 rounded-2xl border border-slate-800">
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1">
+                    Nama Lengkap Petugas *
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      required
+                      placeholder="Contoh: Ir. Hendra Saputra, M.T."
+                      value={operatorName}
+                      onChange={(e) => setOperatorName(e.target.value)}
+                      className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-blue-500 font-medium"
+                    />
+                    <User className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1 flex items-center gap-1">
+                    <KeyRound className="w-3.5 h-3.5 text-blue-400" />
+                    Sandi Keamanan Otorisasi Petugas * (Sandi: 404logic)
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="password"
+                      required
+                      placeholder="Masukkan sandi rahasia (404logic)..."
+                      value={authPassword}
+                      onChange={(e) => setAuthPassword(e.target.value)}
+                      className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-blue-500 font-mono font-medium"
+                    />
+                    <Lock className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
+                  </div>
                 </div>
               </div>
             )}
@@ -436,7 +468,7 @@ export default function FaceAuthOperator({ onLoginSuccess, onCancel }) {
                 ) : (
                   <UserPlus className="w-4 h-4" />
                 )}
-                <span>Simpan Petugas ke PostgreSQL</span>
+                <span>Simpan Petugas (Dengan Sandi 404logic)</span>
               </button>
             )}
 

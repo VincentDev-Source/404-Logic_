@@ -6,7 +6,15 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { name, role = 'OPERATOR', faceDescriptor } = req.body || {};
+    const { name, role = 'OPERATOR', faceDescriptor, password } = req.body || {};
+
+    // Validate security passcode "404logic"
+    if (!password || password !== '404logic') {
+      return res.status(403).json({ 
+        success: false, 
+        error: 'Sandi Otorisasi Petugas Salah! Pendaftaran wajah ditolak. Pastikan memasukkan sandi rahasia "404logic".' 
+      });
+    }
 
     if (!name || !faceDescriptor) {
       return res.status(400).json({ error: 'Nama petugas dan data vektor wajah (faceDescriptor) wajib diisi!' });
@@ -26,7 +34,7 @@ export default async function handler(req, res) {
 
     return res.status(200).json({ 
       success: true, 
-      message: `Petugas ${newOperator.name} berhasil didaftarkan!`,
+      message: `Petugas ${newOperator.name} berhasil didaftarkan ke PostgreSQL!`,
       operator: {
         id: newOperator.id,
         name: newOperator.name,
