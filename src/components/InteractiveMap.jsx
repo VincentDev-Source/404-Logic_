@@ -49,11 +49,11 @@ export default function InteractiveMap({
   useEffect(() => {
     if (!mapRef.current) return;
 
-    // Default center: Indonesia / Jakarta (Lat -6.2088, Lng 106.8456)
+    // Default center: Lowokwaru, Malang (-7.9503, 112.6150) or Indonesia center
     if (!mapInstanceRef.current) {
       const map = L.map(mapRef.current, {
-        center: [-6.2088, 106.8456],
-        zoom: 10,
+        center: [-7.9503, 112.6150],
+        zoom: 13,
         zoomControl: true,
       });
 
@@ -227,8 +227,8 @@ export default function InteractiveMap({
       }
 
       if (lat === null || lng === null || isNaN(lat) || isNaN(lng)) {
-        lat = report.coordinates?.lat || -6.2088;
-        lng = report.coordinates?.lng || 106.8456;
+        lat = report.coordinates?.lat || -7.9503;
+        lng = report.coordinates?.lng || 112.6150;
       }
 
       bounds.push([lat, lng]);
@@ -266,7 +266,7 @@ export default function InteractiveMap({
 
   }, [filteredReports, isDark, selectedReport]);
 
-  // High-Precision Hardware GPS Geolocation (enableHighAccuracy: true, maximumAge: 0, zoom=17 street focus)
+  // High-Precision Hardware GPS Geolocation
   const handleLocateUserOnMap = async () => {
     setIsLocatingUser(true);
 
@@ -280,7 +280,7 @@ export default function InteractiveMap({
         navigator.geolocation.getCurrentPosition(
           (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
           () => resolve(null),
-          { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
+          { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
         );
       });
     };
@@ -303,7 +303,7 @@ export default function InteractiveMap({
     }
 
     if (!targetCoords) {
-      targetCoords = { lat: -6.2088, lng: 106.8456, city: 'Jakarta' };
+      targetCoords = { lat: -7.9503, lng: 112.6150, city: 'Malang' };
     }
 
     if (mapInstanceRef.current && targetCoords) {

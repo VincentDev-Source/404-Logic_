@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import L from 'leaflet';
 import { 
   X, 
   Upload, 
@@ -6,7 +7,8 @@ import {
   CheckCircle2, 
   Navigation, 
   ShieldCheck, 
-  Loader2
+  Loader2,
+  Search
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { CATEGORIES } from '../data/mockReports';
@@ -22,8 +24,8 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport, ope
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('Jalan Rusak');
   const [location, setLocation] = useState('');
-  const [city, setCity] = useState('Jakarta');
-  const [coordinates, setCoordinates] = useState({ lat: -6.2088, lng: 106.8456 });
+  const [city, setCity] = useState('Malang');
+  const [coordinates, setCoordinates] = useState({ lat: -7.9503, lng: 112.6150 }); // Default Lowokwaru / Malang center
   const [description, setDescription] = useState('');
   const [author, setAuthor] = useState('');
   const [isAnonymous, setIsAnonymous] = useState(false);
@@ -31,7 +33,162 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport, ope
   const [isLocating, setIsLocating] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Address search auto-complete states
+  const [searchSuggestions, setSearchSuggestions] = useState([]);
+  const [isSearchingAddress, setIsSearchingAddress] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  // Mini Map Refs
+  const miniMapRef = useRef(null);
+  const miniMapInstanceRef = useRef(null);
+  const draggableMarkerRef = useRef(null);
+
+  // Address search auto-complete handler
+  useEffect(() => {
+    if (!location.trim() || location.includes('GPS:')) {
+      setSearchSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      setIsSearchingAddress(true);
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location)}&countrycodes=id&addressdetails=1&limit=5`
+        );
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          setSearchSuggestions(data);
+          setShowSuggestions(data.length > 0);
+        }
+      } catch (err) {
+        console.warn('Address search error:', err);
+      } finally {
+        setIsSearchingAddress(false);
+      }
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [location]);
+
+  // Initialize and update interactive Mini-Map inside modal
+  useEffect(() => {
+    if (!isOpen || !miniMapRef.current) return;
+
+    // Initialize mini Leaflet map
+    if (!miniMapInstanceRef.current) {
+      const map = L.map(miniMapRef.current, {
+        center: [coordinates.lat, coordinates.lng],
+        zoom: 14,
+        zoomControl: true,
+      });
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap',
+      }).addTo(map);
+
+      // Create Draggable Marker Pin
+      const marker = L.marker([coordinates.lat, coordinates.lng], {
+        draggable: true,
+        icon: L.divIcon({
+          className: 'draggable-mini-pin',
+          html: `
+            <div style="
+              background-color: #10b981;
+              color: #000000;
+              width: 34px;
+              height: 34px;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 17px;
+              box-shadow: 0 0 20px rgba(16, 185, 129, 0.8);
+              border: 3px solid #ffffff;
+              cursor: grab;
+            ">📍</div>
+          `,
+          iconSize: [34, 34],
+          iconAnchor: [17, 17],
+        }),
+      }).addTo(map);
+
+      // Handle Pin Drag End
+      marker.on('dragend', async () => {
+        const { lat, lng } = marker.getLatLng();
+        setCoordinates({ lat, lng });
+
+        try {
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`);
+          const data = await res.json();
+          if (data && data.display_name) {
+            const addr = data.address || {};
+            const cityFound = addr.city || addr.town || addr.regency || addr.state || 'Malang';
+            setLocation(`${data.display_name} (GPS: ${lat.toFixed(6)}, ${lng.toFixed(6)})`);
+            setCity(cityFound);
+          } else {
+            setLocation(`Titik GPS Pilihan: Lat ${lat.toFixed(6)}, Lng ${lng.toFixed(6)} (GPS: ${lat.toFixed(6)}, ${lng.toFixed(6)})`);
+          }
+        } catch (err) {
+          setLocation(`Titik GPS Pilihan: Lat ${lat.toFixed(6)}, Lng ${lng.toFixed(6)} (GPS: ${lat.toFixed(6)}, ${lng.toFixed(6)})`);
+        }
+      });
+
+      // Handle Click anywhere on mini-map to drop pin
+      map.on('click', async (e) => {
+        const { lat, lng } = e.latlng;
+        marker.setLatLng([lat, lng]);
+        setCoordinates({ lat, lng });
+
+        try {
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`);
+          const data = await res.json();
+          if (data && data.display_name) {
+            const addr = data.address || {};
+            const cityFound = addr.city || addr.town || addr.regency || addr.state || 'Malang';
+            setLocation(`${data.display_name} (GPS: ${lat.toFixed(6)}, ${lng.toFixed(6)})`);
+            setCity(cityFound);
+          } else {
+            setLocation(`Titik GPS Pilihan: Lat ${lat.toFixed(6)}, Lng ${lng.toFixed(6)} (GPS: ${lat.toFixed(6)}, ${lng.toFixed(6)})`);
+          }
+        } catch (err) {
+          setLocation(`Titik GPS Pilihan: Lat ${lat.toFixed(6)}, Lng ${lng.toFixed(6)} (GPS: ${lat.toFixed(6)}, ${lng.toFixed(6)})`);
+        }
+      });
+
+      miniMapInstanceRef.current = map;
+      draggableMarkerRef.current = marker;
+    }
+
+    // Update mini-map position if coordinates change
+    const map = miniMapInstanceRef.current;
+    const marker = draggableMarkerRef.current;
+    if (map && marker) {
+      map.setView([coordinates.lat, coordinates.lng], 16);
+      marker.setLatLng([coordinates.lat, coordinates.lng]);
+      setTimeout(() => {
+        map.invalidateSize();
+      }, 200);
+    }
+
+  }, [isOpen, coordinates]);
+
   if (!isOpen) return null;
+
+  // Handle selecting address from auto-complete dropdown
+  const handleSelectSuggestion = (item) => {
+    const lat = parseFloat(item.lat);
+    const lng = parseFloat(item.lon);
+    const addr = item.address || {};
+    const cityFound = addr.city || addr.town || addr.regency || addr.state || 'Malang';
+
+    setCoordinates({ lat, lng });
+    setCity(cityFound);
+    setLocation(`${item.display_name} (GPS: ${lat.toFixed(6)}, ${lng.toFixed(6)})`);
+    setShowSuggestions(false);
+  };
 
   // Helper for IP-based Geolocation Fallback
   const fetchIPLocationFallback = async () => {
@@ -42,7 +199,7 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport, ope
         if (data && data.latitude && data.longitude) {
           const lat = data.latitude;
           const lng = data.longitude;
-          const userCity = data.city || data.region || 'Jakarta';
+          const userCity = data.city || data.region || 'Malang';
           setCoordinates({ lat, lng });
           setCity(userCity);
           setLocation(`Area ${userCity}, ${data.region || 'Indonesia'} (GPS: ${lat.toFixed(6)}, ${lng.toFixed(6)})`);
@@ -55,7 +212,7 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport, ope
     return false;
   };
 
-  // High-Precision Hardware GPS Handler (enableHighAccuracy: true, maximumAge: 0, zoom=18 street level)
+  // High-Precision Hardware GPS Handler
   const handleFetchRealGPS = () => {
     setIsLocating(true);
 
@@ -73,7 +230,6 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport, ope
             setCoordinates({ lat, lng });
 
             try {
-              // High accuracy zoom=18 reverse geocoding for building/street level precision
               const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`);
               const data = await res.json();
               if (data && data.display_name) {
@@ -81,7 +237,7 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport, ope
                 const road = addr.road || addr.street || addr.pedestrian || '';
                 const suburb = addr.suburb || addr.village || addr.neighbourhood || addr.hamlet || '';
                 const district = addr.city_district || addr.district || addr.county || '';
-                const cityFound = addr.city || addr.town || addr.regency || addr.state || 'Jakarta';
+                const cityFound = addr.city || addr.town || addr.regency || addr.state || 'Malang';
 
                 let formattedAddress = data.display_name;
                 if (road || suburb) {
@@ -102,7 +258,7 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport, ope
             console.warn('High accuracy hardware GPS timed out or unavailable, trying IP fallback:', err);
             resolve(false);
           },
-          { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
+          { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
         );
       });
     };
@@ -112,9 +268,9 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport, ope
       if (!browserSuccess) {
         const ipSuccess = await fetchIPLocationFallback();
         if (!ipSuccess) {
-          setLocation('Jl. MH Thamrin No. 28, Jakarta Pusat (GPS: -6.208800, 106.845600)');
-          setCity('Jakarta');
-          setCoordinates({ lat: -6.2088, lng: 106.8456 });
+          setLocation('Lowokwaru, Malang, Jawa Timur (GPS: -7.950300, 112.615000)');
+          setCity('Malang');
+          setCoordinates({ lat: -7.9503, lng: 112.6150 });
         }
       }
       setIsLocating(false);
@@ -219,7 +375,7 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport, ope
             <input
               type="text"
               required
-              placeholder="Contoh: Lubang Jalan Rusak Rawan Kecelakaan..."
+              placeholder="Contoh: Lubang Jalan Rusak di Lowokwaru Malang..."
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className="w-full px-3 py-2 rounded-lg bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-neutral-900 dark:text-white placeholder-neutral-400 text-xs focus:outline-none focus:border-emerald-500 font-medium"
@@ -254,9 +410,10 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport, ope
                 onChange={(e) => setCity(e.target.value)}
                 className="w-full px-3 py-2 rounded-lg bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-neutral-900 dark:text-white text-xs focus:outline-none focus:border-emerald-500 font-medium"
               >
-                <option value="Jakarta">Jakarta</option>
+                <option value="Malang">Malang</option>
                 <option value="Surabaya">Surabaya</option>
                 <option value="Bandung">Bandung</option>
+                <option value="Jakarta">Jakarta</option>
                 <option value="Yogyakarta">Yogyakarta</option>
                 <option value="Semarang">Semarang</option>
                 <option value="Medan">Medan</option>
@@ -265,11 +422,11 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport, ope
             </div>
           </div>
 
-          {/* Lokasi Alamat & Tombol Real GPS */}
-          <div>
+          {/* Lokasi Alamat & Instant Search Auto-Complete */}
+          <div className="relative space-y-1">
             <div className="flex items-center justify-between mb-1">
               <label className="font-bold text-neutral-800 dark:text-neutral-200">
-                Lokasi / Titik Alamat Lengkap *
+                Cari Alamat & Lokasi Presisi *
               </label>
               <button
                 type="button"
@@ -280,7 +437,7 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport, ope
                 {isLocating ? (
                   <>
                     <Loader2 className="w-3 h-3 animate-spin text-emerald-500" />
-                    <span>Mengunci GPS Hardware...</span>
+                    <span>Mengunci GPS Satelit...</span>
                   </>
                 ) : (
                   <>
@@ -290,16 +447,59 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport, ope
                 )}
               </button>
             </div>
+
             <div className="relative">
               <input
                 type="text"
                 required
-                placeholder="Jl. Sudirman No. 45..."
+                placeholder="Ketik alamat e.g. Lowokwaru, Malang, Jatimulyo, Jl. Soekarno Hatta..."
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                className="w-full pl-8 pr-3 py-2 rounded-lg bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-neutral-900 dark:text-white placeholder-neutral-400 text-xs focus:outline-none focus:border-emerald-500 font-medium"
+                onFocus={() => setShowSuggestions(searchSuggestions.length > 0)}
+                className="w-full pl-8 pr-8 py-2 rounded-lg bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-neutral-900 dark:text-white placeholder-neutral-400 text-xs focus:outline-none focus:border-emerald-500 font-medium"
               />
-              <MapPin className="w-3.5 h-3.5 text-neutral-400 absolute left-2.5 top-2.5" />
+              <MapPin className="w-3.5 h-3.5 text-emerald-500 absolute left-2.5 top-2.5" />
+              {isSearchingAddress && (
+                <Loader2 className="w-3.5 h-3.5 text-neutral-400 animate-spin absolute right-2.5 top-2.5" />
+              )}
+            </div>
+
+            {/* Auto-Complete Dropdown Suggestions */}
+            {showSuggestions && searchSuggestions.length > 0 && (
+              <div className="absolute left-0 right-0 top-full mt-1 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl shadow-2xl z-50 overflow-hidden max-h-48 overflow-y-auto">
+                {searchSuggestions.map((item, idx) => (
+                  <div
+                    key={idx}
+                    onClick={() => handleSelectSuggestion(item)}
+                    className="p-2.5 hover:bg-neutral-100 dark:hover:bg-neutral-800 cursor-pointer border-b border-neutral-100 dark:border-neutral-800/50 last:border-none text-xs transition-colors flex items-start gap-2"
+                  >
+                    <MapPin className="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-bold text-neutral-900 dark:text-white line-clamp-1">
+                        {item.display_name}
+                      </p>
+                      <p className="text-[10px] text-emerald-500 font-mono font-semibold">
+                        GPS: {parseFloat(item.lat).toFixed(6)}, {parseFloat(item.lon).toFixed(6)}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Interactive Mini-Map with Draggable Pin */}
+          <div className="space-y-1">
+            <div className="flex items-center justify-between text-[11px]">
+              <span className="font-bold text-neutral-700 dark:text-neutral-300">
+                Pilih / Geser Pin di Mini-Map Presisi:
+              </span>
+              <span className="text-emerald-500 font-mono font-bold text-[10px]">
+                Lat: {coordinates.lat.toFixed(5)}, Lng: {coordinates.lng.toFixed(5)}
+              </span>
+            </div>
+            <div className="relative w-full h-44 rounded-xl overflow-hidden border border-neutral-200 dark:border-neutral-800 shadow-inner">
+              <div ref={miniMapRef} className="w-full h-full min-h-[176px]" />
             </div>
           </div>
 
