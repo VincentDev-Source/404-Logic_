@@ -8,10 +8,12 @@ import {
   Navigation, 
   ShieldCheck, 
   Loader2,
-  Search
+  Search,
+  ChevronDown
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { CATEGORIES } from '../data/mockReports';
+import { INDONESIAN_CITIES, normalizeCityName } from '../data/indonesianCities';
 
 const SAMPLE_PHOTOS = [
   { label: 'Jalan Rusak', url: 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=800&q=80' },
@@ -20,11 +22,116 @@ const SAMPLE_PHOTOS = [
   { label: 'Banjir Selokan', url: 'https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?auto=format&fit=crop&w=800&q=80' },
 ];
 
+// Custom Searchable Dropdown UI Component for Cities across Indonesia
+function CitySearchDropdown({ value, onChange }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const dropdownRef = useRef(null);
+
+  // Close menu on click outside
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const filteredCities = INDONESIAN_CITIES.filter(c => 
+    c.name.toLowerCase().includes(searchQuery.toLowerCase().trim()) ||
+    c.province.toLowerCase().includes(searchQuery.toLowerCase().trim())
+  );
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      {/* Trigger Button */}
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full px-3 py-2 rounded-lg bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-neutral-900 dark:text-white text-xs font-bold flex items-center justify-between shadow-sm hover:border-emerald-500/50 transition-colors"
+      >
+        <div className="flex items-center gap-1.5 truncate">
+          <MapPin className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+          <span className="truncate">{value || 'Pilih Kota / Wilayah'}</span>
+        </div>
+        <ChevronDown className={`w-3.5 h-3.5 text-neutral-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+
+      {/* Glassmorphism Dropdown Menu */}
+      {isOpen && (
+        <div className="absolute left-0 right-0 top-full mt-1.5 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-150 p-2 space-y-2">
+          
+          {/* Search Box */}
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Cari kota/kabupaten di Indonesia..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              autoFocus
+              className="w-full pl-8 pr-3 py-1.5 rounded-lg bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 text-neutral-900 dark:text-white placeholder-neutral-400 text-xs focus:outline-none focus:border-emerald-500 font-medium"
+            />
+            <Search className="w-3.5 h-3.5 text-neutral-400 absolute left-2.5 top-2" />
+          </div>
+
+          {/* City Options List */}
+          <div className="max-h-52 overflow-y-auto space-y-0.5 pr-1">
+            {filteredCities.length > 0 ? (
+              filteredCities.map((item, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => {
+                    onChange(item.name);
+                    setIsOpen(false);
+                    setSearchQuery('');
+                  }}
+                  className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs flex items-center justify-between transition-colors ${
+                    value === item.name
+                      ? 'bg-emerald-500 text-black font-extrabold'
+                      : 'hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-800 dark:text-neutral-200 font-medium'
+                  }`}
+                >
+                  <span className="truncate">{item.name}</span>
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded ${
+                    value === item.name ? 'bg-black/20 text-black font-bold' : 'bg-neutral-200 dark:bg-neutral-800 text-neutral-500'
+                  }`}>
+                    {item.province}
+                  </span>
+                </button>
+              ))
+            ) : (
+              /* Allow custom typed city fallback */
+              <div className="p-3 text-center space-y-2">
+                <p className="text-xs text-neutral-500">Wilayah "{searchQuery}" tidak ada di daftar baku.</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onChange(searchQuery.trim());
+                    setIsOpen(false);
+                    setSearchQuery('');
+                  }}
+                  className="w-full py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-xs shadow"
+                >
+                  Gunakan "{searchQuery.trim()}"
+                </button>
+              </div>
+            )}
+          </div>
+
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function CreateReportModal({ isOpen, onClose, onSubmitReport, openAlert }) {
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('Jalan Rusak');
   const [location, setLocation] = useState('');
-  const [city, setCity] = useState('Malang');
+  const [city, setCity] = useState('Kota Malang');
   const [coordinates, setCoordinates] = useState({ lat: -7.9503, lng: 112.6150 }); // Default Lowokwaru / Malang center
   const [description, setDescription] = useState('');
   const [author, setAuthor] = useState('');
@@ -72,52 +179,46 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport, ope
     return () => clearTimeout(timer);
   }, [location]);
 
-  // Initialize and update interactive Mini-Map inside modal
+  // Leaflet Mini-Map Initialization
   useEffect(() => {
     if (!isOpen || !miniMapRef.current) return;
 
-    // Initialize mini Leaflet map
     if (!miniMapInstanceRef.current) {
+      const customPinIcon = L.divIcon({
+        className: 'custom-pin-marker',
+        html: `
+          <div style="position: relative; width: 28px; height: 28px; display: flex; items-center; justify-content: center;">
+            <div style="position: absolute; width: 100%; height: 100%; background: rgba(16, 185, 129, 0.4); border-radius: 50%; animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;"></div>
+            <div style="width: 24px; height: 24px; background: #10b981; border: 2.5px solid white; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.4); display: flex; items-center; justify-content: center;">
+              <div style="width: 8px; height: 8px; background: white; border-radius: 50%;"></div>
+            </div>
+          </div>
+        `,
+        iconSize: [28, 28],
+        iconAnchor: [14, 14],
+      });
+
       const map = L.map(miniMapRef.current, {
         center: [coordinates.lat, coordinates.lng],
-        zoom: 14,
-        zoomControl: true,
+        zoom: 16,
+        zoomControl: false,
+        attributionControl: false,
       });
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
-        attribution: '&copy; OpenStreetMap',
       }).addTo(map);
 
-      // Create Draggable Marker Pin
       const marker = L.marker([coordinates.lat, coordinates.lng], {
+        icon: customPinIcon,
         draggable: true,
-        icon: L.divIcon({
-          className: 'draggable-mini-pin',
-          html: `
-            <div style="
-              background-color: #10b981;
-              color: #000000;
-              width: 34px;
-              height: 34px;
-              border-radius: 50%;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              font-size: 17px;
-              box-shadow: 0 0 20px rgba(16, 185, 129, 0.8);
-              border: 3px solid #ffffff;
-              cursor: grab;
-            ">📍</div>
-          `,
-          iconSize: [34, 34],
-          iconAnchor: [17, 17],
-        }),
       }).addTo(map);
 
-      // Handle Pin Drag End
+      // Handle marker drag event to update location & city automatically
       marker.on('dragend', async () => {
-        const { lat, lng } = marker.getLatLng();
+        const position = marker.getLatLng();
+        const lat = position.lat;
+        const lng = position.lng;
         setCoordinates({ lat, lng });
 
         try {
@@ -125,31 +226,9 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport, ope
           const data = await res.json();
           if (data && data.display_name) {
             const addr = data.address || {};
-            const cityFound = addr.city || addr.town || addr.regency || addr.state || 'Malang';
+            const cityFound = addr.city || addr.town || addr.regency || addr.municipality || addr.city_district || addr.county || addr.state_district || addr.state || 'Kota Malang';
             setLocation(`${data.display_name} (GPS: ${lat.toFixed(6)}, ${lng.toFixed(6)})`);
-            setCity(cityFound);
-          } else {
-            setLocation(`Titik GPS Pilihan: Lat ${lat.toFixed(6)}, Lng ${lng.toFixed(6)} (GPS: ${lat.toFixed(6)}, ${lng.toFixed(6)})`);
-          }
-        } catch (err) {
-          setLocation(`Titik GPS Pilihan: Lat ${lat.toFixed(6)}, Lng ${lng.toFixed(6)} (GPS: ${lat.toFixed(6)}, ${lng.toFixed(6)})`);
-        }
-      });
-
-      // Handle Click anywhere on mini-map to drop pin
-      map.on('click', async (e) => {
-        const { lat, lng } = e.latlng;
-        marker.setLatLng([lat, lng]);
-        setCoordinates({ lat, lng });
-
-        try {
-          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`);
-          const data = await res.json();
-          if (data && data.display_name) {
-            const addr = data.address || {};
-            const cityFound = addr.city || addr.town || addr.regency || addr.state || 'Malang';
-            setLocation(`${data.display_name} (GPS: ${lat.toFixed(6)}, ${lng.toFixed(6)})`);
-            setCity(cityFound);
+            setCity(normalizeCityName(cityFound));
           } else {
             setLocation(`Titik GPS Pilihan: Lat ${lat.toFixed(6)}, Lng ${lng.toFixed(6)} (GPS: ${lat.toFixed(6)}, ${lng.toFixed(6)})`);
           }
@@ -182,10 +261,10 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport, ope
     const lat = parseFloat(item.lat);
     const lng = parseFloat(item.lon);
     const addr = item.address || {};
-    const cityFound = addr.city || addr.town || addr.regency || addr.state || 'Malang';
+    const cityFound = addr.city || addr.town || addr.regency || addr.municipality || addr.city_district || addr.county || addr.state_district || addr.state || 'Kota Malang';
 
     setCoordinates({ lat, lng });
-    setCity(cityFound);
+    setCity(normalizeCityName(cityFound));
     setLocation(`${item.display_name} (GPS: ${lat.toFixed(6)}, ${lng.toFixed(6)})`);
     setShowSuggestions(false);
   };
@@ -199,9 +278,9 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport, ope
         if (data && data.latitude && data.longitude) {
           const lat = data.latitude;
           const lng = data.longitude;
-          const userCity = data.city || data.region || 'Malang';
+          const userCity = data.city || data.region || 'Kota Malang';
           setCoordinates({ lat, lng });
-          setCity(userCity);
+          setCity(normalizeCityName(userCity));
           setLocation(`Area ${userCity}, ${data.region || 'Indonesia'} (GPS: ${lat.toFixed(6)}, ${lng.toFixed(6)})`);
           return true;
         }
@@ -212,7 +291,7 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport, ope
     return false;
   };
 
-  // High-Precision Hardware GPS Handler
+  // High-Precision Hardware GPS Handler with Automatic City Extractor
   const handleFetchRealGPS = () => {
     setIsLocating(true);
 
@@ -237,7 +316,7 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport, ope
                 const road = addr.road || addr.street || addr.pedestrian || '';
                 const suburb = addr.suburb || addr.village || addr.neighbourhood || addr.hamlet || '';
                 const district = addr.city_district || addr.district || addr.county || '';
-                const cityFound = addr.city || addr.town || addr.regency || addr.state || 'Malang';
+                const cityFound = addr.city || addr.town || addr.regency || addr.municipality || addr.state_district || addr.state || 'Kota Malang';
 
                 let formattedAddress = data.display_name;
                 if (road || suburb) {
@@ -245,7 +324,7 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport, ope
                 }
 
                 setLocation(`${formattedAddress} (GPS: ${lat.toFixed(6)}, ${lng.toFixed(6)})`);
-                setCity(cityFound);
+                setCity(normalizeCityName(cityFound));
               } else {
                 setLocation(`Titik GPS Real: Lat ${lat.toFixed(6)}, Lng ${lng.toFixed(6)} (GPS: ${lat.toFixed(6)}, ${lng.toFixed(6)})`);
               }
@@ -254,30 +333,36 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport, ope
             }
             resolve(true);
           },
-          (err) => {
-            console.warn('High accuracy hardware GPS timed out or unavailable, trying IP fallback:', err);
+          async (error) => {
+            console.warn('Browser Geolocation Hardware Warning:', error.message);
             resolve(false);
           },
-          { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
+          {
+            enableHighAccuracy: true,
+            timeout: 20000,
+            maximumAge: 0,
+          }
         );
       });
     };
 
-    (async () => {
-      const browserSuccess = await tryHighPrecisionBrowserGPS();
-      if (!browserSuccess) {
+    tryHighPrecisionBrowserGPS().then(async (success) => {
+      if (!success) {
         const ipSuccess = await fetchIPLocationFallback();
-        if (!ipSuccess) {
-          setLocation('Lowokwaru, Malang, Jawa Timur (GPS: -7.950300, 112.615000)');
-          setCity('Malang');
-          setCoordinates({ lat: -7.9503, lng: 112.6150 });
+        if (!ipSuccess && openAlert) {
+          openAlert({
+            title: 'Koneksi GPS Terbatas',
+            message: 'Tidak dapat mengunci koordinat GPS satelit secara otomatis. Silakan tentukan lokasi pada kolom pencarian alamat.',
+            type: 'warning',
+          });
         }
       }
       setIsLocating(false);
-    })();
+    });
   };
 
-  const handleFileChange = (e) => {
+  // Image File Upload Simulator
+  const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
@@ -288,101 +373,108 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport, ope
     }
   };
 
-  const handleSubmit = (e) => {
+  // Submit Handler
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!title.trim() || !location.trim() || !description.trim()) {
-      if (openAlert) {
-        openAlert({ title: 'Form Belum Lengkap', message: 'Mohon lengkapi Judul Laporan, Lokasi, dan Deskripsi Detail Kendala.', type: 'warning' });
-      }
+
+    if (!title.trim()) {
+      if (openAlert) openAlert({ title: 'Form Belum Lengkap', message: 'Masukkan Judul Aduan terlebih dahulu!', type: 'warning' });
+      return;
+    }
+
+    if (!location.trim()) {
+      if (openAlert) openAlert({ title: 'Form Belum Lengkap', message: 'Tentukan Alamat / Lokasi Aduan terlebih dahulu!', type: 'warning' });
+      return;
+    }
+
+    if (!description.trim()) {
+      if (openAlert) openAlert({ title: 'Form Belum Lengkap', message: 'Tuliskan Deskripsi Kerusakan / Masalah secara rinci!', type: 'warning' });
       return;
     }
 
     setIsSubmitting(true);
 
-    setTimeout(() => {
+    try {
+      await onSubmitReport({
+        title: title.trim(),
+        category,
+        location: location.trim(),
+        city,
+        coordinates,
+        description: description.trim(),
+        author: isAnonymous ? 'Pelapor Anonim' : author.trim() || 'Warga Peduli',
+        isAnonymous,
+        imageUrl,
+      });
+
+      // Trigger Confetti Celebration
       confetti({
-        particleCount: 80,
-        spread: 60,
+        particleCount: 100,
+        spread: 70,
         origin: { y: 0.6 }
       });
 
-      // Format location to persist GPS coordinates reliably in PostgreSQL
-      const formattedLocation = location.includes('GPS:')
-        ? location
-        : `${location} (GPS: ${coordinates.lat.toFixed(6)}, ${coordinates.lng.toFixed(6)})`;
-
-      // Extract accurate lat and lng from formattedLocation
-      let finalCoords = coordinates;
-      if (formattedLocation.includes('GPS:')) {
-        const match = formattedLocation.match(/GPS:\s*([-\d.]+),\s*([-\d.]+)/);
-        if (match) {
-          finalCoords = { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
-        }
-      }
-
-      const newReportData = {
-        title,
-        category,
-        location: formattedLocation,
-        city,
-        coordinates: finalCoords,
-        description,
-        author: isAnonymous ? 'Warga Anonim' : (author.trim() || 'Warga Peduli'),
-        isAnonymous,
-        image: imageUrl || SAMPLE_PHOTOS[0].url,
-        imageUrl: imageUrl || SAMPLE_PHOTOS[0].url,
-      };
-
-      onSubmitReport(newReportData);
       setIsSubmitting(false);
       onClose();
 
+      // Reset Form State
       setTitle('');
       setLocation('');
       setDescription('');
       setAuthor('');
       setIsAnonymous(false);
-    }, 800);
+      setImageUrl(SAMPLE_PHOTOS[0].url);
+
+    } catch (err) {
+      console.error('Error submitting report modal:', err);
+      setIsSubmitting(false);
+      if (openAlert) openAlert({ title: 'Gagal Mengirim Aduan', message: err.message || 'Terjadi kesalahan sistem.', type: 'error' });
+    }
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200">
-      <div className="relative w-full max-w-xl bg-white dark:bg-black rounded-xl border border-neutral-200 dark:border-neutral-800 shadow-2xl overflow-hidden my-6 animate-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200 font-sans">
+      <div className="relative w-full max-w-2xl bg-white dark:bg-black rounded-xl border border-neutral-200 dark:border-neutral-800 shadow-2xl overflow-hidden my-6 animate-in zoom-in-95 duration-200">
         
         {/* Modal Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-200 dark:border-neutral-800">
-          <div>
-            <h2 className="text-base font-black text-neutral-900 dark:text-white">Buat Laporan Fasilitas Baru</h2>
-            <p className="text-xs text-neutral-500 dark:text-neutral-400 font-medium">Partisipasi warga untuk SDG 11 Kota Berkelanjutan</p>
+          <div className="flex items-center space-x-2.5">
+            <div className="w-9 h-9 rounded-lg bg-emerald-500 text-black flex items-center justify-center font-extrabold shadow-sm">
+              <ShieldCheck className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-base font-black text-neutral-900 dark:text-white">Buat Aduan Fasilitas Publik</h2>
+              <p className="text-xs text-neutral-500 dark:text-neutral-400 font-medium">Lapor masalah publik langsung ke dinas teknis terkait</p>
+            </div>
           </div>
 
           <button
             onClick={onClose}
-            className="p-1 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400 hover:text-neutral-900 dark:hover:text-white"
+            className="p-1 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Modal Form Content */}
-        <form onSubmit={handleSubmit} className="p-5 space-y-4 max-h-[78vh] overflow-y-auto text-xs">
+        {/* Modal Body Form */}
+        <form onSubmit={handleSubmit} className="p-5 space-y-4 text-xs">
           
           {/* Judul Laporan */}
           <div>
             <label className="block font-bold text-neutral-800 dark:text-neutral-200 mb-1">
-              Judul Laporan *
+              Judul Aduan *
             </label>
             <input
               type="text"
               required
-              placeholder="Contoh: Lubang Jalan Rusak di Lowokwaru Malang..."
+              placeholder="Contoh: Lubang Jalan Parah di Dekat Pertigaan Lowokwaru"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className="w-full px-3 py-2 rounded-lg bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-neutral-900 dark:text-white placeholder-neutral-400 text-xs focus:outline-none focus:border-emerald-500 font-medium"
             />
           </div>
 
-          {/* Kategori & Kota */}
+          {/* Kategori & Kota Dropdown */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block font-bold text-neutral-800 dark:text-neutral-200 mb-1">
@@ -405,20 +497,10 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport, ope
               <label className="block font-bold text-neutral-800 dark:text-neutral-200 mb-1">
                 Kota / Wilayah *
               </label>
-              <select
+              <CitySearchDropdown
                 value={city}
-                onChange={(e) => setCity(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-neutral-900 dark:text-white text-xs focus:outline-none focus:border-emerald-500 font-medium"
-              >
-                <option value="Malang">Malang</option>
-                <option value="Surabaya">Surabaya</option>
-                <option value="Bandung">Bandung</option>
-                <option value="Jakarta">Jakarta</option>
-                <option value="Yogyakarta">Yogyakarta</option>
-                <option value="Semarang">Semarang</option>
-                <option value="Medan">Medan</option>
-                <option value="Badung / Bali">Badung / Bali</option>
-              </select>
+                onChange={(newCity) => setCity(newCity)}
+              />
             </div>
           </div>
 
@@ -498,108 +580,109 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport, ope
                 Lat: {coordinates.lat.toFixed(5)}, Lng: {coordinates.lng.toFixed(5)}
               </span>
             </div>
+
             <div className="relative w-full h-44 rounded-xl overflow-hidden border border-neutral-200 dark:border-neutral-800 shadow-inner">
-              <div ref={miniMapRef} className="w-full h-full min-h-[176px]" />
+              <div ref={miniMapRef} className="w-full h-full z-10" />
             </div>
           </div>
 
-          {/* Upload Foto */}
+          {/* Deskripsi Masalah */}
           <div>
             <label className="block font-bold text-neutral-800 dark:text-neutral-200 mb-1">
-              Bukti Foto Kendala Fasilitas
-            </label>
-
-            <div className="border border-dashed border-neutral-300 dark:border-neutral-700 rounded-lg p-3 text-center bg-neutral-50 dark:bg-neutral-900">
-              {imageUrl ? (
-                <div className="relative h-32 w-full rounded overflow-hidden group">
-                  <img src={imageUrl} alt="Preview" className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                    <label className="px-3 py-1 bg-emerald-500 text-black text-[11px] font-bold rounded cursor-pointer">
-                      Ganti Foto
-                      <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
-                    </label>
-                  </div>
-                </div>
-              ) : (
-                <label className="cursor-pointer block py-3 space-y-1">
-                  <Upload className="w-6 h-6 text-emerald-500 mx-auto" />
-                  <p className="text-[11px] text-neutral-600 dark:text-neutral-300 font-bold">Klik untuk unggah foto</p>
-                  <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
-                </label>
-              )}
-            </div>
-
-            <div className="mt-1.5 flex items-center gap-1.5 overflow-x-auto">
-              <span className="text-[10px] text-neutral-400 shrink-0 font-medium">Sampel foto:</span>
-              {SAMPLE_PHOTOS.map((sample, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  onClick={() => setImageUrl(sample.url)}
-                  className={`text-[10px] px-2 py-0.5 rounded border font-bold whitespace-nowrap active:scale-95 transition-all ${
-                    imageUrl === sample.url
-                      ? 'bg-emerald-500 text-black border-emerald-500'
-                      : 'bg-neutral-100 dark:bg-neutral-900 text-neutral-600 dark:text-neutral-400 border-neutral-200 dark:border-neutral-800'
-                  }`}
-                >
-                  {sample.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Deskripsi */}
-          <div>
-            <label className="block font-bold text-neutral-800 dark:text-neutral-200 mb-1">
-              Deskripsi Detail Kendala *
+              Deskripsi Rinci Kerusakan / Masalah *
             </label>
             <textarea
               required
               rows={3}
-              placeholder="Jelaskan kondisi spesifik atau potensi bahaya..."
+              placeholder="Jelaskan secara singkat kronologi, dampak, dan kondisi kerusakan fasilitas publik tersebut..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className="w-full px-3 py-2 rounded-lg bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-neutral-900 dark:text-white placeholder-neutral-400 text-xs focus:outline-none focus:border-emerald-500 font-medium"
             />
           </div>
 
-          {/* Privasi Anonim - Bulletproof Flex Toggle Switch */}
-          <div className="bg-neutral-100 dark:bg-neutral-900 p-3 rounded-lg border border-neutral-200 dark:border-neutral-800 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="font-bold text-neutral-800 dark:text-neutral-200 flex items-center gap-1">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
-                Lapor sebagai Anonim
-              </span>
-              
-              <button
-                type="button"
-                onClick={() => setIsAnonymous(!isAnonymous)}
-                className={`w-11 h-6 rounded-full p-1 transition-colors duration-200 ease-in-out focus:outline-none flex items-center ${
-                  isAnonymous ? 'bg-emerald-500 justify-end' : 'bg-neutral-300 dark:bg-neutral-700 justify-start'
-                }`}
-                title={isAnonymous ? 'Anonim Aktif' : 'Anonim Non-aktif'}
-              >
-                <span className="w-4 h-4 rounded-full bg-black dark:bg-white shadow-md transition-transform" />
-              </button>
-            </div>
+          {/* Pengungah Foto Bukti */}
+          <div>
+            <label className="block font-bold text-neutral-800 dark:text-neutral-200 mb-1">
+              Foto Bukti Kerusakan Lapangan
+            </label>
+            
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  placeholder="URL Foto atau pilih contoh foto di bawah..."
+                  value={imageUrl}
+                  onChange={(e) => setImageUrl(e.target.value)}
+                  className="flex-1 px-3 py-1.5 rounded-lg bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-neutral-900 dark:text-white placeholder-neutral-400 text-xs focus:outline-none focus:border-emerald-500 font-medium"
+                />
 
-            {!isAnonymous && (
-              <input
-                type="text"
-                placeholder="Nama Lengkap Pelapor (opsional)..."
-                value={author}
-                onChange={(e) => setAuthor(e.target.value)}
-                className="w-full px-2.5 py-1.5 rounded bg-white dark:bg-black border border-neutral-200 dark:border-neutral-800 text-neutral-900 dark:text-white text-xs focus:outline-none focus:border-emerald-500 font-medium"
-              />
-            )}
+                <label className="px-3 py-1.5 rounded-lg bg-neutral-200 dark:bg-neutral-800 hover:bg-neutral-300 dark:hover:bg-neutral-700 text-neutral-900 dark:text-white font-bold text-xs cursor-pointer flex items-center gap-1 transition-colors">
+                  <Upload className="w-3.5 h-3.5 text-emerald-500" />
+                  <span>Unggah</span>
+                  <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
+                </label>
+              </div>
+
+              {/* Sample Photo Selectors */}
+              <div className="grid grid-cols-4 gap-2">
+                {SAMPLE_PHOTOS.map((sample, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => setImageUrl(sample.url)}
+                    className={`relative h-14 rounded-lg overflow-hidden border transition-all ${
+                      imageUrl === sample.url
+                        ? 'border-emerald-500 ring-2 ring-emerald-500/30 scale-105'
+                        : 'border-neutral-200 dark:border-neutral-800 opacity-60 hover:opacity-100'
+                    }`}
+                  >
+                    <img src={sample.url} alt={sample.label} className="w-full h-full object-cover" />
+                    <span className="absolute bottom-0 inset-x-0 bg-black/70 text-[9px] font-bold text-white text-center py-0.5 truncate px-1">
+                      {sample.label}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
 
-          {/* Form Actions */}
-          <div className="pt-2 flex items-center justify-end space-x-2 border-t border-neutral-100 dark:border-neutral-800">
+          {/* Identitas Pelapor & Mode Anonim */}
+          <div className="pt-2 border-t border-neutral-200 dark:border-neutral-800 grid grid-cols-1 sm:grid-cols-2 gap-3 items-center">
+            <div>
+              <label className="block font-bold text-neutral-800 dark:text-neutral-200 mb-1">
+                Nama Pelapor
+              </label>
+              <input
+                type="text"
+                disabled={isAnonymous}
+                placeholder={isAnonymous ? 'Pelapor Anonim' : 'Contoh: Ahmad Subagyo'}
+                value={author}
+                onChange={(e) => setAuthor(e.target.value)}
+                className="w-full px-3 py-1.5 rounded-lg bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-neutral-900 dark:text-white placeholder-neutral-400 text-xs focus:outline-none focus:border-emerald-500 disabled:opacity-50 font-medium"
+              />
+            </div>
+
+            <div className="flex items-center space-x-2 pt-4 sm:pt-0">
+              <input
+                type="checkbox"
+                id="anonymous-check"
+                checked={isAnonymous}
+                onChange={(e) => setIsAnonymous(e.target.checked)}
+                className="w-4 h-4 rounded text-emerald-500 focus:ring-emerald-500 bg-neutral-100 dark:bg-neutral-900 border-neutral-300 dark:border-neutral-700"
+              />
+              <label htmlFor="anonymous-check" className="text-xs font-bold text-neutral-700 dark:text-neutral-300 cursor-pointer">
+                Kirim sebagai Pelapor Anonim (Privasi Terjaga)
+              </label>
+            </div>
+          </div>
+
+          {/* Footer Modal Action Buttons */}
+          <div className="pt-4 border-t border-neutral-200 dark:border-neutral-800 flex items-center justify-end space-x-2">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-lg font-bold text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+              className="px-4 py-2 rounded-lg bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-300 font-bold text-xs transition-colors"
             >
               Batal
             </button>
@@ -607,23 +690,24 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport, ope
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-5 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 active:scale-95 text-black font-extrabold shadow flex items-center gap-1.5 transition-all"
+              className="px-5 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-xs shadow flex items-center space-x-1.5 transition-all active:scale-95 disabled:opacity-50"
             >
               {isSubmitting ? (
                 <>
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  <span>Menerbitkan...</span>
+                  <span>Menerbitkan Laporan...</span>
                 </>
               ) : (
                 <>
                   <CheckCircle2 className="w-3.5 h-3.5" />
-                  <span>Kirim Laporan</span>
+                  <span>Kirim Laporan Resmi</span>
                 </>
               )}
             </button>
           </div>
 
         </form>
+
       </div>
     </div>
   );
