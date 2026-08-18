@@ -10,6 +10,8 @@ import SplashScreen from './components/SplashScreen';
 import ConfirmModal from './components/ConfirmModal';
 import AlertModal from './components/AlertModal';
 import FaceAuth from './components/FaceAuth';
+import FaceAuthOperator from './components/FaceAuthOperator';
+import OperatorDashboard from './components/OperatorDashboard';
 import Footer from './components/Footer';
 import { CheckCircle2, X, AlertTriangle, RefreshCw, Loader2 } from 'lucide-react';
 
@@ -56,7 +58,7 @@ function normalizeReport(raw) {
     categoryKey: (raw.category || '').toLowerCase().replace('/', '_').replace(/\s+/g, '_'),
     severity: raw.severity || 'Sedang',
     status: raw.status || 'Menunggu',
-    statusKey: raw.status === 'Selesai' ? 'selesai' : raw.status === 'Sedang Ditangani' ? 'diproses' : 'menunggu',
+    statusKey: raw.status === 'Selesai' ? 'selesai' : raw.status === 'Sedang Ditangani' || raw.status === 'Diproses' ? 'diproses' : 'menunggu',
     location: raw.location || 'Lokasi tidak disebutkan',
     city: raw.city || 'Jakarta',
     district: raw.district || 'Kecamatan Terkait',
@@ -64,6 +66,7 @@ function normalizeReport(raw) {
     description: raw.description || '',
     author: raw.author || 'Warga Peduli',
     isAnonymous: raw.isAnonymous ?? false,
+    verifiedBy: raw.verifiedBy || null,
     date: formattedDate,
     upvotes: raw.upvotes ?? 0,
     upvotedByUser: Boolean(raw.upvotedByUser),
@@ -75,7 +78,7 @@ function normalizeReport(raw) {
     timeline: raw.timeline || [
       { step: 1, title: 'Laporan Diterima', date: formattedDate, done: true, desc: 'Laporan terdaftar secara resmi di sistem CivicPulse.' },
       { step: 2, title: 'Verifikasi Dinas', date: 'Dalam Antrean', done: raw.status !== 'Menunggu', desc: 'Pengungahan berkas ke instansi dinas teknis terkait.' },
-      { step: 3, title: 'Petugas Meluncur', date: 'Menunggu', done: raw.status === 'Sedang Ditangani' || raw.status === 'Selesai', desc: 'Penugasan tim inspeksi dan perbaikan lapangan.' },
+      { step: 3, title: 'Petugas Meluncur', date: 'Menunggu', done: raw.status === 'Sedang Ditangani' || raw.status === 'Diproses' || raw.status === 'Selesai', desc: 'Penugasan tim inspeksi dan perbaikan lapangan.' },
       { step: 4, title: 'Perbaikan Selesai', date: 'Menunggu', done: raw.status === 'Selesai', desc: 'Proses pengerjaan dan konfirmasi perbaikan dari warga.' }
     ]
   };
@@ -85,6 +88,10 @@ export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     return sessionStorage.getItem('civicpulse_face_auth') === 'true';
   });
+
+  // Operator Portal States
+  const [isOperatorPortal, setIsOperatorPortal] = useState(false);
+  const [activeOperator, setActiveOperator] = useState(null);
 
   const [showSplash, setShowSplash] = useState(true);
   const [reports, setReports] = useState([]);
@@ -354,6 +361,28 @@ export default function App() {
     }
   };
 
+  // Operator Portal Mode Switch Router
+  if (isOperatorPortal) {
+    if (!activeOperator) {
+      return (
+        <FaceAuthOperator
+          onLoginSuccess={(op) => setActiveOperator(op)}
+          onCancel={() => setIsOperatorPortal(false)}
+        />
+      );
+    }
+    return (
+      <OperatorDashboard
+        operator={activeOperator}
+        onLogout={() => {
+          setActiveOperator(null);
+          setIsOperatorPortal(false);
+          fetchReports();
+        }}
+      />
+    );
+  }
+
   // If user is not authenticated with Face Recognition, display FaceAuth protection screen
   if (!isAuthenticated) {
     return (
@@ -425,6 +454,7 @@ export default function App() {
         theme={theme}
         setTheme={setTheme}
         onLockFaceAuth={handleLockFaceAuth}
+        onOpenOperatorPortal={() => setIsOperatorPortal(true)}
       />
 
       {/* Main Content Area */}

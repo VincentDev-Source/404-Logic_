@@ -7,6 +7,14 @@ datasource db {
   url      = env("POSTGRES_PRISMA_DATABASE_URL")
 }
 
+model Operator {
+  id             Int      @id @default(autoincrement())
+  name           String
+  role           String   @default("OPERATOR")
+  faceDescriptor String   @db.Text
+  createdAt      DateTime @default(now())
+}
+
 model Report {
   id          Int      @id @default(autoincrement())
   title       String
@@ -16,5 +24,7 @@ model Report {
   location    String?
   imageUrl    String?
   upvotes     Int      @default(0)
+  verifiedBy  String?
   createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
 }

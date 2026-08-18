@@ -10,7 +10,8 @@ import {
   Ticket,
   Sun,
   Moon,
-  Lock
+  Lock,
+  UserCheck
 } from 'lucide-react';
 
 export default function Navbar({ 
@@ -23,7 +24,8 @@ export default function Navbar({
   onSearchTicket,
   theme,
   setTheme,
-  onLockFaceAuth
+  onLockFaceAuth,
+  onOpenOperatorPortal
 }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -103,6 +105,17 @@ export default function Navbar({
           {/* Quick Actions Bar */}
           <div className="hidden lg:flex items-center space-x-2.5">
             
+            {/* Operator Portal Entry Button */}
+            {onOpenOperatorPortal && (
+              <button
+                onClick={onOpenOperatorPortal}
+                className="px-3 py-1.5 rounded-xl bg-blue-600/10 hover:bg-blue-600/20 text-blue-500 dark:text-blue-400 border border-blue-500/30 text-xs font-extrabold flex items-center gap-1.5 transition-all active:scale-95 shadow-sm"
+              >
+                <UserCheck className="w-4 h-4" />
+                <span>Masuk Petugas</span>
+              </button>
+            )}
+
             {/* Quick Ticket Input Form */}
             <form onSubmit={handleTicketFormSubmit} className="relative">
               <input
@@ -110,7 +123,7 @@ export default function Navbar({
                 placeholder="Lacak Tiket #..."
                 value={quickTicketInput}
                 onChange={(e) => setQuickTicketInput(e.target.value)}
-                className="pl-8 pr-3 py-1.5 w-36 rounded-xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-neutral-900 dark:text-white placeholder-neutral-400 text-xs focus:outline-none focus:border-emerald-500 transition-all font-mono font-medium"
+                className="pl-8 pr-3 py-1.5 w-32 rounded-xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-neutral-900 dark:text-white placeholder-neutral-400 text-xs focus:outline-none focus:border-emerald-500 transition-all font-mono font-medium"
               />
               <Ticket className="w-3.5 h-3.5 text-neutral-400 absolute left-2.5 top-2.5" />
             </form>
@@ -159,22 +172,21 @@ export default function Navbar({
 
           {/* Mobile menu button */}
           <div className="flex lg:hidden items-center gap-2">
+            {onOpenOperatorPortal && (
+              <button
+                onClick={onOpenOperatorPortal}
+                className="px-2.5 py-1.5 rounded-xl bg-blue-600/10 text-blue-400 border border-blue-500/30 text-xs font-bold active:scale-95"
+              >
+                Petugas
+              </button>
+            )}
+
             <button
               onClick={toggleTheme}
               className="p-2 rounded-xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-neutral-700 dark:text-neutral-300 active:scale-95"
             >
               {theme === 'dark' ? <Sun className="w-4 h-4 text-emerald-400" /> : <Moon className="w-4 h-4 text-neutral-700" />}
             </button>
-
-            {onLockFaceAuth && (
-              <button
-                onClick={onLockFaceAuth}
-                className="p-2 rounded-xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-neutral-700 dark:text-neutral-300 active:scale-95"
-                title="Kunci Aplikasi"
-              >
-                <Lock className="w-4 h-4 text-red-400" />
-              </button>
-            )}
 
             <button
               onClick={onOpenCreateModal}
@@ -221,6 +233,16 @@ export default function Navbar({
             <BarChart3 className="w-4 h-4" />
             <span>Analitik SDG</span>
           </button>
+
+          {onOpenOperatorPortal && (
+            <button
+              onClick={() => { setMobileMenuOpen(false); onOpenOperatorPortal(); }}
+              className="w-full text-left px-3 py-2 rounded-xl flex items-center gap-2 text-blue-400 bg-blue-500/10 border border-blue-500/20"
+            >
+              <UserCheck className="w-4 h-4" />
+              <span>Portal Masuk Petugas (Biometrik Wajah)</span>
+            </button>
+          )}
 
           {onLockFaceAuth && (
             <button
