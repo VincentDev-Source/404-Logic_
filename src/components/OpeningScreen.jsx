@@ -1,26 +1,47 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Building2 } from 'lucide-react';
 
 export default function OpeningScreen({ onFinish }) {
   const [stage, setStage] = useState('loading'); // 'loading' | 'revealing' | 'done'
+  const [progress, setProgress] = useState(0);
+
+  // SVG Circular Progress Ring Math
+  const radius = 48;
+  const circumference = 2 * Math.PI * radius; // ~301.59
+  const strokeDashoffset = circumference - (progress / 100) * circumference;
 
   useEffect(() => {
-    // Stage 1: Hold initial logo & progress for 1.8s
-    const timer1 = setTimeout(() => {
-      setStage('revealing');
-    }, 1800);
+    // Dynamic smooth progress counter from 0% to 100% over ~1.8s
+    const startTime = Date.now();
+    const duration = 1800; // 1.8 seconds
 
-    // Stage 2: Finish curtain reveal after 2.8s total
-    const timer2 = setTimeout(() => {
-      setStage('done');
-      if (onFinish) onFinish();
-    }, 2800);
+    const interval = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const currentProgress = Math.min(100, Math.floor((elapsed / duration) * 100));
+      
+      setProgress(currentProgress);
 
-    return () => {
-      clearTimeout(timer1);
-      clearTimeout(timer2);
-    };
-  }, [onFinish]);
+      if (currentProgress >= 100) {
+        clearInterval(interval);
+        setTimeout(() => {
+          setStage('revealing');
+        }, 200);
+      }
+    }, 20);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    if (stage === 'revealing') {
+      const timer = setTimeout(() => {
+        setStage('done');
+        if (onFinish) onFinish();
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [stage, onFinish]);
 
   return (
     <AnimatePresence>
@@ -43,48 +64,72 @@ export default function OpeningScreen({ onFinish }) {
             }}
             className="absolute inset-0 bg-[#050505] text-white flex flex-col items-center justify-center pointer-events-auto"
           >
-            {/* Ambient Emerald Glow Radial Orb (100% Matching CivicPulse Emerald Theme) */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[450px] h-[450px] bg-emerald-500/20 rounded-full blur-[140px] pointer-events-none animate-pulse" />
+            {/* Ambient Emerald Glow Radial Orb */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[450px] h-[450px] bg-emerald-500/15 rounded-full blur-[140px] pointer-events-none animate-pulse" />
 
             {/* Opening Screen Content */}
             <motion.div
               animate={stage === 'revealing' ? { opacity: 0, y: -40 } : { opacity: 1, y: 0 }}
               transition={{ duration: 0.4 }}
-              className="relative z-10 text-center space-y-4 px-6 max-w-md"
+              className="relative z-10 text-center space-y-6 px-6 max-w-md flex flex-col items-center"
             >
-              {/* Brand Logo Header */}
-              <div className="space-y-1">
-                <motion.div
-                  initial={{ scale: 0.9, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ duration: 0.5 }}
-                  className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-600 via-emerald-400 to-teal-300 p-0.5 mx-auto mb-3 shadow-[0_0_30px_#10B981]"
-                >
-                  <div className="w-full h-full bg-black rounded-[14px] flex items-center justify-center">
-                    <span className="text-xl font-black text-emerald-400">CP</span>
-                  </div>
-                </motion.div>
+              
+              {/* CIRCULAR PROGRESS RING (PROGRESS BUNDAR) + OFFICIAL LOGO */}
+              <div className="relative w-36 h-36 flex items-center justify-center">
+                
+                {/* Background Track Circle */}
+                <svg className="w-full h-full transform -rotate-90" viewBox="0 0 120 120">
+                  <circle
+                    cx="60"
+                    cy="60"
+                    r={radius}
+                    className="stroke-neutral-900"
+                    strokeWidth="6"
+                    fill="transparent"
+                  />
+                  {/* Dynamic Glowing Emerald Progress Circle */}
+                  <circle
+                    cx="60"
+                    cy="60"
+                    r={radius}
+                    stroke="#10B981"
+                    strokeWidth="6"
+                    strokeLinecap="round"
+                    fill="transparent"
+                    strokeDasharray={circumference}
+                    strokeDashoffset={strokeDashoffset}
+                    className="transition-all duration-150 ease-out drop-shadow-[0_0_12px_#10B981]"
+                  />
+                </svg>
 
+                {/* Official CivicPulse Building2 Emblem in Center of Ring */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <div className="w-14 h-14 rounded-2xl bg-emerald-500 text-black flex items-center justify-center font-extrabold shadow-lg shadow-emerald-500/40 border border-emerald-400">
+                    <Building2 className="w-7 h-7" />
+                  </div>
+                </div>
+
+              </div>
+
+              {/* Brand Title & Percentage Display */}
+              <div className="space-y-1">
                 <h1 className="text-2xl sm:text-3xl font-black tracking-[0.25em] text-white uppercase">
                   CIVIC<span className="text-emerald-400">PULSE</span>
                 </h1>
+
+                <div className="flex items-center justify-center gap-1.5 text-xs font-mono font-bold text-emerald-400 pt-1">
+                  <span>LOADING</span>
+                  <span className="text-sm font-black text-white px-1.5 py-0.5 rounded bg-emerald-500/20 border border-emerald-500/30">
+                    {String(progress).padStart(2, '0')}%
+                  </span>
+                </div>
               </div>
 
               {/* Monospaced Subtitle */}
-              <div className="pt-2">
-                <p className="text-[11px] font-mono font-bold tracking-widest text-emerald-400/90 uppercase animate-pulse">
+              <div>
+                <p className="text-[10px] font-mono font-bold tracking-widest text-emerald-400/80 uppercase animate-pulse">
                   INITIALIZING CIVIC PULSE // SDG 11...
                 </p>
-              </div>
-
-              {/* Progress Line */}
-              <div className="w-40 h-0.5 bg-neutral-900 rounded-full mx-auto overflow-hidden border border-neutral-800">
-                <motion.div
-                  initial={{ width: '0%' }}
-                  animate={{ width: '100%' }}
-                  transition={{ duration: 1.6, ease: 'easeInOut' }}
-                  className="h-full bg-gradient-to-r from-emerald-700 via-emerald-500 to-emerald-400 shadow-[0_0_10px_#10B981]"
-                />
               </div>
 
             </motion.div>
