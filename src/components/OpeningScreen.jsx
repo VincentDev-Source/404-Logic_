@@ -3,18 +3,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Building2 } from 'lucide-react';
 
 export default function OpeningScreen({ onFinish }) {
-  const [stage, setStage] = useState('loading'); // 'loading' | 'revealing' | 'done'
   const [progress, setProgress] = useState(0);
-
-  // SVG Circular Progress Ring Math
-  const radius = 48;
-  const circumference = 2 * Math.PI * radius; // ~301.59
-  const strokeDashoffset = circumference - (progress / 100) * circumference;
+  const [isExiting, setIsExiting] = useState(false);
 
   useEffect(() => {
-    // Dynamic smooth progress counter from 0% to 100% over ~1.8s
+    // Fast, simple progress from 0% to 100% over ~1.2s
     const startTime = Date.now();
-    const duration = 1800; // 1.8 seconds
+    const duration = 1200;
 
     const interval = setInterval(() => {
       const elapsed = Date.now() - startTime;
@@ -25,133 +20,75 @@ export default function OpeningScreen({ onFinish }) {
       if (currentProgress >= 100) {
         clearInterval(interval);
         setTimeout(() => {
-          setStage('revealing');
-        }, 200);
+          setIsExiting(true);
+          setTimeout(() => {
+            if (onFinish) onFinish();
+          }, 400);
+        }, 150);
       }
     }, 20);
 
     return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    if (stage === 'revealing') {
-      const timer = setTimeout(() => {
-        setStage('done');
-        if (onFinish) onFinish();
-      }, 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [stage, onFinish]);
+  }, [onFinish]);
 
   return (
     <AnimatePresence>
-      {stage !== 'done' && (
+      {!isExiting && (
         <motion.div
-          key="opening-screen"
-          exit={{ opacity: 0, transition: { duration: 0.3 } }}
-          className="fixed inset-0 z-50 pointer-events-none select-none font-sans overflow-hidden"
+          key="simple-opening-screen"
+          initial={{ opacity: 1 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0, transition: { duration: 0.4, ease: 'easeInOut' } }}
+          className="fixed inset-0 z-50 bg-[#0a0a0a] text-white flex flex-col items-center justify-center font-sans select-none overflow-hidden"
         >
-          {/* 
-            Wavy Curtain Overlay SVG Background 
-            Mimics the Figma Ellipse/Union/Subtract wavy curtain reveal
-          */}
-          <motion.div
-            initial={{ y: 0 }}
-            animate={stage === 'revealing' ? { y: '-100%' } : { y: 0 }}
-            transition={{
-              duration: 1.0,
-              ease: [0.76, 0, 0.24, 1], // Custom smooth 60 FPS cubic-bezier
-            }}
-            className="absolute inset-0 bg-[#050505] text-white flex flex-col items-center justify-center pointer-events-auto overflow-hidden"
-          >
-            {/* Ambient Soft Emerald Radial Orb (No Square Borders) */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-emerald-500/15 rounded-full blur-[150px] pointer-events-none animate-pulse" />
+          {/* Subtle Ambient Radial Backlight */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
 
-            {/* Opening Screen Content */}
+          {/* Simple Clean Content Box */}
+          <div className="relative z-10 flex flex-col items-center text-center space-y-5 px-6 max-w-sm">
+            
+            {/* Logo Emblem */}
             <motion.div
-              animate={stage === 'revealing' ? { opacity: 0, y: -40 } : { opacity: 1, y: 0 }}
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.4 }}
-              className="relative z-10 text-center space-y-6 px-6 max-w-md flex flex-col items-center"
+              className="w-12 h-12 rounded-xl bg-emerald-500 text-black flex items-center justify-center shadow-lg shadow-emerald-500/20"
             >
-              
-              {/* CIRCULAR PROGRESS RING (PROGRESS BUNDAR) + OFFICIAL LOGO */}
-              <div className="relative w-36 h-36 flex items-center justify-center">
-                
-                {/* Seamless Radial Glow Backdrop Layer Behind Ring (Eliminates Box Clipping) */}
-                <div className="absolute inset-[-12px] rounded-full bg-emerald-500/25 blur-2xl pointer-events-none animate-pulse" />
-
-                {/* SVG Progress Ring with Expanded ViewBox & overflow-visible to prevent clipping */}
-                <svg className="w-full h-full transform -rotate-90 overflow-visible relative z-10" viewBox="-15 -15 150 150">
-                  {/* Background Track Circle */}
-                  <circle
-                    cx="60"
-                    cy="60"
-                    r={radius}
-                    stroke="#18181b"
-                    strokeWidth="6"
-                    fill="none"
-                  />
-
-                  {/* Dynamic Glowing Emerald Progress Circle */}
-                  <circle
-                    cx="60"
-                    cy="60"
-                    r={radius}
-                    stroke="#10B981"
-                    strokeWidth="6"
-                    strokeLinecap="round"
-                    fill="none"
-                    strokeDasharray={circumference}
-                    strokeDashoffset={strokeDashoffset}
-                    className="transition-all duration-150 ease-out"
-                  />
-                </svg>
-
-                {/* Official CivicPulse Building2 Emblem in Center of Ring */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center z-20">
-                  <div className="w-14 h-14 rounded-2xl bg-emerald-500 text-black flex items-center justify-center font-extrabold shadow-lg shadow-emerald-500/40 border border-emerald-400">
-                    <Building2 className="w-7 h-7" />
-                  </div>
-                </div>
-
-              </div>
-
-              {/* Brand Title & Percentage Display */}
-              <div className="space-y-1">
-                <h1 className="text-2xl sm:text-3xl font-black tracking-[0.25em] text-white uppercase">
-                  CIVIC<span className="text-emerald-400">PULSE</span>
-                </h1>
-
-                <div className="flex items-center justify-center gap-1.5 text-xs font-mono font-bold text-emerald-400 pt-1">
-                  <span>LOADING</span>
-                  <span className="text-sm font-black text-white px-1.5 py-0.5 rounded bg-emerald-500/20 border border-emerald-500/30">
-                    {String(progress).padStart(2, '0')}%
-                  </span>
-                </div>
-              </div>
-
-              {/* Monospaced Subtitle */}
-              <div>
-                <p className="text-[10px] font-mono font-bold tracking-widest text-emerald-400/80 uppercase animate-pulse">
-                  INITIALIZING CIVIC PULSE // SDG 11...
-                </p>
-              </div>
-
+              <Building2 className="w-6 h-6" />
             </motion.div>
 
-            {/* Bottom Wavy Edge SVG */}
-            <div className="absolute left-0 right-0 top-full w-full h-32 overflow-hidden leading-none pointer-events-none">
-              <svg
-                className="relative block w-full h-full text-[#050505]"
-                viewBox="0 0 1440 320"
-                preserveAspectRatio="none"
-                fill="currentColor"
-              >
-                <path d="M0,32L48,53.3C96,75,192,117,288,128C384,139,480,117,576,106.7C672,96,768,96,864,112C960,128,1056,160,1152,160C1248,160,1344,128,1392,112L1440,96L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z" />
-              </svg>
-            </div>
+            {/* Brand Title */}
+            <motion.h1
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1, duration: 0.4 }}
+              className="text-xl sm:text-2xl font-black tracking-wider text-white uppercase"
+            >
+              CIVIC<span className="text-emerald-400">PULSE</span>
+            </motion.h1>
 
-          </motion.div>
+            {/* Simple Progress Bar & Counter */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2, duration: 0.4 }}
+              className="flex flex-col items-center space-y-2 pt-2"
+            >
+              {/* Thin Elegant Progress Line */}
+              <div className="w-36 h-1 bg-neutral-800 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-emerald-400 transition-all duration-100 ease-out"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+
+              {/* Simple Percentage Text */}
+              <span className="text-xs font-mono font-medium text-neutral-400 tracking-widest">
+                {progress}%
+              </span>
+            </motion.div>
+
+          </div>
         </motion.div>
       )}
     </AnimatePresence>
