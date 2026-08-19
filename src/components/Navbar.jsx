@@ -9,7 +9,8 @@ import {
   Sun,
   Moon,
   Lock,
-  UserCheck
+  UserCheck,
+  Newspaper
 } from 'lucide-react';
 
 export default function Navbar({ 
@@ -86,6 +87,18 @@ export default function Navbar({
             >
               <MapPin className="w-4 h-4" />
               <span>Peta Radar</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('news')}
+              className={`px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs font-extrabold transition-all duration-200 active:scale-95 flex items-center space-x-1.5 ${
+                activeTab === 'news'
+                  ? 'bg-neutral-100 dark:bg-neutral-900 text-emerald-500 dark:text-emerald-400 border border-neutral-200 dark:border-neutral-800'
+                  : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-900'
+              }`}
+            >
+              <Newspaper className="w-4 h-4" />
+              <span>Berita Kota</span>
             </button>
 
             <button

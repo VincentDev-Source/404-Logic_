@@ -138,14 +138,14 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const [activeTab, setActiveTab] = useState('feed'); // 'feed' | 'map' | 'analytics'
+  const [activeTab, setActiveTab] = useState('feed'); // 'feed' | 'map' | 'news' | 'analytics'
   const [selectedCategory, setSelectedCategory] = useState('semua');
   const [selectedStatus, setSelectedStatus] = useState('semua');
   const [searchQuery, setSearchQuery] = useState('');
   const [quickTicketInput, setQuickTicketInput] = useState('');
   const [viewMode, setViewMode] = useState('feed'); // 'feed' | 'map'
 
-  // Custom Confirm & Alert Modal States (Replaces native browser "says" popups)
+  // Custom Confirm & Alert Modal States
   const [confirmModalState, setConfirmModalState] = useState({
     isOpen: false,
     title: '',
@@ -574,6 +574,12 @@ export default function App() {
                 theme={theme}
               />
             </div>
+          ) : activeTab === 'news' ? (
+            /* BERITA TAB VIEW */
+            <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-4 pb-28 sm:pb-16 space-y-6">
+              <EarthquakeAlert />
+              <CityNewsWidget />
+            </div>
           ) : (
             /* BERANDA TAB VIEW */
             <>
@@ -622,6 +628,8 @@ export default function App() {
           activeTab={
             activeTab === 'feed'
               ? 'home'
+              : activeTab === 'news'
+              ? 'news'
               : activeTab === 'map'
               ? 'search'
               : activeTab === 'analytics'
@@ -630,6 +638,7 @@ export default function App() {
           }
           onTabChange={(tabId) => {
             if (tabId === 'home') setActiveTab('feed');
+            else if (tabId === 'news') setActiveTab('news');
             else if (tabId === 'search') setActiveTab('map');
             else if (tabId === 'like') setActiveTab('analytics');
           }}
