@@ -30,7 +30,6 @@ function normalizeReport(raw) {
   let lat = null;
   let lng = null;
 
-  // PRIORITY 1 (Ground Truth): Parse exact embedded (GPS: lat, lng) from raw.location
   if (raw.location && raw.location.includes('GPS:')) {
     const gpsMatch = raw.location.match(/GPS:\s*([-\d.]+),\s*([-\d.]+)/);
     if (gpsMatch) {
@@ -39,13 +38,11 @@ function normalizeReport(raw) {
     }
   }
 
-  // PRIORITY 2: Fallback to raw.coordinates if present
   if (lat === null || lng === null || isNaN(lat) || isNaN(lng)) {
     lat = raw.coordinates?.lat || raw.lat;
     lng = raw.coordinates?.lng || raw.lng;
   }
 
-  // PRIORITY 3: Default fallback if coordinates remain null
   if (lat === null || lng === null || isNaN(lat) || isNaN(lng)) {
     const defaultLat = -6.2088 + (((numId * 37) % 50) - 25) * 0.005;
     const defaultLng = 106.8456 + (((numId * 53) % 50) - 25) * 0.005;
@@ -60,7 +57,6 @@ function normalizeReport(raw) {
   const isProcessing = raw.status === 'Diproses' || raw.status === 'Sedang Ditangani';
   const isCompleted = raw.status === 'Selesai';
 
-  // Dynamic Timeline reflecting exact officer status updates
   const dynamicTimeline = [
     {
       step: 1,
@@ -125,9 +121,8 @@ function normalizeReport(raw) {
 }
 
 export default function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    return sessionStorage.getItem('civicpulse_face_auth') === 'true';
-  });
+  // Default to true so users immediately land on the dashboard without getting blocked by FaceAuth
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
 
   // Operator Portal States
   const [isOperatorPortal, setIsOperatorPortal] = useState(false);
@@ -186,7 +181,6 @@ export default function App() {
     return saved ? saved : 'dark';
   });
 
-  // Apply dark class to html document element
   useEffect(() => {
     localStorage.setItem('civicpulse_theme', theme);
     if (theme === 'dark') {
@@ -204,7 +198,6 @@ export default function App() {
   // Toast notification state
   const [toastMessage, setToastMessage] = useState(null);
 
-  // Show Toast helper
   const showToast = (title, message, type = 'success') => {
     setToastMessage({ title, message, type });
     setTimeout(() => {
@@ -212,7 +205,6 @@ export default function App() {
     }, 4000);
   };
 
-  // Face Recognition Auth Callbacks
   const handleFaceAuthSuccess = () => {
     sessionStorage.setItem('civicpulse_face_auth', 'true');
     setIsAuthenticated(true);
@@ -225,7 +217,6 @@ export default function App() {
     showToast('Aplikasi Dikunci 🔒', 'Sesi autentikasi wajah Anda telah dikunci kembali.', 'info');
   };
 
-  // Fetch real reports strictly from backend API (/api/reports) with NO mock data fallbacks
   const fetchReports = useCallback(async () => {
     setIsLoading(true);
     setError(null);
@@ -235,7 +226,6 @@ export default function App() {
         throw new Error(`Gagal memuat data (HTTP ${res.status})`);
       }
       const data = await res.json();
-      
       const normalizedData = Array.isArray(data) ? data.map(normalizeReport) : [];
       setReports(normalizedData);
     } catch (err) {
@@ -252,7 +242,6 @@ export default function App() {
     }
   }, [isAuthenticated, fetchReports]);
 
-  // Filter reports based on search, category, and status
   const filteredReports = useMemo(() => {
     return reports.filter((report) => {
       if (selectedCategory !== 'semua' && report.category !== selectedCategory) {
@@ -275,7 +264,6 @@ export default function App() {
     });
   }, [reports, selectedCategory, selectedStatus, searchQuery]);
 
-  // Handle citizen rating & review submission for completed reports
   const handleRateReport = async (reportId, ratingValue, feedbackText) => {
     const target = reports.find(r => r.id === reportId || String(r.rawId) === String(reportId));
     if (!target) return;
@@ -311,7 +299,6 @@ export default function App() {
     }
   };
 
-  // Handle report deletion
   const handleDeleteReport = async (reportId) => {
     const target = reports.find((r) => r.id === reportId || String(r.rawId) === String(reportId));
     if (!target) return;
@@ -336,7 +323,6 @@ export default function App() {
     }
   };
 
-  // Handle upvoting with API patch call
   const handleUpvote = async (reportId) => {
     const target = reports.find((r) => r.id === reportId || String(r.rawId) === String(reportId));
     if (!target) return;
@@ -344,7 +330,6 @@ export default function App() {
     const isUpvoted = target.upvotedByUser;
     const targetDbId = target.rawId || target.id;
 
-    // Optimistic UI update
     setReports((prevReports) =>
       prevReports.map((report) => {
         if (report.id === reportId || String(report.rawId) === String(reportId)) {
@@ -378,19 +363,16 @@ export default function App() {
     }
   };
 
-  // Handle open ticket tracker
   const handleTrackTicket = (ticketId) => {
     setActiveTicketId(ticketId);
     setIsTrackerModalOpen(true);
   };
 
-  // Handle ticket search from navbar/quick inputs
   const handleSearchTicketFromNav = (ticketId) => {
     setActiveTicketId(ticketId);
     setIsTrackerModalOpen(true);
   };
 
-  // Handle new report creation sending POST to /api/reports
   const handleCreateReport = async (newReportData) => {
     try {
       const res = await fetch('/api/reports', {
@@ -431,7 +413,6 @@ export default function App() {
     }
   };
 
-  // Operator Portal Mode Switch Router
   if (isOperatorPortal) {
     if (!activeOperator) {
       return (
@@ -453,7 +434,6 @@ export default function App() {
     );
   }
 
-  // If user is not authenticated with Face Recognition, display FaceAuth protection screen
   if (!isAuthenticated) {
     return (
       <FaceAuth onSuccess={handleFaceAuthSuccess} />
@@ -561,7 +541,7 @@ export default function App() {
         ) : (
           /* BERANDA TAB VIEW */
           <>
-            {/* Hero Impact Stats */}
+            {/* Hero Impact Header */}
             <HeroStats
               reports={reports}
               searchQuery={searchQuery}
@@ -571,13 +551,13 @@ export default function App() {
 
             <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pb-28 sm:pb-16 space-y-6">
               
-              {/* Real-Time Earthquake Early Warning System Widget (BMKG TEWS Open Data - SDG 11.5) */}
+              {/* Real-Time Earthquake Early Warning System Widget */}
               <EarthquakeAlert />
 
-              {/* Geo-Targeted Local News & Disaster Mitigation Widget (SDG 11) */}
+              {/* Geo-Targeted Local News & Disaster Mitigation Widget (Prominently Placed!) */}
               <CityNewsWidget />
 
-              {/* Citizen Reports Feed (Scoped loading/error states so widgets remain visible!) */}
+              {/* Citizen Reports Feed (Scoped loading/error state) */}
               {isLoading ? (
                 <div className="py-12 flex flex-col items-center justify-center space-y-3 bg-neutral-900/40 rounded-3xl border border-neutral-800">
                   <Loader2 className="w-8 h-8 text-emerald-500 animate-spin" />
