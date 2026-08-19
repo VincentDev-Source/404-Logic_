@@ -532,74 +532,72 @@ export default function App() {
       {/* Main Content Area */}
       <main className="flex-grow">
         
-        {/* Loading Indicator */}
-        {isLoading ? (
-          <div className="py-20 flex flex-col items-center justify-center space-y-3">
-            <Loader2 className="w-10 h-10 text-emerald-500 animate-spin" />
-            <p className="text-neutral-600 dark:text-neutral-400 font-bold text-xs">
-              Mengambil data aduan dari database PostgreSQL...
-            </p>
+        {/* Dedicated Tab View Router */}
+        {activeTab === 'analytics' ? (
+          /* ANALITIK TAB VIEW */
+          <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-4 pb-28 sm:pb-16">
+            <AnalyticsDashboard reports={reports} theme={theme} />
           </div>
-        ) : error ? (
-          /* Error State Fallback UI */
-          <div className="p-6 my-6 max-w-xl mx-auto bg-red-500/10 border border-red-500/20 rounded-2xl text-center flex flex-col items-center justify-center space-y-3">
-            <AlertTriangle className="w-8 h-8 text-red-500" />
-            <p className="text-red-600 dark:text-red-400 font-bold text-xs">{error}</p>
-            <button
-              onClick={fetchReports}
-              className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white font-bold rounded-lg text-xs flex items-center gap-2 transition-all shadow-md"
-            >
-              <RefreshCw className="w-3.5 h-3.5" />
-              <span>Muat Ulang Data</span>
-            </button>
+        ) : activeTab === 'map' ? (
+          /* PETA TAB VIEW */
+          <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-4 pb-28 sm:pb-16">
+            <InteractiveMap
+              reports={filteredReports}
+              onUpvote={handleUpvote}
+              onTrackTicket={handleTrackTicket}
+              onDeleteReport={handleDeleteReport}
+              onRateReport={handleRateReport}
+              openConfirm={openConfirm}
+              openAlert={openAlert}
+              theme={theme}
+            />
+          </div>
+        ) : activeTab === 'news' ? (
+          /* BERITA TAB VIEW */
+          <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-4 pb-28 sm:pb-16 space-y-6">
+            <EarthquakeAlert />
+            <CityNewsWidget />
           </div>
         ) : (
-          /* Dedicated Tab View Router */
-          activeTab === 'analytics' ? (
-            /* ANALITIK TAB VIEW */
-            <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-4 pb-28 sm:pb-16">
-              <AnalyticsDashboard reports={reports} theme={theme} />
-            </div>
-          ) : activeTab === 'map' ? (
-            /* PETA TAB VIEW */
-            <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-4 pb-28 sm:pb-16">
-              <InteractiveMap
-                reports={filteredReports}
-                onUpvote={handleUpvote}
-                onTrackTicket={handleTrackTicket}
-                onDeleteReport={handleDeleteReport}
-                onRateReport={handleRateReport}
-                openConfirm={openConfirm}
-                openAlert={openAlert}
-                theme={theme}
-              />
-            </div>
-          ) : activeTab === 'news' ? (
-            /* BERITA TAB VIEW */
-            <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-4 pb-28 sm:pb-16 space-y-6">
+          /* BERANDA TAB VIEW */
+          <>
+            {/* Hero Impact Stats */}
+            <HeroStats
+              reports={reports}
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              onOpenCreateModal={() => setIsCreateModalOpen(true)}
+            />
+
+            <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pb-28 sm:pb-16 space-y-6">
+              
+              {/* Real-Time Earthquake Early Warning System Widget (BMKG TEWS Open Data - SDG 11.5) */}
               <EarthquakeAlert />
+
+              {/* Geo-Targeted Local News & Disaster Mitigation Widget (SDG 11) */}
               <CityNewsWidget />
-            </div>
-          ) : (
-            /* BERANDA TAB VIEW */
-            <>
-              {/* Hero Impact Stats */}
-              <HeroStats
-                reports={reports}
-                searchQuery={searchQuery}
-                setSearchQuery={setSearchQuery}
-                onOpenCreateModal={() => setIsCreateModalOpen(true)}
-              />
 
-              <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pb-28 sm:pb-16 space-y-6">
-                
-                {/* Real-Time Earthquake Early Warning System Widget (BMKG TEWS Open Data - SDG 11.5) */}
-                <EarthquakeAlert />
-
-                {/* Geo-Targeted Local News & Disaster Mitigation Widget (SDG 11) */}
-                <CityNewsWidget />
-
-                {/* Citizen Reports Feed */}
+              {/* Citizen Reports Feed (Scoped loading/error states so widgets remain visible!) */}
+              {isLoading ? (
+                <div className="py-12 flex flex-col items-center justify-center space-y-3 bg-neutral-900/40 rounded-3xl border border-neutral-800">
+                  <Loader2 className="w-8 h-8 text-emerald-500 animate-spin" />
+                  <p className="text-neutral-400 font-bold text-xs">
+                    Mengambil data aduan dari database...
+                  </p>
+                </div>
+              ) : error ? (
+                <div className="p-5 bg-red-500/10 border border-red-500/20 rounded-2xl text-center flex flex-col items-center justify-center space-y-2">
+                  <AlertTriangle className="w-6 h-6 text-red-500" />
+                  <p className="text-red-400 font-bold text-xs">{error}</p>
+                  <button
+                    onClick={fetchReports}
+                    className="px-3 py-1.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-lg text-xs flex items-center gap-1.5 transition-all shadow mx-auto"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5" />
+                    <span>Coba Muat Ulang Data Aduan</span>
+                  </button>
+                </div>
+              ) : (
                 <ReportFeed
                   reports={filteredReports}
                   onUpvote={handleUpvote}
@@ -615,9 +613,10 @@ export default function App() {
                   viewMode={viewMode}
                   setViewMode={setViewMode}
                 />
-              </div>
-            </>
-          )
+              )}
+
+            </div>
+          </>
         )}
 
       </main>
@@ -633,14 +632,14 @@ export default function App() {
               : activeTab === 'map'
               ? 'search'
               : activeTab === 'analytics'
-              ? 'like'
+              ? 'analytics'
               : 'home'
           }
           onTabChange={(tabId) => {
             if (tabId === 'home') setActiveTab('feed');
             else if (tabId === 'news') setActiveTab('news');
             else if (tabId === 'search') setActiveTab('map');
-            else if (tabId === 'like') setActiveTab('analytics');
+            else if (tabId === 'analytics') setActiveTab('analytics');
           }}
           onOpenCreateModal={() => setIsCreateModalOpen(true)}
           onOpenTrackerModal={() => setIsTrackerModalOpen(true)}

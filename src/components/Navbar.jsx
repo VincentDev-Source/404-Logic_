@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { 
   Building2, 
   MapPin, 
@@ -63,7 +63,7 @@ export default function Navbar({
             </div>
           </div>
 
-          {/* Navigation Tabs (Visible on Tablet & Desktop) */}
+          {/* Desktop Navigation Tabs */}
           <nav className="hidden sm:flex items-center space-x-1">
             <button
               onClick={() => setActiveTab('feed')}
@@ -75,18 +75,6 @@ export default function Navbar({
             >
               <ShieldCheck className="w-4 h-4" />
               <span>Semua Laporan</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('map')}
-              className={`px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs font-extrabold transition-all duration-200 active:scale-95 flex items-center space-x-1.5 ${
-                activeTab === 'map'
-                  ? 'bg-neutral-100 dark:bg-neutral-900 text-emerald-500 dark:text-emerald-400 border border-neutral-200 dark:border-neutral-800'
-                  : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-900'
-              }`}
-            >
-              <MapPin className="w-4 h-4" />
-              <span>Peta Radar</span>
             </button>
 
             <button
@@ -102,6 +90,18 @@ export default function Navbar({
             </button>
 
             <button
+              onClick={() => setActiveTab('map')}
+              className={`px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs font-extrabold transition-all duration-200 active:scale-95 flex items-center space-x-1.5 ${
+                activeTab === 'map'
+                  ? 'bg-neutral-100 dark:bg-neutral-900 text-emerald-500 dark:text-emerald-400 border border-neutral-200 dark:border-neutral-800'
+                  : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-900'
+              }`}
+            >
+              <MapPin className="w-4 h-4" />
+              <span>Peta Radar</span>
+            </button>
+
+            <button
               onClick={() => setActiveTab('analytics')}
               className={`px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs font-extrabold transition-all duration-200 active:scale-95 flex items-center space-x-1.5 ${
                 activeTab === 'analytics'
@@ -114,8 +114,8 @@ export default function Navbar({
             </button>
           </nav>
 
-          {/* Header Right Actions (Tablet & Desktop) */}
-          <div className="flex items-center space-x-2">
+          {/* Header Right Actions */}
+          <div className="flex items-center space-x-1.5 sm:space-x-2">
             
             {/* Operator Portal Entry Button */}
             {onOpenOperatorPortal && (
@@ -152,7 +152,7 @@ export default function Navbar({
             {/* Theme Toggle */}
             <button
               onClick={toggleTheme}
-              className="p-2 text-neutral-600 dark:text-neutral-400 bg-neutral-100 dark:bg-neutral-900 hover:bg-neutral-200 dark:hover:bg-neutral-800 border border-neutral-200 dark:border-neutral-800 rounded-xl transition-all active:scale-95 flex items-center justify-center"
+              className="p-1.5 sm:p-2 text-neutral-600 dark:text-neutral-400 bg-neutral-100 dark:bg-neutral-900 hover:bg-neutral-200 dark:hover:bg-neutral-800 border border-neutral-200 dark:border-neutral-800 rounded-xl transition-all active:scale-95 flex items-center justify-center"
               title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
             >
               {theme === 'dark' ? (
@@ -162,7 +162,7 @@ export default function Navbar({
               )}
             </button>
 
-            {/* Lock / Logout Face Auth Button (Tablet & Desktop) */}
+            {/* Lock / Logout Face Auth Button */}
             {onLockFaceAuth && (
               <button
                 onClick={onLockFaceAuth}
@@ -173,10 +173,10 @@ export default function Navbar({
               </button>
             )}
 
-            {/* CTA Button (Tablet & Desktop) */}
+            {/* CTA Button (Desktop & Mobile) */}
             <button
               onClick={onOpenCreateModal}
-              className="hidden sm:flex px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-xs shadow items-center gap-1.5 transition-all active:scale-95"
+              className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-xs shadow flex items-center gap-1 sm:gap-1.5 transition-all active:scale-95 shrink-0"
             >
               <PlusCircle className="w-4 h-4" />
               <span>Buat Aduan</span>
@@ -184,6 +184,68 @@ export default function Navbar({
           </div>
 
         </div>
+
+        {/* Mobile Horizontal Scrollable Tab Pills (Always visible on mobile screens!) */}
+        <div className="sm:hidden flex items-center gap-1.5 overflow-x-auto py-2 border-t border-neutral-200/60 dark:border-neutral-800/60 no-scrollbar">
+          <button
+            onClick={() => setActiveTab('feed')}
+            className={`px-3 py-1 rounded-lg text-[11px] font-extrabold shrink-0 flex items-center gap-1 transition-all ${
+              activeTab === 'feed'
+                ? 'bg-emerald-500 text-black shadow'
+                : 'bg-neutral-100 dark:bg-neutral-900 text-neutral-400 hover:text-white'
+            }`}
+          >
+            <ShieldCheck className="w-3 h-3" />
+            <span>Semua Laporan</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('news')}
+            className={`px-3 py-1 rounded-lg text-[11px] font-extrabold shrink-0 flex items-center gap-1 transition-all ${
+              activeTab === 'news'
+                ? 'bg-emerald-500 text-black shadow'
+                : 'bg-neutral-100 dark:bg-neutral-900 text-neutral-400 hover:text-white'
+            }`}
+          >
+            <Newspaper className="w-3 h-3" />
+            <span>📰 Berita Kota</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('map')}
+            className={`px-3 py-1 rounded-lg text-[11px] font-extrabold shrink-0 flex items-center gap-1 transition-all ${
+              activeTab === 'map'
+                ? 'bg-emerald-500 text-black shadow'
+                : 'bg-neutral-100 dark:bg-neutral-900 text-neutral-400 hover:text-white'
+            }`}
+          >
+            <MapPin className="w-3 h-3" />
+            <span>Peta Radar</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('analytics')}
+            className={`px-3 py-1 rounded-lg text-[11px] font-extrabold shrink-0 flex items-center gap-1 transition-all ${
+              activeTab === 'analytics'
+                ? 'bg-emerald-500 text-black shadow'
+                : 'bg-neutral-100 dark:bg-neutral-900 text-neutral-400 hover:text-white'
+            }`}
+          >
+            <BarChart3 className="w-3 h-3" />
+            <span>Analitik SDG</span>
+          </button>
+
+          {onOpenOperatorPortal && (
+            <button
+              onClick={onOpenOperatorPortal}
+              className="px-2.5 py-1 rounded-lg text-[11px] font-extrabold shrink-0 bg-blue-600/10 text-blue-400 border border-blue-500/20 flex items-center gap-1"
+            >
+              <UserCheck className="w-3 h-3" />
+              <span>Petugas</span>
+            </button>
+          )}
+        </div>
+
       </div>
     </header>
   );
