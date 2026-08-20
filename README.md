@@ -35,10 +35,10 @@
 
 | Nama | Peran | GitHub |
 |------|-------|--------|
-| **Annafi Arkaditya** | Project Lead & Full Stack Developer | [@Arklerknight](https://github.com/Arklerknight) |
-| **Tim 404 Logic - Frontend** | Frontend Developer | [@404-Logic](https://github.com/Arklerknight) |
-| **Tim 404 Logic - Backend** | Backend Developer | [@404-Logic](https://github.com/Arklerknight) |
-| **Tim 404 Logic - UI/UX** | UI/UX Designer | [@404-Logic](https://github.com/Arklerknight) |
+| **VincentDev as Malvino** | Project Lead & UX/UI Developer | [@404-Logic](https://github.com/VincentDev-Source) |
+| **annafi2 as Arka** | Full Stack Developer | [@Arklerknight](https://github.com/annafi2) |
+| **27RamaaaDevRamaaa as Rama - Frontend** | Frontend & Backend Developer | [@404-Logic](https://github.com/27RamaaaDev) |
+
 
 ---
 
