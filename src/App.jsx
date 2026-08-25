@@ -217,6 +217,19 @@ export default function App() {
         const sessionId = urlParams.get('session_id') || '';
         setDonationSuccessDetails({ amount, program, donor, sessionId });
         setIsDonationSuccessModalOpen(true);
+
+        // Record real donation immediately to database & Stripe verification
+        fetch('/api/donate/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sessionId,
+            amount,
+            program,
+            donorName: donor,
+          }),
+        }).catch((e) => console.warn('Donation auto-verify error:', e));
+
         window.history.replaceState({}, '', window.location.pathname);
       } else if (donationStatus === 'cancelled') {
         showToast('Donasi Dibatalkan', 'Pembayaran donasi Stripe telah dibatalkan.', 'info');

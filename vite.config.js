@@ -22,6 +22,7 @@ function apiDevPlugin() {
           else if (pathname === '/api/operator/reports') handlerPath = './api/operator/reports.js';
           else if (pathname === '/api/donate/create-checkout') handlerPath = './api/donate/create-checkout.js';
           else if (pathname === '/api/donate/history') handlerPath = './api/donate/history.js';
+          else if (pathname === '/api/donate/verify') handlerPath = './api/donate/verify.js';
 
           if (!handlerPath) return next();
 

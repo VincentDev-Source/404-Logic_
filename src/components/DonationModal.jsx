@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Heart,
@@ -21,7 +21,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 
-const PROGRAMS = [
+const BASE_PROGRAMS = [
   {
     id: 'Mitigasi Banjir & Pompa Air Kota',
     title: 'Mitigasi Banjir & Pompa Air Kota',
@@ -30,8 +30,6 @@ const PROGRAMS = [
     color: 'from-blue-500/20 to-cyan-500/20 border-blue-500/40 text-cyan-400',
     sdg: 'SDG 11.5',
     target: 'Rp 35.000.000',
-    raised: 'Rp 31.500.000',
-    percentage: 90
   },
   {
     id: 'Tanggap Darurat Bencana & Korban',
@@ -41,8 +39,6 @@ const PROGRAMS = [
     color: 'from-rose-500/20 to-amber-500/20 border-rose-500/40 text-rose-400',
     sdg: 'SDG 11.5',
     target: 'Rp 25.000.000',
-    raised: 'Rp 22.800.000',
-    percentage: 91
   },
   {
     id: 'Perbaikan Jalan & Fasilitas Publik',
@@ -52,8 +48,6 @@ const PROGRAMS = [
     color: 'from-amber-500/20 to-orange-500/20 border-amber-500/40 text-amber-400',
     sdg: 'SDG 11.2',
     target: 'Rp 20.000.000',
-    raised: 'Rp 18.200.000',
-    percentage: 91
   },
   {
     id: 'Penanaman 10.000 Pohon & RTH',
@@ -63,8 +57,6 @@ const PROGRAMS = [
     color: 'from-emerald-500/20 to-teal-500/20 border-emerald-500/40 text-emerald-400',
     sdg: 'SDG 11.7',
     target: 'Rp 10.000.000',
-    raised: 'Rp 8.500.000',
-    percentage: 85
   },
   {
     id: 'Pemasangan PJU Pintar Tenaga Surya',
@@ -74,8 +66,6 @@ const PROGRAMS = [
     color: 'from-yellow-500/20 to-amber-500/20 border-yellow-500/40 text-yellow-400',
     sdg: 'SDG 11.6',
     target: 'Rp 10.000.000',
-    raised: 'Rp 6.500.000',
-    percentage: 65
   }
 ];
 
@@ -90,7 +80,7 @@ const PRESET_AMOUNTS = [
 
 export default function DonationModal({ isOpen, onClose, showToast }) {
   const [activeTab, setActiveTab] = useState('donate'); // 'donate' | 'transparency'
-  const [selectedProgram, setSelectedProgram] = useState(PROGRAMS[0].id);
+  const [selectedProgram, setSelectedProgram] = useState(BASE_PROGRAMS[0].id);
   const [selectedAmount, setSelectedAmount] = useState(100000);
   const [customAmount, setCustomAmount] = useState('');
   const [donorName, setDonorName] = useState('');
@@ -99,31 +89,47 @@ export default function DonationModal({ isOpen, onClose, showToast }) {
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Transparency Data State
+  // Transparency Data State (100% Real from PostgreSQL / Stripe)
   const [transparencyData, setTransparencyData] = useState(null);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
 
-  // Fetch transparency history
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const fetchHistory = async () => {
-      setIsLoadingHistory(true);
-      try {
-        const res = await fetch('/api/donate/history');
-        if (res.ok) {
-          const json = await res.json();
-          if (json.success) setTransparencyData(json.data);
-        }
-      } catch (err) {
-        console.warn('Failed to load donation history:', err);
-      } finally {
-        setIsLoadingHistory(false);
+  // Fetch real-time transparency history
+  const fetchHistory = async () => {
+    setIsLoadingHistory(true);
+    try {
+      const res = await fetch('/api/donate/history');
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success) setTransparencyData(json.data);
       }
-    };
+    } catch (err) {
+      console.warn('Failed to load donation history:', err);
+    } finally {
+      setIsLoadingHistory(false);
+    }
+  };
 
-    fetchHistory();
+  useEffect(() => {
+    if (isOpen) {
+      fetchHistory();
+    }
   }, [isOpen]);
+
+  // Merge base programs with real-time donation metrics
+  const dynamicPrograms = useMemo(() => {
+    return BASE_PROGRAMS.map((prog) => {
+      const live = transparencyData?.programs?.find(
+        (p) => p.id === prog.id || p.title === prog.title
+      );
+      const raisedVal = live ? live.raised : 0;
+      const pct = live ? live.percentage : 0;
+      return {
+        ...prog,
+        raised: `Rp ${raisedVal.toLocaleString('id-ID')}`,
+        percentage: pct,
+      };
+    });
+  }, [transparencyData]);
 
   const effectiveAmount = customAmount ? parseInt(customAmount, 10) || 0 : selectedAmount;
 
@@ -167,6 +173,11 @@ export default function DonationModal({ isOpen, onClose, showToast }) {
     }
   };
 
+  const totalRaised = transparencyData?.totalRaised || 0;
+  const targetGoal = transparencyData?.targetGoal || 100000000;
+  const overallPercentage = targetGoal > 0 ? Math.min(100, Math.round((totalRaised / targetGoal) * 100)) : 0;
+  const recentDonors = transparencyData?.recentDonors || [];
+
   if (!isOpen) return null;
 
   return (
@@ -190,11 +201,11 @@ export default function DonationModal({ isOpen, onClose, showToast }) {
                     Donasi Pembangunan & Bencana Kota
                   </h3>
                   <span className="px-2 py-0.5 text-[9px] font-mono font-bold rounded bg-emerald-950 text-emerald-400 border border-emerald-800/60 hidden sm:inline-block">
-                    STRIPE VERIFIED
+                    STRIPE LIVE / SANDBOX
                   </span>
                 </div>
                 <p className="text-[11px] text-neutral-400">
-                  Partisipasi publik langsung untuk mendukung program prioritas pemerintah (SDG 11).
+                  Partisipasi publik real-time untuk mendukung program prioritas pemerintah (SDG 11).
                 </p>
               </div>
             </div>
@@ -229,7 +240,7 @@ export default function DonationModal({ isOpen, onClose, showToast }) {
               }`}
             >
               <TrendingUp className="w-3.5 h-3.5" />
-              <span>Transparansi Dana Publik</span>
+              <span>Transparansi Dana Publik (Real Data)</span>
             </button>
           </div>
 
@@ -246,7 +257,7 @@ export default function DonationModal({ isOpen, onClose, showToast }) {
                     <span className="text-[10px] text-neutral-500 font-mono">Tersalurkan ke dinas terkait</span>
                   </label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                    {PROGRAMS.map((prog) => {
+                    {dynamicPrograms.map((prog) => {
                       const Icon = prog.icon;
                       const isSelected = selectedProgram === prog.id;
 
@@ -415,7 +426,7 @@ export default function DonationModal({ isOpen, onClose, showToast }) {
 
               </form>
             ) : (
-              /* Transparency & Public Donors Tab */
+              /* Transparency & Public Donors Tab (100% Real) */
               <div className="space-y-6">
                 
                 {/* Hero Aggregate Metric */}
@@ -426,24 +437,27 @@ export default function DonationModal({ isOpen, onClose, showToast }) {
                         TOTAL DANA PARTISIPASI PUBLIK TERKUMPUL
                       </span>
                       <h3 className="text-2xl sm:text-3xl font-black text-white font-mono mt-0.5">
-                        Rp {transparencyData?.totalRaised?.toLocaleString('id-ID') || '87.500.000'}
+                        Rp {totalRaised.toLocaleString('id-ID')}
                       </h3>
                     </div>
                     <div className="text-right">
                       <span className="text-[10px] font-mono text-neutral-400">Target Kota</span>
                       <p className="text-sm font-bold text-neutral-300 font-mono">
-                        Rp {transparencyData?.targetGoal?.toLocaleString('id-ID') || '100.000.000'}
+                        Rp {targetGoal.toLocaleString('id-ID')}
                       </p>
                     </div>
                   </div>
 
                   {/* Overall Progress Bar */}
                   <div className="w-full h-3 bg-neutral-800 rounded-full overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full" style={{ width: '87.5%' }} />
+                    <div
+                      className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all duration-700"
+                      style={{ width: `${overallPercentage}%` }}
+                    />
                   </div>
                   <div className="flex items-center justify-between text-[10px] font-mono text-neutral-400">
-                    <span>87.5% Tercapai</span>
-                    <span>{transparencyData?.totalDonors || 348} Total Donatur Warga</span>
+                    <span>{overallPercentage}% Tercapai</span>
+                    <span>{transparencyData?.totalDonors || 0} Total Donatur Warga</span>
                   </div>
                 </div>
 
@@ -451,14 +465,17 @@ export default function DonationModal({ isOpen, onClose, showToast }) {
                 <div className="space-y-2.5">
                   <h4 className="text-xs font-extrabold text-white">Alokasi & Progres Program</h4>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                    {PROGRAMS.map((prog) => (
+                    {dynamicPrograms.map((prog) => (
                       <div key={prog.id} className="bg-neutral-950/60 border border-neutral-800 rounded-xl p-3 space-y-2">
                         <div className="flex items-center justify-between text-xs">
                           <span className="font-bold text-white truncate">{prog.title}</span>
                           <span className="text-[10px] font-mono font-bold text-emerald-400">{prog.percentage}%</span>
                         </div>
                         <div className="w-full h-1.5 bg-neutral-800 rounded-full overflow-hidden">
-                          <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${prog.percentage}%` }} />
+                          <div
+                            className="h-full bg-emerald-500 rounded-full transition-all duration-700"
+                            style={{ width: `${prog.percentage}%` }}
+                          />
                         </div>
                         <div className="flex items-center justify-between text-[9px] font-mono text-neutral-500">
                           <span>{prog.raised}</span>
@@ -479,30 +496,53 @@ export default function DonationModal({ isOpen, onClose, showToast }) {
                     <span className="text-[10px] font-mono text-neutral-500">Transparansi Real-time</span>
                   </div>
 
-                  <div className="space-y-2">
-                    {(transparencyData?.recentDonors || []).map((don) => (
-                      <div key={don.id} className="bg-neutral-900/50 border border-neutral-800/80 rounded-xl p-3 space-y-1.5">
-                        <div className="flex items-center justify-between text-xs">
-                          <div className="flex items-center gap-1.5 font-bold text-white">
-                            <span>{don.name}</span>
-                            {don.verified && (
-                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                            )}
-                          </div>
-                          <span className="font-mono font-extrabold text-emerald-400 text-xs">
-                            Rp {don.amount.toLocaleString('id-ID')}
-                          </span>
-                        </div>
-                        <p className="text-[11px] text-neutral-300 italic">
-                          "{don.message}"
-                        </p>
-                        <div className="flex items-center justify-between text-[9px] font-mono text-neutral-500 pt-0.5">
-                          <span>Program: {don.program}</span>
-                          <span>Terverifikasi Stripe</span>
-                        </div>
+                  {recentDonors.length === 0 ? (
+                    <div className="text-center py-8 px-4 bg-neutral-950/60 border border-neutral-800/80 rounded-2xl space-y-2.5">
+                      <div className="w-10 h-10 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center mx-auto text-neutral-500">
+                        <Heart className="w-5 h-5" />
                       </div>
-                    ))}
-                  </div>
+                      <div className="space-y-1">
+                        <p className="text-xs font-bold text-white">Belum Ada Donasi Publik Tercatat</p>
+                        <p className="text-[11px] text-neutral-400 max-w-sm mx-auto">
+                          Jadilah donatur pertama dari warga untuk mendukung pembangunan dan mitigasi kota tercinta!
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab('donate')}
+                        className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-black font-extrabold text-xs inline-flex items-center gap-1.5 transition-all shadow-md active:scale-95"
+                      >
+                        <Heart className="w-3.5 h-3.5 fill-black" />
+                        <span>Salurkan Donasi Pertama</span>
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {recentDonors.map((don) => (
+                        <div key={don.id} className="bg-neutral-900/50 border border-neutral-800/80 rounded-xl p-3 space-y-1.5">
+                          <div className="flex items-center justify-between text-xs">
+                            <div className="flex items-center gap-1.5 font-bold text-white">
+                              <span>{don.name}</span>
+                              {don.verified && (
+                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                              )}
+                            </div>
+                            <span className="font-mono font-extrabold text-emerald-400 text-xs">
+                              Rp {don.amount.toLocaleString('id-ID')}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-neutral-300 italic">
+                            "{don.message}"
+                          </p>
+                          <div className="flex items-center justify-between text-[9px] font-mono text-neutral-500 pt-0.5">
+                            <span>Program: {don.program}</span>
+                            <span>Terverifikasi Stripe Sandbox/Live</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
                 </div>
 
               </div>
@@ -515,3 +555,4 @@ export default function DonationModal({ isOpen, onClose, showToast }) {
     </AnimatePresence>
   );
 }
+
