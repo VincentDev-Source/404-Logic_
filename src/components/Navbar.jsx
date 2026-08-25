@@ -10,7 +10,8 @@ import {
   Moon,
   Lock,
   UserCheck,
-  Newspaper
+  Newspaper,
+  Heart
 } from 'lucide-react';
 
 export default function Navbar({ 
@@ -24,7 +25,8 @@ export default function Navbar({
   theme,
   setTheme,
   onLockFaceAuth,
-  onOpenOperatorPortal
+  onOpenOperatorPortal,
+  onOpenDonationModal
 }) {
 
   const handleTicketFormSubmit = (e) => {
@@ -117,6 +119,18 @@ export default function Navbar({
           {/* Header Right Actions */}
           <div className="flex items-center space-x-1.5 sm:space-x-2">
             
+            {/* Donation Button (Stripe) */}
+            {onOpenDonationModal && (
+              <button
+                onClick={onOpenDonationModal}
+                className="hidden sm:flex px-3 py-1.5 rounded-xl bg-gradient-to-r from-rose-500/10 to-amber-500/10 hover:from-rose-500/20 hover:to-amber-500/20 text-rose-500 dark:text-rose-400 border border-rose-500/30 text-xs font-black items-center gap-1.5 transition-all active:scale-95 shadow-sm"
+                title="Donasi Pembangunan & Mitigasi Kota (Stripe)"
+              >
+                <Heart className="w-3.5 h-3.5 fill-rose-500 text-rose-500 animate-pulse" />
+                <span>Donasi</span>
+              </button>
+            )}
+
             {/* Operator Portal Entry Button */}
             {onOpenOperatorPortal && (
               <button
@@ -234,6 +248,16 @@ export default function Navbar({
             <BarChart3 className="w-3 h-3" />
             <span>Analitik SDG</span>
           </button>
+
+          {onOpenDonationModal && (
+            <button
+              onClick={onOpenDonationModal}
+              className="px-2.5 py-1 rounded-lg text-[11px] font-black shrink-0 bg-rose-500/10 text-rose-400 border border-rose-500/30 flex items-center gap-1"
+            >
+              <Heart className="w-3 h-3 fill-rose-400 text-rose-400" />
+              <span>Donasi</span>
+            </button>
+          )}
 
           {onOpenOperatorPortal && (
             <button

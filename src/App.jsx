@@ -20,6 +20,8 @@ import CurvedNavbar from './components/CurvedNavbar';
 import EarthquakeAlert from './components/EarthquakeAlert';
 import CityNewsWidget from './components/CityNewsWidget';
 import NewsPage from './components/NewsPage';
+import DonationModal from './components/DonationModal';
+import DonationSuccessModal from './components/DonationSuccessModal';
 import { CheckCircle2, X, AlertTriangle, RefreshCw, Loader2 } from 'lucide-react';
 
 // Normalize database records to match frontend component requirements
@@ -196,9 +198,34 @@ export default function App() {
   const [createReportInitialData, setCreateReportInitialData] = useState(null);
   const [isTrackerModalOpen, setIsTrackerModalOpen] = useState(false);
   const [activeTicketId, setActiveTicketId] = useState('');
+  const [isDonationModalOpen, setIsDonationModalOpen] = useState(false);
+  const [isDonationSuccessModalOpen, setIsDonationSuccessModalOpen] = useState(false);
+  const [donationSuccessDetails, setDonationSuccessDetails] = useState(null);
 
   // Toast notification state
   const [toastMessage, setToastMessage] = useState(null);
+
+  // Detect Stripe Checkout return params (?donation=success or ?donation=cancelled)
+  useEffect(() => {
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const donationStatus = urlParams.get('donation');
+      if (donationStatus === 'success') {
+        const amount = urlParams.get('amount') || '100000';
+        const program = urlParams.get('program') || 'Mitigasi Banjir & Pompa Air Kota';
+        const donor = urlParams.get('donor') || 'Warga Peduli';
+        const sessionId = urlParams.get('session_id') || '';
+        setDonationSuccessDetails({ amount, program, donor, sessionId });
+        setIsDonationSuccessModalOpen(true);
+        window.history.replaceState({}, '', window.location.pathname);
+      } else if (donationStatus === 'cancelled') {
+        showToast('Donasi Dibatalkan', 'Pembayaran donasi Stripe telah dibatalkan.', 'info');
+        window.history.replaceState({}, '', window.location.pathname);
+      }
+    } catch (err) {
+      console.warn('URL param parse error:', err);
+    }
+  }, []);
 
   const showToast = (title, message, type = 'success') => {
     setToastMessage({ title, message, type });
@@ -509,6 +536,7 @@ export default function App() {
         setTheme={setTheme}
         onLockFaceAuth={handleLockFaceAuth}
         onOpenOperatorPortal={() => setIsOperatorPortal(true)}
+        onOpenDonationModal={() => setIsDonationModalOpen(true)}
       />
 
       {/* Main Content Area */}
@@ -558,6 +586,7 @@ export default function App() {
                 setCreateReportInitialData(null);
                 setIsCreateModalOpen(true);
               }}
+              onOpenDonationModal={() => setIsDonationModalOpen(true)}
             />
 
             <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pb-28 sm:pb-16 space-y-6">
@@ -670,6 +699,20 @@ export default function App() {
         reports={reports}
         activeTicketId={activeTicketId}
         onRateReport={handleRateReport}
+      />
+
+      {/* Stripe Donation Modal */}
+      <DonationModal
+        isOpen={isDonationModalOpen}
+        onClose={() => setIsDonationModalOpen(false)}
+        showToast={showToast}
+      />
+
+      {/* Stripe Donation Success Confirmation Modal */}
+      <DonationSuccessModal
+        isOpen={isDonationSuccessModalOpen}
+        onClose={() => setIsDonationSuccessModalOpen(false)}
+        donationDetails={donationSuccessDetails || {}}
       />
 
     </div>

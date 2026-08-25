@@ -20,6 +20,8 @@ function apiDevPlugin() {
           else if (pathname === '/api/auth/face-login') handlerPath = './api/auth/face-login.js';
           else if (pathname === '/api/auth/face-register') handlerPath = './api/auth/face-register.js';
           else if (pathname === '/api/operator/reports') handlerPath = './api/operator/reports.js';
+          else if (pathname === '/api/donate/create-checkout') handlerPath = './api/donate/create-checkout.js';
+          else if (pathname === '/api/donate/history') handlerPath = './api/donate/history.js';
 
           if (!handlerPath) return next();
 

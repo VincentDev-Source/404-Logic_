@@ -8,14 +8,16 @@ import {
   ArrowUpRight, 
   TrendingUp,
   ShieldCheck,
-  Star
+  Star,
+  Heart
 } from 'lucide-react';
 
 export default function HeroStats({ 
   reports = [],
   searchQuery, 
   setSearchQuery,
-  onOpenCreateModal
+  onOpenCreateModal,
+  onOpenDonationModal
 }) {
   const totalCount = reports.length;
   const resolvedReports = reports.filter(r => r.status === 'Selesai');
@@ -166,6 +168,38 @@ export default function HeroStats({
           </div>
 
         </div>
+
+        {/* Civic Crowdfunding / Donation Banner */}
+        {onOpenDonationModal && (
+          <div className="mt-4 p-4 rounded-2xl bg-gradient-to-r from-rose-950/40 via-neutral-900 to-amber-950/40 border border-rose-500/20 flex flex-col sm:flex-row items-center justify-between gap-3 animate-fade-in-up shadow-sm">
+            <div className="flex items-center gap-3 text-left">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-rose-500 to-amber-500 text-white flex items-center justify-center shrink-0 shadow-lg shadow-rose-500/20">
+                <Heart className="w-5 h-5 fill-white animate-pulse" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h4 className="text-xs sm:text-sm font-black text-white">
+                    Dana Partisipasi Publik & Mitigasi Bencana Kota
+                  </h4>
+                  <span className="px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-rose-950 text-rose-300 border border-rose-800/60">
+                    STRIPE VERIFIED
+                  </span>
+                </div>
+                <p className="text-[11px] text-neutral-400 mt-0.5">
+                  Dukung percepatan pompa air banjir, perbaikan jalan, dan bantuan darurat korban bencana.
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={onOpenDonationModal}
+              className="w-full sm:w-auto px-4 py-2 rounded-xl bg-gradient-to-r from-rose-500 to-amber-500 hover:from-rose-400 hover:to-amber-400 text-white font-extrabold text-xs shadow-md shadow-rose-500/20 flex items-center justify-center gap-1.5 transition-all active:scale-95 shrink-0"
+            >
+              <Heart className="w-3.5 h-3.5 fill-white" />
+              <span>Salurkan Donasi</span>
+            </button>
+          </div>
+        )}
 
       </div>
     </section>
