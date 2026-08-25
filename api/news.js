@@ -61,7 +61,7 @@ export default async function handler(req, res) {
                 fullContent: art.content || art.description || 'Konten berita lengkap dapat diakses melalui portal sumber resmi.',
                 url: art.url,
                 source: art.source?.name || 'GNews Aggregator',
-                image: art.image || getFallbackImage(art.title),
+                image: art.image || getThematicNewsImage(art.title, cat),
                 publishedAt: art.publishedAt || new Date().toISOString(),
                 category: cat,
                 readTime: calculateReadTime(textContent),
@@ -103,7 +103,7 @@ export default async function handler(req, res) {
                 fullContent: textContent.length > 20 ? textContent : `Pemerintah dan instansi terkait di ${cleanCity} terus memantau situasi terkini serta menghimbau masyarakat untuk tetap waspada dan aktif berpartisipasi dalam menjaga kenyamanan lingkungan kota.`,
                 url: item.link || item.guid || '#',
                 source: sourceName,
-                image: item.enclosure?.link || item.thumbnail || getFallbackImage(cleanTitle),
+                image: extractImageFromRssItem(item, cleanTitle, cat),
                 publishedAt: item.pubDate ? new Date(item.pubDate).toISOString() : new Date().toISOString(),
                 category: cat,
                 readTime: calculateReadTime(textContent),
@@ -232,25 +232,178 @@ function extractTags(title, city, category) {
   return tags;
 }
 
-// Utility: Fallback images based on keywords
-function getFallbackImage(title) {
-  const lower = (title || '').toLowerCase();
-  if (lower.includes('banjir') || lower.includes('hujan') || lower.includes('air') || lower.includes('genangan')) {
+// Utility: Extract Image from RSS Item or Fallback to Thematic Image
+function extractImageFromRssItem(item, title, category) {
+  if (item.enclosure && item.enclosure.link && item.enclosure.link.startsWith('http')) {
+    return item.enclosure.link;
+  }
+  if (item.thumbnail && item.thumbnail.startsWith('http') && !item.thumbnail.includes('googleusercontent.com/gadgets/proxy')) {
+    return item.thumbnail;
+  }
+  const rawHtml = (item.description || '') + ' ' + (item.content || '');
+  const imgMatch = rawHtml.match(/<img[^>]+src=["'](https?:\/\/[^"'>]+)["']/i);
+  if (imgMatch && imgMatch[1] && !imgMatch[1].includes('favicon') && !imgMatch[1].includes('1x1')) {
+    return imgMatch[1];
+  }
+  return getThematicNewsImage(title, category);
+}
+
+// Highly contextual and accurate thematic image matcher for Indonesian urban & municipal news
+function getThematicNewsImage(title = '', category = '') {
+  const lower = `${title} ${category}`.toLowerCase();
+
+  // 1. Sungai / Normalisasi / Kali / Aliran / Waduk / Bendungan / Irigasi / Pengerukan / BBWS / Tanggul
+  if (
+    lower.includes('sungai') ||
+    lower.includes('normalisasi') ||
+    lower.includes('bbws') ||
+    lower.includes('kali') ||
+    lower.includes('amprong') ||
+    lower.includes('brantas') ||
+    lower.includes('ciliwung') ||
+    lower.includes('bengawan') ||
+    lower.includes('waduk') ||
+    lower.includes('bendungan') ||
+    lower.includes('pengerukan') ||
+    lower.includes('tanggul') ||
+    lower.includes('sedimentasi')
+  ) {
+    return 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=1200&q=80';
+  }
+
+  // 2. Banjir / Hujan Lebat / Genangan / Air / Drainase / Pompa / Selokan / Gorong-gorong / Luapan
+  if (
+    lower.includes('banjir') ||
+    lower.includes('genangan') ||
+    lower.includes('drainase') ||
+    lower.includes('selokan') ||
+    lower.includes('hujan lebat') ||
+    lower.includes('air bah') ||
+    lower.includes('pompa air') ||
+    lower.includes('luapan')
+  ) {
     return 'https://images.unsplash.com/photo-1547683905-f686c993aae5?auto=format&fit=crop&w=1200&q=80';
   }
-  if (lower.includes('gempa') || lower.includes('bencana') || lower.includes('bpbd') || lower.includes('evakuasi')) {
+
+  // 3. Cuaca / Cerah / Panas / Awan / Langit / Kabut / Kabur / Suhu / Angin / Iklim / Prakiraan
+  if (
+    lower.includes('cerah') ||
+    lower.includes('udara kabur') ||
+    lower.includes('kabut') ||
+    lower.includes('langit') ||
+    lower.includes('cuaca') ||
+    lower.includes('suhu') ||
+    lower.includes('panas') ||
+    lower.includes('kemarau') ||
+    lower.includes('berawan') ||
+    lower.includes('iklim')
+  ) {
+    return 'https://images.unsplash.com/photo-1601297183305-6df142704ea2?auto=format&fit=crop&w=1200&q=80';
+  }
+
+  // 4. Gempa / Bencana / Longsor / Vulkanik / Tsunami / Tim SAR / BPBD / Evakuasi
+  if (
+    lower.includes('gempa') ||
+    lower.includes('longsor') ||
+    lower.includes('tsunami') ||
+    lower.includes('gunung') ||
+    lower.includes('bencana') ||
+    lower.includes('bpbd') ||
+    lower.includes('evakuasi') ||
+    lower.includes('sar')
+  ) {
     return 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=1200&q=80';
   }
-  if (lower.includes('jalan') || lower.includes('infrastruktur') || lower.includes('pju') || lower.includes('aspal') || lower.includes('jembatan')) {
+
+  // 5. Jalan Rusak / Aspal / Lubang / Bina Marga / Proyek / Jembatan / Flyover / Trotoar / PJU / Lampu
+  if (
+    lower.includes('jalan') ||
+    lower.includes('aspal') ||
+    lower.includes('lubang') ||
+    lower.includes('bina marga') ||
+    lower.includes('jembatan') ||
+    lower.includes('pju') ||
+    lower.includes('lampu') ||
+    lower.includes('trotoar') ||
+    lower.includes('flyover') ||
+    lower.includes('perbaikan')
+  ) {
     return 'https://images.unsplash.com/photo-1584463688353-27c196413a91?auto=format&fit=crop&w=1200&q=80';
   }
-  if (lower.includes('taman') || lower.includes('hijau') || lower.includes('pohon') || lower.includes('lingkungan')) {
-    return 'https://images.unsplash.com/photo-1477959858617-67f30ac4ce78?auto=format&fit=crop&w=1200&q=80';
+
+  // 6. Transportasi / Macet / Lalu Lintas / Bus / Angkutan / Kendaraan / Parkir / Dishub
+  if (
+    lower.includes('macet') ||
+    lower.includes('lalu lintas') ||
+    lower.includes('transportasi') ||
+    lower.includes('bus') ||
+    lower.includes('angkot') ||
+    lower.includes('dishub') ||
+    lower.includes('kendaraan') ||
+    lower.includes('parkir')
+  ) {
+    return 'https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=1200&q=80';
   }
-  if (lower.includes('sensor') || lower.includes('iot') || lower.includes('teknologi') || lower.includes('smart')) {
+
+  // 7. Smart City / IoT / Sensor / AI / Digital / CCTV / Aplikasi / Diskominfo / Komputer / Telemetri
+  if (
+    lower.includes('sensor') ||
+    lower.includes('iot') ||
+    lower.includes('smart city') ||
+    lower.includes('cctv') ||
+    lower.includes('digital') ||
+    lower.includes('aplikasi') ||
+    lower.includes('teknologi') ||
+    lower.includes('ai') ||
+    lower.includes('diskominfo')
+  ) {
     return 'https://images.unsplash.com/photo-1573164713988-8665fc963095?auto=format&fit=crop&w=1200&q=80';
   }
-  return 'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?auto=format&fit=crop&w=1200&q=80';
+
+  // 8. Taman / RTH / Pohon / Hutan / Lingkungan / Hijau / Daur Ulang / Sampah / DLH / Kebersihan
+  if (
+    lower.includes('taman') ||
+    lower.includes('rth') ||
+    lower.includes('pohon') ||
+    lower.includes('hutan') ||
+    lower.includes('hijau') ||
+    lower.includes('sampah') ||
+    lower.includes('daur ulang') ||
+    lower.includes('kebersihan') ||
+    lower.includes('dlh')
+  ) {
+    return 'https://images.unsplash.com/photo-1477959858617-67f30ac4ce78?auto=format&fit=crop&w=1200&q=80';
+  }
+
+  // 9. Pelayanan / KTP / Dukcapil / Kantor / Pemkot / Walikota / Bupati / Rapat / Kebijakan / Sosialisasi
+  if (
+    lower.includes('pelayanan') ||
+    lower.includes('ktp') ||
+    lower.includes('dukcapil') ||
+    lower.includes('pemkot') ||
+    lower.includes('pemkab') ||
+    lower.includes('walikota') ||
+    lower.includes('bupati') ||
+    lower.includes('kebijakan') ||
+    lower.includes('dprd')
+  ) {
+    return 'https://images.unsplash.com/photo-1450133064473-71024230f91b?auto=format&fit=crop&w=1200&q=80';
+  }
+
+  // 10. Kesehatan / Puskesmas / RSUD / Posyandu / Bansos / Warga
+  if (
+    lower.includes('puskesmas') ||
+    lower.includes('rsud') ||
+    lower.includes('kesehatan') ||
+    lower.includes('vaksin') ||
+    lower.includes('bansos') ||
+    lower.includes('posyandu')
+  ) {
+    return 'https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=1200&q=80';
+  }
+
+  // Default City Architecture
+  return 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=80';
 }
 
 // Generate Realistic Multi-category Articles for Indonesian Cities
