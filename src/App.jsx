@@ -205,25 +205,47 @@ export default function App() {
   // Toast notification state
   const [toastMessage, setToastMessage] = useState(null);
 
-  // Detect Stripe Checkout return params (?donation=success or ?donation=cancelled)
+  // Detect Midtrans Checkout return params (?donation=success, ?order_id=...&transaction_status=settlement)
   useEffect(() => {
     try {
       const urlParams = new URLSearchParams(window.location.search);
       const donationStatus = urlParams.get('donation');
-      if (donationStatus === 'success') {
+      const orderId = urlParams.get('order_id') || urlParams.get('session_id');
+      const transactionStatus = urlParams.get('transaction_status');
+      const statusCode = urlParams.get('status_code');
+
+      const isSuccess =
+        donationStatus === 'success' ||
+        transactionStatus === 'settlement' ||
+        transactionStatus === 'capture' ||
+        (statusCode === '200' && orderId);
+
+      const isPending =
+        donationStatus === 'pending' ||
+        transactionStatus === 'pending' ||
+        statusCode === '201';
+
+      const isCancelled =
+        donationStatus === 'cancelled' ||
+        donationStatus === 'error' ||
+        transactionStatus === 'cancel' ||
+        transactionStatus === 'deny' ||
+        transactionStatus === 'expire';
+
+      if (isSuccess && orderId) {
         const amount = urlParams.get('amount') || '100000';
         const program = urlParams.get('program') || 'Mitigasi Banjir & Pompa Air Kota';
         const donor = urlParams.get('donor') || 'Warga Peduli';
-        const sessionId = urlParams.get('session_id') || '';
-        setDonationSuccessDetails({ amount, program, donor, sessionId });
+
+        setDonationSuccessDetails({ amount, program, donor, sessionId: orderId });
         setIsDonationSuccessModalOpen(true);
 
-        // Record real donation immediately to database & Stripe verification
+        // Record real donation immediately to database & Midtrans verification
         fetch('/api/donate/verify', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            sessionId,
+            orderId,
             amount,
             program,
             donorName: donor,
@@ -231,8 +253,11 @@ export default function App() {
         }).catch((e) => console.warn('Donation auto-verify error:', e));
 
         window.history.replaceState({}, '', window.location.pathname);
-      } else if (donationStatus === 'cancelled') {
-        showToast('Donasi Dibatalkan', 'Pembayaran donasi Stripe telah dibatalkan.', 'info');
+      } else if (isPending) {
+        showToast('Menunggu Pembayaran', 'Donasi Anda sedang diproses oleh Midtrans.', 'info');
+        window.history.replaceState({}, '', window.location.pathname);
+      } else if (isCancelled) {
+        showToast('Donasi Dibatalkan', 'Pembayaran donasi Midtrans telah dibatalkan.', 'info');
         window.history.replaceState({}, '', window.location.pathname);
       }
     } catch (err) {

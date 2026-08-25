@@ -154,83 +154,18 @@ export default function DonationModal({ isOpen, onClose, showToast, onDonationSu
           donorEmail: donorEmail.trim(),
           message: message.trim(),
           isAnonymous: isAnonymous,
+          originUrl: window.location.origin,
         }),
       });
 
       const data = await res.json();
 
-      if (!res.ok || !data.success || !data.token) {
+      if (!res.ok || !data.success || !data.redirectUrl) {
         throw new Error(data.error || 'Gagal membuat sesi transaksi Midtrans.');
       }
 
-      const snapToken = data.token;
-      const orderId = data.orderId;
-
-      if (window.snap && typeof window.snap.pay === 'function') {
-        window.snap.pay(snapToken, {
-          onSuccess: async function (result) {
-            console.log('Midtrans Payment Success:', result);
-            setIsSubmitting(false);
-            onClose();
-
-            // Auto verify and record to PostgreSQL
-            try {
-              await fetch('/api/donate/verify', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  orderId: result.order_id || orderId,
-                  transactionId: result.transaction_id,
-                  amount: effectiveAmount,
-                  program: selectedProgram,
-                  donorName: isAnonymous ? 'Hamba Allah (Anonim)' : (donorName.trim() || 'Warga Peduli'),
-                  donorEmail: donorEmail.trim(),
-                  message: message.trim(),
-                  isAnonymous: isAnonymous,
-                  paymentType: result.payment_type || 'Midtrans Sandbox',
-                }),
-              });
-            } catch (err) {
-              console.warn('Verify call error:', err);
-            }
-
-            if (onDonationSuccess) {
-              onDonationSuccess({
-                amount: effectiveAmount,
-                program: selectedProgram,
-                donor: isAnonymous ? 'Hamba Allah (Anonim)' : (donorName.trim() || 'Warga Peduli'),
-                sessionId: result.order_id || orderId,
-                paymentType: result.payment_type || 'Midtrans Sandbox',
-              });
-            }
-
-            if (showToast) {
-              showToast('Donasi Berhasil 🎉', `Terima kasih! Donasi Rp ${effectiveAmount.toLocaleString('id-ID')} telah diterima via Midtrans.`, 'success');
-            }
-          },
-          onPending: function (result) {
-            console.log('Midtrans Payment Pending:', result);
-            setIsSubmitting(false);
-            if (showToast) {
-              showToast('Menunggu Pembayaran ⏳', `Silakan selesaikan pembayaran via ${result.payment_type || 'Virtual Account / QRIS'}.`, 'info');
-            }
-          },
-          onError: function (result) {
-            console.error('Midtrans Payment Error:', result);
-            setIsSubmitting(false);
-            if (showToast) {
-              showToast('Pembayaran Dibatalkan / Gagal', result.status_message || 'Transaksi tidak selesai.', 'error');
-            }
-          },
-          onClose: function () {
-            setIsSubmitting(false);
-          },
-        });
-      } else if (data.redirectUrl) {
-        window.location.href = data.redirectUrl;
-      } else {
-        throw new Error('Midtrans Snap SDK belum termuat.');
-      }
+      // Direct Redirection to Midtrans Sandbox Payment Portal
+      window.location.href = data.redirectUrl;
     } catch (err) {
       console.error('Checkout error:', err);
       if (showToast) showToast('Gagal Memproses Pembayaran', err.message, 'error');
