@@ -78,7 +78,7 @@ const PRESET_AMOUNTS = [
   { value: 1000000, label: 'Rp 1.000.000' }
 ];
 
-export default function DonationModal({ isOpen, onClose, showToast }) {
+export default function DonationModal({ isOpen, onClose, showToast, onDonationSuccess }) {
   const [activeTab, setActiveTab] = useState('donate'); // 'donate' | 'transparency'
   const [selectedProgram, setSelectedProgram] = useState(BASE_PROGRAMS[0].id);
   const [selectedAmount, setSelectedAmount] = useState(100000);
@@ -89,7 +89,7 @@ export default function DonationModal({ isOpen, onClose, showToast }) {
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Transparency Data State (100% Real from PostgreSQL / Stripe)
+  // Transparency Data State (100% Real from PostgreSQL / Midtrans)
   const [transparencyData, setTransparencyData] = useState(null);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
 
@@ -136,15 +136,15 @@ export default function DonationModal({ isOpen, onClose, showToast }) {
   const handleCheckout = async (e) => {
     e.preventDefault();
 
-    if (!effectiveAmount || effectiveAmount < 10000) {
-      if (showToast) showToast('Nominal Kurang', 'Nominal donasi minimal adalah Rp 10.000.', 'error');
+    if (!effectiveAmount || effectiveAmount < 1000) {
+      if (showToast) showToast('Nominal Kurang', 'Nominal donasi minimal adalah Rp 1.000.', 'error');
       return;
     }
 
     setIsSubmitting(true);
 
     try {
-      const res = await fetch('/api/donate/create-checkout', {
+      const res = await fetch('/api/donate/midtrans-token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -154,18 +154,83 @@ export default function DonationModal({ isOpen, onClose, showToast }) {
           donorEmail: donorEmail.trim(),
           message: message.trim(),
           isAnonymous: isAnonymous,
-          originUrl: window.location.origin,
         }),
       });
 
       const data = await res.json();
 
-      if (!res.ok || !data.success || !data.url) {
-        throw new Error(data.error || 'Gagal membuat sesi pembayaran Stripe.');
+      if (!res.ok || !data.success || !data.token) {
+        throw new Error(data.error || 'Gagal membuat sesi transaksi Midtrans.');
       }
 
-      // Redirect to Stripe Checkout
-      window.location.href = data.url;
+      const snapToken = data.token;
+      const orderId = data.orderId;
+
+      if (window.snap && typeof window.snap.pay === 'function') {
+        window.snap.pay(snapToken, {
+          onSuccess: async function (result) {
+            console.log('Midtrans Payment Success:', result);
+            setIsSubmitting(false);
+            onClose();
+
+            // Auto verify and record to PostgreSQL
+            try {
+              await fetch('/api/donate/verify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  orderId: result.order_id || orderId,
+                  transactionId: result.transaction_id,
+                  amount: effectiveAmount,
+                  program: selectedProgram,
+                  donorName: isAnonymous ? 'Hamba Allah (Anonim)' : (donorName.trim() || 'Warga Peduli'),
+                  donorEmail: donorEmail.trim(),
+                  message: message.trim(),
+                  isAnonymous: isAnonymous,
+                  paymentType: result.payment_type || 'Midtrans Sandbox',
+                }),
+              });
+            } catch (err) {
+              console.warn('Verify call error:', err);
+            }
+
+            if (onDonationSuccess) {
+              onDonationSuccess({
+                amount: effectiveAmount,
+                program: selectedProgram,
+                donor: isAnonymous ? 'Hamba Allah (Anonim)' : (donorName.trim() || 'Warga Peduli'),
+                sessionId: result.order_id || orderId,
+                paymentType: result.payment_type || 'Midtrans Sandbox',
+              });
+            }
+
+            if (showToast) {
+              showToast('Donasi Berhasil 🎉', `Terima kasih! Donasi Rp ${effectiveAmount.toLocaleString('id-ID')} telah diterima via Midtrans.`, 'success');
+            }
+          },
+          onPending: function (result) {
+            console.log('Midtrans Payment Pending:', result);
+            setIsSubmitting(false);
+            if (showToast) {
+              showToast('Menunggu Pembayaran ⏳', `Silakan selesaikan pembayaran via ${result.payment_type || 'Virtual Account / QRIS'}.`, 'info');
+            }
+          },
+          onError: function (result) {
+            console.error('Midtrans Payment Error:', result);
+            setIsSubmitting(false);
+            if (showToast) {
+              showToast('Pembayaran Dibatalkan / Gagal', result.status_message || 'Transaksi tidak selesai.', 'error');
+            }
+          },
+          onClose: function () {
+            setIsSubmitting(false);
+          },
+        });
+      } else if (data.redirectUrl) {
+        window.location.href = data.redirectUrl;
+      } else {
+        throw new Error('Midtrans Snap SDK belum termuat.');
+      }
     } catch (err) {
       console.error('Checkout error:', err);
       if (showToast) showToast('Gagal Memproses Pembayaran', err.message, 'error');
@@ -201,7 +266,7 @@ export default function DonationModal({ isOpen, onClose, showToast }) {
                     Donasi Pembangunan & Bencana Kota
                   </h3>
                   <span className="px-2 py-0.5 text-[9px] font-mono font-bold rounded bg-emerald-950 text-emerald-400 border border-emerald-800/60 hidden sm:inline-block">
-                    STRIPE LIVE / SANDBOX
+                    MIDTRANS SANDBOX
                   </span>
                 </div>
                 <p className="text-[11px] text-neutral-400">
@@ -361,7 +426,7 @@ export default function DonationModal({ isOpen, onClose, showToast }) {
                     />
                     <input
                       type="email"
-                      placeholder="Email (untuk bukti/tanda terima Stripe)..."
+                      placeholder="Email (untuk bukti/tanda terima donasi)..."
                       value={donorEmail}
                       onChange={(e) => setDonorEmail(e.target.value)}
                       className="px-3.5 py-2.5 rounded-xl bg-neutral-950 border border-neutral-800 text-white placeholder-neutral-500 text-xs focus:outline-none focus:border-emerald-500"
@@ -400,24 +465,24 @@ export default function DonationModal({ isOpen, onClose, showToast }) {
                   <div className="flex items-center justify-between text-[10px] text-neutral-400 border-t border-neutral-800 pt-3">
                     <div className="flex items-center gap-1.5">
                       <Lock className="w-3 h-3 text-emerald-400" />
-                      <span>Diproses secara aman oleh Stripe Checkout</span>
+                      <span>Diproses secara aman oleh Midtrans Sandbox</span>
                     </div>
-                    <span className="font-mono">Visa • Mastercard • JCB • E-Wallet</span>
+                    <span className="font-mono">QRIS • BCA/Mandiri/BNI/BRI VA • GoPay</span>
                   </div>
 
                   <button
                     type="submit"
-                    disabled={isSubmitting || effectiveAmount < 10000}
+                    disabled={isSubmitting || effectiveAmount < 1000}
                     className="w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 disabled:opacity-50 text-black font-black text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.99] shadow-xl shadow-emerald-500/20"
                   >
                     {isSubmitting ? (
                       <>
                         <Loader2 className="w-4 h-4 animate-spin" />
-                        <span>Menghubungkan ke Stripe...</span>
+                        <span>Menghubungkan ke Midtrans Snap...</span>
                       </>
                     ) : (
                       <>
-                        <span>Lanjutkan Pembayaran via Stripe</span>
+                        <span>Lanjutkan Pembayaran via Midtrans</span>
                         <ArrowRight className="w-4 h-4" />
                       </>
                     )}
@@ -536,7 +601,7 @@ export default function DonationModal({ isOpen, onClose, showToast }) {
                           </p>
                           <div className="flex items-center justify-between text-[9px] font-mono text-neutral-500 pt-0.5">
                             <span>Program: {don.program}</span>
-                            <span>Terverifikasi Stripe Sandbox/Live</span>
+                            <span>Terverifikasi Midtrans Sandbox</span>
                           </div>
                         </div>
                       ))}

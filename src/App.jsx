@@ -714,14 +714,18 @@ export default function App() {
         onRateReport={handleRateReport}
       />
 
-      {/* Stripe Donation Modal */}
+      {/* Midtrans Donation Modal */}
       <DonationModal
         isOpen={isDonationModalOpen}
         onClose={() => setIsDonationModalOpen(false)}
         showToast={showToast}
+        onDonationSuccess={(details) => {
+          setDonationSuccessDetails(details);
+          setIsDonationSuccessModalOpen(true);
+        }}
       />
 
-      {/* Stripe Donation Success Confirmation Modal */}
+      {/* Midtrans Donation Success Confirmation Modal */}
       <DonationSuccessModal
         isOpen={isDonationSuccessModalOpen}
         onClose={() => setIsDonationSuccessModalOpen(false)}

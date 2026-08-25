@@ -182,7 +182,7 @@ export default function HeroStats({
                     Dana Partisipasi Publik & Mitigasi Bencana Kota
                   </h4>
                   <span className="px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-rose-950 text-rose-300 border border-rose-800/60">
-                    STRIPE VERIFIED
+                    MIDTRANS SANDBOX
                   </span>
                 </div>
                 <p className="text-[11px] text-neutral-400 mt-0.5">

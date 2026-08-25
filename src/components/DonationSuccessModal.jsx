@@ -87,7 +87,7 @@ export default function DonationSuccessModal({
           <div className="space-y-1">
             <span className="px-2.5 py-0.5 text-[10px] font-mono font-bold rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800/60 inline-flex items-center gap-1">
               <Sparkles className="w-3 h-3" />
-              PEMBAYARAN STRIPE BERHASIL
+              PEMBAYARAN MIDTRANS BERHASIL
             </span>
             <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight">
               Terima Kasih, {donor}! 🎉
@@ -104,7 +104,7 @@ export default function DonationSuccessModal({
                 <Building2 className="w-4 h-4 text-emerald-400" />
                 <span>CivicPulse SDG 11 Receipt</span>
               </div>
-              <span className="text-[10px] text-emerald-400 font-bold">PAID (STRIPE)</span>
+              <span className="text-[10px] text-emerald-400 font-bold">PAID (MIDTRANS)</span>
             </div>
 
             <div className="space-y-1.5 text-[11px] text-neutral-300">

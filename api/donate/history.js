@@ -1,7 +1,6 @@
 // Vercel Serverless Function for 100% Real-time Public Donation Statistics & Transparency
 // Endpoint: GET /api/donate/history
 
-import Stripe from 'stripe';
 import prisma from '../../src/lib/prisma.js';
 
 const PROGRAM_TARGETS = [
@@ -61,11 +60,6 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
-  const stripeKey =
-    process.env.STRIPE_SECRET_KEY ||
-    process.env.OTHER_STRIPE_SECRET_KEY ||
-    process.env.VITE_STRIPE_SECRET_KEY;
-
   let realDonations = [];
 
   // 1. Fetch Real Donations from PostgreSQL Database
@@ -79,71 +73,6 @@ export default async function handler(req, res) {
     }
   } catch (dbErr) {
     console.warn('Database donation fetch warning:', dbErr.message);
-  }
-
-  // 2. Fetch Live Completed Sessions from Stripe Sandbox / Test Account to ensure immediate reflection
-  if (stripeKey) {
-    try {
-      const stripe = new Stripe(stripeKey, { apiVersion: '2024-06-20' });
-      const sessions = await stripe.checkout.sessions.list({ limit: 50 });
-
-      if (sessions && Array.isArray(sessions.data)) {
-        for (const session of sessions.data) {
-          if (session.payment_status === 'paid' || session.status === 'complete') {
-            const existsInDb = realDonations.some(
-              (d) => d.stripeSessionId === session.id
-            );
-
-            if (!existsInDb && session.amount_total) {
-              const meta = session.metadata || {};
-              const donorName = meta.isAnonymous === 'true'
-                ? 'Hamba Allah (Anonim)'
-                : meta.donorName || session.customer_details?.name || 'Warga Peduli';
-              const program = meta.program || 'Mitigasi Banjir & Pompa Air Kota';
-              const message = meta.message || '';
-              const isAnon = meta.isAnonymous === 'true';
-
-              const newDonation = {
-                id: `stripe-${session.id.slice(-6)}`,
-                donorName,
-                donorEmail: session.customer_details?.email || null,
-                amount: session.amount_total,
-                currency: session.currency ? session.currency.toUpperCase() : 'IDR',
-                program,
-                message,
-                isAnonymous: isAnon,
-                stripeSessionId: session.id,
-                status: 'SUCCESS',
-                createdAt: new Date(session.created * 1000),
-              };
-
-              realDonations.push(newDonation);
-
-              // Auto-sync into PostgreSQL
-              try {
-                await prisma.donation.create({
-                  data: {
-                    stripeSessionId: session.id,
-                    amount: session.amount_total,
-                    program,
-                    donorName,
-                    donorEmail: session.customer_details?.email || null,
-                    message,
-                    isAnonymous: isAnon,
-                    status: 'SUCCESS',
-                    createdAt: new Date(session.created * 1000),
-                  },
-                });
-              } catch (e) {
-                // Ignore unique constraint collision
-              }
-            }
-          }
-        }
-      }
-    } catch (stripeErr) {
-      console.warn('Stripe sessions query warning:', stripeErr.message);
-    }
   }
 
   // Sort by date descending
@@ -181,12 +110,12 @@ export default async function handler(req, res) {
     };
   });
 
-  const recentDonors = realDonations.slice(0, 15).map((d) => ({
+  const recentDonors = realDonations.slice(0, 20).map((d) => ({
     id: d.id,
     name: d.isAnonymous ? 'Hamba Allah (Anonim)' : d.donorName,
     amount: Number(d.amount),
     program: d.program,
-    message: d.message || 'Donasi untuk kota berkelanjutan',
+    message: d.message || 'Donasi untuk kemajuan dan mitigasi kota',
     createdAt: d.createdAt,
     verified: true,
   }));

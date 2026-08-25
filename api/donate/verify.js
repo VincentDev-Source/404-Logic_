@@ -1,7 +1,6 @@
-// Vercel Serverless Function to Verify & Record Real Stripe Donation
+// Vercel Serverless Function to Verify & Record Real Midtrans / Payment Gateway Donation
 // Endpoint: POST /api/donate/verify
 
-import Stripe from 'stripe';
 import prisma from '../../src/lib/prisma.js';
 
 export default async function handler(req, res) {
@@ -19,14 +18,16 @@ export default async function handler(req, res) {
     return;
   }
 
-  const stripeKey =
-    process.env.STRIPE_SECRET_KEY ||
-    process.env.OTHER_STRIPE_SECRET_KEY ||
-    process.env.VITE_STRIPE_SECRET_KEY;
+  const serverKey =
+    process.env.MIDTRANS_SERVER_KEY ||
+    process.env.OTHER_MIDTRANS_SERVER_KEY ||
+    '';
 
   try {
     const payload = req.method === 'POST' ? req.body || {} : req.query || {};
     const {
+      orderId,
+      transactionId,
       sessionId,
       amount,
       program,
@@ -34,39 +35,55 @@ export default async function handler(req, res) {
       donorEmail,
       message,
       isAnonymous,
+      paymentType,
     } = payload;
 
+    const refId = orderId || transactionId || sessionId || `DONASI-${Date.now()}`;
     let finalAmount = parseFloat(amount) || 0;
     let finalProgram = program || 'Mitigasi Banjir & Pompa Air Kota';
     let finalDonorName = donorName || 'Warga Peduli';
     let finalEmail = donorEmail || null;
     let finalMessage = message || '';
     let finalIsAnonymous = isAnonymous === true || isAnonymous === 'true';
+    let finalPaymentType = paymentType || 'Midtrans Sandbox';
 
-    // If Stripe session ID provided and Stripe key exists, verify directly with Stripe
-    if (sessionId && stripeKey) {
+    // Verify with Midtrans Sandbox API if orderId and ServerKey are present
+    if (orderId && serverKey) {
       try {
-        const stripe = new Stripe(stripeKey, { apiVersion: '2024-06-20' });
-        const session = await stripe.checkout.sessions.retrieve(sessionId);
+        const isProduction = process.env.MIDTRANS_IS_PRODUCTION === 'true';
+        const statusUrl = isProduction
+          ? `https://api.midtrans.com/v2/${orderId}/status`
+          : `https://api.sandbox.midtrans.com/v2/${orderId}/status`;
 
-        if (session) {
-          if (session.amount_total) {
-            finalAmount = session.amount_total;
+        const authString = Buffer.from(`${serverKey}:`).toString('base64');
+        const statusRes = await fetch(statusUrl, {
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+            Authorization: `Basic ${authString}`,
+          },
+        });
+
+        if (statusRes.ok) {
+          const statusData = await statusRes.json();
+          if (statusData.gross_amount) {
+            finalAmount = parseFloat(statusData.gross_amount);
           }
-          if (session.metadata) {
-            if (session.metadata.program) finalProgram = session.metadata.program;
-            if (session.metadata.donorName) finalDonorName = session.metadata.donorName;
-            if (session.metadata.message) finalMessage = session.metadata.message;
-            if (session.metadata.isAnonymous !== undefined) {
-              finalIsAnonymous = session.metadata.isAnonymous === 'true';
-            }
+          if (statusData.payment_type) {
+            finalPaymentType = statusData.payment_type;
           }
-          if (session.customer_details?.email) {
-            finalEmail = session.customer_details.email;
+          if (statusData.custom_field1) {
+            finalProgram = statusData.custom_field1;
+          }
+          if (statusData.custom_field2) {
+            finalMessage = statusData.custom_field2;
+          }
+          if (statusData.custom_field3 !== undefined) {
+            finalIsAnonymous = statusData.custom_field3 === 'true';
           }
         }
-      } catch (stripeErr) {
-        console.warn('Stripe session retrieval warning:', stripeErr.message);
+      } catch (midtransErr) {
+        console.warn('Midtrans status check warning:', midtransErr.message);
       }
     }
 
@@ -74,45 +91,35 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Nominal donasi tidak valid.' });
     }
 
+    const savedDonorName = finalIsAnonymous
+      ? 'Hamba Allah (Anonim)'
+      : (finalDonorName.trim() || 'Warga Peduli');
+
     // Save into PostgreSQL database using Prisma
     let donationRecord = null;
     try {
-      if (sessionId) {
-        donationRecord = await prisma.donation.upsert({
-          where: { stripeSessionId: sessionId },
-          update: {
-            amount: finalAmount,
-            program: finalProgram,
-            donorName: finalIsAnonymous ? 'Hamba Allah (Anonim)' : finalDonorName,
-            donorEmail: finalEmail,
-            message: finalMessage,
-            isAnonymous: finalIsAnonymous,
-            status: 'SUCCESS',
-          },
-          create: {
-            stripeSessionId: sessionId,
-            amount: finalAmount,
-            program: finalProgram,
-            donorName: finalIsAnonymous ? 'Hamba Allah (Anonim)' : finalDonorName,
-            donorEmail: finalEmail,
-            message: finalMessage,
-            isAnonymous: finalIsAnonymous,
-            status: 'SUCCESS',
-          },
-        });
-      } else {
-        donationRecord = await prisma.donation.create({
-          data: {
-            amount: finalAmount,
-            program: finalProgram,
-            donorName: finalIsAnonymous ? 'Hamba Allah (Anonim)' : finalDonorName,
-            donorEmail: finalEmail,
-            message: finalMessage,
-            isAnonymous: finalIsAnonymous,
-            status: 'SUCCESS',
-          },
-        });
-      }
+      donationRecord = await prisma.donation.upsert({
+        where: { stripeSessionId: refId },
+        update: {
+          amount: finalAmount,
+          program: finalProgram,
+          donorName: savedDonorName,
+          donorEmail: finalEmail,
+          message: finalMessage,
+          isAnonymous: finalIsAnonymous,
+          status: 'SUCCESS',
+        },
+        create: {
+          stripeSessionId: refId,
+          amount: finalAmount,
+          program: finalProgram,
+          donorName: savedDonorName,
+          donorEmail: finalEmail,
+          message: finalMessage,
+          isAnonymous: finalIsAnonymous,
+          status: 'SUCCESS',
+        },
+      });
     } catch (dbErr) {
       console.error('Database write error for donation:', dbErr);
     }
@@ -122,8 +129,9 @@ export default async function handler(req, res) {
       donation: donationRecord || {
         amount: finalAmount,
         program: finalProgram,
-        donorName: finalIsAnonymous ? 'Hamba Allah (Anonim)' : finalDonorName,
+        donorName: savedDonorName,
         message: finalMessage,
+        paymentType: finalPaymentType,
       },
     });
   } catch (error) {
