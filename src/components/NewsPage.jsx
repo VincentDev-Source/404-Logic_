@@ -35,6 +35,7 @@ import {
   DEFAULT_CITY
 } from '../utils/geolocation';
 import { INDONESIAN_CITIES, normalizeCityName } from '../data/indonesianCities';
+import { getClientFallbackArticles } from '../data/fallbackNews';
 import EarthquakeAlert from './EarthquakeAlert';
 import NewsReaderModal from './NewsReaderModal';
 import NewsWeatherWidget from './NewsWeatherWidget';
@@ -81,7 +82,7 @@ export default function NewsPage({
   const [activeReaderArticle, setActiveReaderArticle] = useState(null);
   const [isReaderOpen, setIsReaderOpen] = useState(false);
 
-  // 6. Fetch News from API
+  // 6. Fetch News from API with resilient client fallback
   const fetchNews = useCallback(async (cityName, isManual = false) => {
     if (isManual) setIsRefreshingNews(true);
     else setIsLoadingNews(true);
@@ -89,18 +90,21 @@ export default function NewsPage({
 
     try {
       const res = await fetch(`/api/news?city=${encodeURIComponent(cityName)}`);
-      if (!res.ok) {
-        throw new Error(`Gagal mengambil berita (HTTP ${res.status})`);
+      const contentType = res.headers.get('content-type') || '';
+      if (res.ok && contentType.includes('application/json')) {
+        const data = await res.json();
+        if (data.success && Array.isArray(data.articles) && data.articles.length > 0) {
+          setNews(data.articles);
+          return;
+        }
       }
-      const data = await res.json();
-      if (data.success && Array.isArray(data.articles)) {
-        setNews(data.articles);
-      } else {
-        throw new Error('Format data berita tidak sesuai');
-      }
+      // If server returned non-JSON (e.g. Vite static JS file) or empty
+      const fallback = getClientFallbackArticles(cityName);
+      setNews(fallback);
     } catch (err) {
-      console.error('Error fetching news:', err);
-      setError(err.message || 'Gagal memuat berita terkini.');
+      console.warn('News API fetch error, fallback activated:', err);
+      const fallback = getClientFallbackArticles(cityName);
+      setNews(fallback);
     } finally {
       setIsLoadingNews(false);
       setIsRefreshingNews(false);

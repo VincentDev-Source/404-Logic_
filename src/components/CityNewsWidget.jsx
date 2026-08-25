@@ -24,6 +24,7 @@ import {
   POPULAR_CITIES, 
   DEFAULT_CITY 
 } from '../utils/geolocation';
+import { getClientFallbackArticles } from '../data/fallbackNews';
 import NewsReaderModal from './NewsReaderModal';
 
 export default function CityNewsWidget({ onNavigateToNews, onOpenReportModalWithContext, showToast }) {
@@ -72,7 +73,7 @@ export default function CityNewsWidget({ onNavigateToNews, onOpenReportModalWith
     });
   };
 
-  // 1. Fetch News Function for given city
+  // 1. Fetch News Function for given city with resilient fallback
   const fetchNews = useCallback(async (cityName, isManualRefresh = false) => {
     if (isManualRefresh) setIsRefreshingNews(true);
     else setIsLoadingNews(true);
@@ -80,18 +81,20 @@ export default function CityNewsWidget({ onNavigateToNews, onOpenReportModalWith
 
     try {
       const res = await fetch(`/api/news?city=${encodeURIComponent(cityName)}`);
-      if (!res.ok) {
-        throw new Error(`Gagal mengambil berita (HTTP ${res.status})`);
+      const contentType = res.headers.get('content-type') || '';
+      if (res.ok && contentType.includes('application/json')) {
+        const data = await res.json();
+        if (data.success && Array.isArray(data.articles) && data.articles.length > 0) {
+          setNews(data.articles);
+          return;
+        }
       }
-      const data = await res.json();
-      if (data.success && Array.isArray(data.articles)) {
-        setNews(data.articles);
-      } else {
-        throw new Error('Format respon berita tidak valid');
-      }
+      const fallback = getClientFallbackArticles(cityName);
+      setNews(fallback);
     } catch (err) {
-      console.error('Error fetching news:', err);
-      setError(err.message || 'Gagal memuat berita lokal.');
+      console.warn('CityNewsWidget API fetch error, fallback activated:', err);
+      const fallback = getClientFallbackArticles(cityName);
+      setNews(fallback);
     } finally {
       setIsLoadingNews(false);
       setIsRefreshingNews(false);
