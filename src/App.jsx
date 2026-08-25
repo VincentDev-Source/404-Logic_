@@ -19,6 +19,7 @@ import Footer from './components/Footer';
 import CurvedNavbar from './components/CurvedNavbar';
 import EarthquakeAlert from './components/EarthquakeAlert';
 import CityNewsWidget from './components/CityNewsWidget';
+import NewsPage from './components/NewsPage';
 import { CheckCircle2, X, AlertTriangle, RefreshCw, Loader2 } from 'lucide-react';
 
 // Normalize database records to match frontend component requirements
@@ -192,6 +193,7 @@ export default function App() {
 
   // Modals state
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [createReportInitialData, setCreateReportInitialData] = useState(null);
   const [isTrackerModalOpen, setIsTrackerModalOpen] = useState(false);
   const [activeTicketId, setActiveTicketId] = useState('');
 
@@ -533,10 +535,16 @@ export default function App() {
             />
           </div>
         ) : activeTab === 'news' ? (
-          /* BERITA TAB VIEW */
+          /* BERITA TAB VIEW (DEDICATED INTERACTIVE NEWS HUB) */
           <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-4 pb-28 sm:pb-16 space-y-6">
-            <EarthquakeAlert />
-            <CityNewsWidget />
+            <NewsPage
+              onOpenReportModalWithContext={(ctx) => {
+                setCreateReportInitialData(ctx);
+                setIsCreateModalOpen(true);
+              }}
+              showToast={showToast}
+              theme={theme}
+            />
           </div>
         ) : (
           /* BERANDA TAB VIEW */
@@ -546,7 +554,10 @@ export default function App() {
               reports={reports}
               searchQuery={searchQuery}
               setSearchQuery={setSearchQuery}
-              onOpenCreateModal={() => setIsCreateModalOpen(true)}
+              onOpenCreateModal={() => {
+                setCreateReportInitialData(null);
+                setIsCreateModalOpen(true);
+              }}
             />
 
             <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pb-28 sm:pb-16 space-y-6">
@@ -555,7 +566,14 @@ export default function App() {
               <EarthquakeAlert />
 
               {/* Geo-Targeted Local News & Disaster Mitigation Widget (Prominently Placed!) */}
-              <CityNewsWidget />
+              <CityNewsWidget
+                onNavigateToNews={() => setActiveTab('news')}
+                onOpenReportModalWithContext={(ctx) => {
+                  setCreateReportInitialData(ctx);
+                  setIsCreateModalOpen(true);
+                }}
+                showToast={showToast}
+              />
 
               {/* Citizen Reports Feed (Scoped loading/error state) */}
               {isLoading ? (
@@ -637,9 +655,13 @@ export default function App() {
       {/* Modals */}
       <CreateReportModal
         isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
+        onClose={() => {
+          setIsCreateModalOpen(false);
+          setCreateReportInitialData(null);
+        }}
         onSubmitReport={handleCreateReport}
         openAlert={openAlert}
+        initialData={createReportInitialData}
       />
 
       <TicketTrackerModal

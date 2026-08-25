@@ -14,7 +14,9 @@ import {
   AlertCircle,
   Filter,
   Globe,
-  Loader2
+  Loader2,
+  ArrowRight,
+  FileText
 } from 'lucide-react';
 import { 
   detectUserLocation, 
@@ -22,8 +24,9 @@ import {
   POPULAR_CITIES, 
   DEFAULT_CITY 
 } from '../utils/geolocation';
+import NewsReaderModal from './NewsReaderModal';
 
-export default function CityNewsWidget() {
+export default function CityNewsWidget({ onNavigateToNews, onOpenReportModalWithContext, showToast }) {
   const [cityData, setCityData] = useState({
     city: DEFAULT_CITY,
     fullName: 'DKI Jakarta',
@@ -36,8 +39,38 @@ export default function CityNewsWidget() {
   const [isLoadingNews, setIsLoadingNews] = useState(true);
   const [isRefreshingNews, setIsRefreshingNews] = useState(false);
   const [error, setError] = useState(null);
-  const [activeCategory, setActiveCategory] = useState('Semua'); // 'Semua' | 'Bencana & Cuaca' | 'Tata Kota & Aduan'
+  const [activeCategory, setActiveCategory] = useState('Semua');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  // Reader Modal State
+  const [activeReaderArticle, setActiveReaderArticle] = useState(null);
+  const [isReaderOpen, setIsReaderOpen] = useState(false);
+
+  // Bookmarks from localStorage
+  const [bookmarkedArticles, setBookmarkedArticles] = useState(() => {
+    try {
+      const saved = localStorage.getItem('civicpulse_bookmarked_news');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const handleToggleBookmark = (article) => {
+    setBookmarkedArticles(prev => {
+      const exists = prev.some(a => a.id === article.id);
+      let updated;
+      if (exists) {
+        updated = prev.filter(a => a.id !== article.id);
+        if (showToast) showToast('Dihapus dari Simpanan', 'Artikel dihapus dari daftar tersimpan.', 'info');
+      } else {
+        updated = [article, ...prev];
+        if (showToast) showToast('Artikel Disimpan ⭐', 'Artikel tersimpan di portal berita.', 'success');
+      }
+      localStorage.setItem('civicpulse_bookmarked_news', JSON.stringify(updated));
+      return updated;
+    });
+  };
 
   // 1. Fetch News Function for given city
   const fetchNews = useCallback(async (cityName, isManualRefresh = false) => {
@@ -111,13 +144,13 @@ export default function CityNewsWidget() {
 
     const minutes = Math.floor(diffInSeconds / 60);
     if (minutes < 1) return 'Baru saja';
-    if (minutes < 60) return `${minutes} menit yang lalu`;
+    if (minutes < 60) return `${minutes}m yang lalu`;
 
     const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours} jam yang lalu`;
+    if (hours < 24) return `${hours}j yang lalu`;
 
     const days = Math.floor(hours / 24);
-    if (days < 7) return `${days} hari yang lalu`;
+    if (days < 7) return `${days}h yang lalu`;
 
     return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
   };
@@ -165,14 +198,24 @@ export default function CityNewsWidget() {
             </p>
           </div>
 
-          {/* Location Actions & Manual City Selector */}
+          {/* Location Actions & Portal Link */}
           <div className="flex items-center gap-2 flex-wrap shrink-0">
             
+            {onNavigateToNews && (
+              <button
+                onClick={onNavigateToNews}
+                className="px-3.5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-black flex items-center gap-1.5 transition-all active:scale-95 shadow-lg shadow-emerald-500/20"
+              >
+                <span>Lihat Portal Lengkap</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            )}
+
             {/* Auto Detect Location Button */}
             <button
               onClick={handleAutoDetectLocation}
               disabled={isDetectingLocation}
-              className="px-3.5 py-2 rounded-xl bg-emerald-600/10 hover:bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95 disabled:opacity-50"
+              className="px-3 py-2 rounded-xl bg-emerald-600/10 hover:bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95 disabled:opacity-50"
               title="Deteksi Lokasi GPS Otomatis"
             >
               {isDetectingLocation ? (
@@ -180,14 +223,14 @@ export default function CityNewsWidget() {
               ) : (
                 <Navigation className="w-3.5 h-3.5" />
               )}
-              <span>{isDetectingLocation ? 'Mendeteksi...' : 'Lokasi Saya'}</span>
+              <span className="hidden sm:inline">{isDetectingLocation ? 'Mendeteksi...' : 'Lokasi Saya'}</span>
             </button>
 
             {/* Manual City Dropdown */}
             <div className="relative">
               <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="px-3.5 py-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-neutral-200 border border-neutral-700/80 text-xs font-bold flex items-center gap-1.5 transition-all"
+                className="px-3 py-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-neutral-200 border border-neutral-700/80 text-xs font-bold flex items-center gap-1.5 transition-all"
               >
                 <MapPin className="w-3.5 h-3.5 text-neutral-400" />
                 <span>{cityData.city}</span>
@@ -250,7 +293,8 @@ export default function CityNewsWidget() {
           {[
             { id: 'Semua', label: 'Semua Berita', icon: Globe },
             { id: 'Bencana & Cuaca', label: 'Bencana & Cuaca', icon: ShieldAlert },
-            { id: 'Tata Kota & Aduan', label: 'Tata Kota & Aduan', icon: Building2 }
+            { id: 'Tata Kota & Jalan', label: 'Tata Kota & Jalan', icon: Building2 },
+            { id: 'Inovasi & Smart City', label: 'Inovasi & Smart City', icon: Sparkles }
           ].map((tab) => {
             const Icon = tab.icon;
             const isActive = activeCategory === tab.id;
@@ -317,7 +361,7 @@ export default function CityNewsWidget() {
             animate="visible"
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
           >
-            {filteredArticles.map((article) => {
+            {filteredArticles.slice(0, 6).map((article) => {
               const isDisaster = article.category === 'Bencana & Cuaca';
               return (
                 <motion.div
@@ -367,12 +411,18 @@ export default function CityNewsWidget() {
                         </span>
                       </div>
 
-                      {/* Title with hover underline */}
-                      <h4 className="text-sm font-extrabold text-white group-hover:text-emerald-400 transition-colors leading-snug line-clamp-2">
+                      {/* Title */}
+                      <h4 
+                        onClick={() => {
+                          setActiveReaderArticle(article);
+                          setIsReaderOpen(true);
+                        }}
+                        className="text-sm font-extrabold text-white group-hover:text-emerald-400 transition-colors leading-snug line-clamp-2 cursor-pointer"
+                      >
                         {article.title}
                       </h4>
 
-                      {/* Description Summary (line-clamp-2) */}
+                      {/* Description Summary */}
                       <p className="text-xs text-neutral-400 leading-relaxed line-clamp-2">
                         {article.description}
                       </p>
@@ -380,15 +430,25 @@ export default function CityNewsWidget() {
                   </div>
 
                   {/* Card Action Footer */}
-                  <div className="p-4 pt-0">
+                  <div className="p-4 pt-0 flex items-center gap-2">
+                    <button
+                      onClick={() => {
+                        setActiveReaderArticle(article);
+                        setIsReaderOpen(true);
+                      }}
+                      className="flex-1 py-2 px-3 rounded-xl bg-neutral-800 hover:bg-emerald-500 hover:text-black text-neutral-200 text-xs font-bold flex items-center justify-center gap-1.5 transition-all duration-200"
+                    >
+                      <FileText className="w-3.5 h-3.5" />
+                      <span>Baca Mode AI</span>
+                    </button>
                     <a
                       href={article.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-full py-2 px-3 rounded-xl bg-neutral-800/80 hover:bg-emerald-600 text-neutral-200 hover:text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-all duration-200 group/btn"
+                      className="p-2 rounded-xl bg-neutral-800/60 hover:bg-neutral-800 text-neutral-400 hover:text-white transition-colors"
+                      title="Buka Sumber Asli"
                     >
-                      <span>Baca Selengkapnya</span>
-                      <ExternalLink className="w-3.5 h-3.5 group-hover/btn:translate-x-0.5 transition-transform" />
+                      <ExternalLink className="w-3.5 h-3.5" />
                     </a>
                   </div>
 
@@ -399,6 +459,20 @@ export default function CityNewsWidget() {
         )}
 
       </div>
+
+      {/* Reader Modal */}
+      <NewsReaderModal
+        article={activeReaderArticle}
+        isOpen={isReaderOpen}
+        onClose={() => {
+          setIsReaderOpen(false);
+          setActiveReaderArticle(null);
+        }}
+        isBookmarked={activeReaderArticle ? bookmarkedArticles.some(b => b.id === activeReaderArticle.id) : false}
+        onToggleBookmark={handleToggleBookmark}
+        onOpenReportModalWithContext={onOpenReportModalWithContext}
+        showToast={showToast}
+      />
     </div>
   );
 }

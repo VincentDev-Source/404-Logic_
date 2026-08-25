@@ -39,7 +39,6 @@
 | **annafi2 as Arka** | Full Stack Developer | [@Arklerknight](https://github.com/annafi2) |
 | **27RamaaaDevRamaaa as Rama - Frontend** | Frontend & Backend Developer | [@404-Logic](https://github.com/27RamaaaDev) |
 
-
 ---
 
 ## 🎯 Tentang Proyek

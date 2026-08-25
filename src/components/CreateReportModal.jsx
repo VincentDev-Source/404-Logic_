@@ -128,7 +128,7 @@ function CitySearchDropdown({ value, onChange }) {
   );
 }
 
-export default function CreateReportModal({ isOpen, onClose, onSubmitReport, openAlert }) {
+export default function CreateReportModal({ isOpen, onClose, onSubmitReport, openAlert, initialData = null }) {
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('Jalan Rusak');
   const [location, setLocation] = useState('');
@@ -140,6 +140,16 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport, ope
   const [imageUrl, setImageUrl] = useState(SAMPLE_PHOTOS[0].url);
   const [isLocating, setIsLocating] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Sync initialData if provided (e.g. from News reader modal)
+  useEffect(() => {
+    if (initialData && isOpen) {
+      if (initialData.title) setTitle(initialData.title);
+      if (initialData.category) setCategory(initialData.category);
+      if (initialData.description) setDescription(initialData.description);
+      if (initialData.city) setCity(initialData.city);
+    }
+  }, [initialData, isOpen]);
 
   // Address search auto-complete states
   const [searchSuggestions, setSearchSuggestions] = useState([]);
