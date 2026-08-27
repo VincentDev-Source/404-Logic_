@@ -8,8 +8,6 @@ import CreateReportModal from './components/CreateReportModal';
 import TicketTrackerModal from './components/TicketTrackerModal';
 import AnalyticsDashboard from './components/AnalyticsDashboard';
 import OpeningScreen from './components/OpeningScreen';
-import LoadingScreen from './components/LoadingScreen';
-import SplashScreen from './components/SplashScreen';
 import ConfirmModal from './components/ConfirmModal';
 import AlertModal from './components/AlertModal';
 import FaceAuth from './components/FaceAuth';
