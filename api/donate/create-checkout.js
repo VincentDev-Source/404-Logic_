@@ -3,6 +3,25 @@
 
 import Stripe from 'stripe';
 
+function safeDecodeString(str) {
+  if (!str || typeof str !== 'string') return '';
+  let result = str;
+  for (let i = 0; i < 3; i++) {
+    if (result.includes('%')) {
+      try {
+        const decoded = decodeURIComponent(result);
+        if (decoded === result) break;
+        result = decoded;
+      } catch {
+        break;
+      }
+    } else {
+      break;
+    }
+  }
+  return result.replace(/%20/g, ' ').replace(/\+/g, ' ').trim();
+}
+
 export default async function handler(req, res) {
   // Set CORS headers
   res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -59,7 +78,10 @@ export default async function handler(req, res) {
     const host = originUrl || req.headers.referer || req.headers.origin || 'https://404-logic.vercel.app';
     const baseUrl = host.replace(/\/$/, '');
 
-    const displayName = isAnonymous ? 'Hamba Allah (Anonim)' : donorName;
+    const cleanProgram = safeDecodeString(program) || 'Mitigasi Banjir & Pompa Air Kota';
+    const cleanDonorName = safeDecodeString(donorName) || 'Warga Peduli';
+    const cleanMessage = safeDecodeString(message) || '';
+    const displayName = isAnonymous ? 'Hamba Allah (Anonim)' : cleanDonorName;
 
     // Create Stripe Checkout Session
     const session = await stripe.checkout.sessions.create({
@@ -71,7 +93,7 @@ export default async function handler(req, res) {
             currency: 'idr',
             unit_amount: numericAmount,
             product_data: {
-              name: `Donasi Kota: ${program}`,
+              name: `Donasi Kota: ${cleanProgram}`,
               description: `Partisipasi Publik CivicPulse SDG 11 - Donatur: ${displayName}`,
               images: [
                 'https://images.unsplash.com/photo-1547683905-f686c993aae5?auto=format&fit=crop&w=600&q=80',
@@ -84,13 +106,13 @@ export default async function handler(req, res) {
       customer_email: donorEmail && donorEmail.includes('@') ? donorEmail : undefined,
       metadata: {
         donorName: displayName,
-        program: program,
-        message: message || '',
+        program: cleanProgram,
+        message: cleanMessage,
         isAnonymous: String(isAnonymous),
         amount: String(numericAmount),
       },
       success_url: `${baseUrl}/?donation=success&session_id={CHECKOUT_SESSION_ID}&amount=${numericAmount}&program=${encodeURIComponent(
-        program
+        cleanProgram
       )}&donor=${encodeURIComponent(displayName)}`,
       cancel_url: `${baseUrl}/?donation=cancelled`,
     });

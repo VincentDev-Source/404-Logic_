@@ -20,6 +20,7 @@ import CityNewsWidget from './components/CityNewsWidget';
 import NewsPage from './components/NewsPage';
 import DonationModal from './components/DonationModal';
 import DonationSuccessModal from './components/DonationSuccessModal';
+import { safeDecodeString } from './utils/stringUtils';
 import { CheckCircle2, X, AlertTriangle, RefreshCw, Loader2 } from 'lucide-react';
 
 // Normalize database records to match frontend component requirements
@@ -232,8 +233,10 @@ export default function App() {
 
       if (isSuccess && orderId) {
         const amount = urlParams.get('amount') || '100000';
-        const program = urlParams.get('program') || 'Mitigasi Banjir & Pompa Air Kota';
-        const donor = urlParams.get('donor') || 'Warga Peduli';
+        const rawProgram = urlParams.get('program') || 'Mitigasi Banjir & Pompa Air Kota';
+        const rawDonor = urlParams.get('donor') || 'Warga Peduli';
+        const program = safeDecodeString(rawProgram) || 'Mitigasi Banjir & Pompa Air Kota';
+        const donor = safeDecodeString(rawDonor) || 'Warga Peduli';
 
         setDonationSuccessDetails({ amount, program, donor, sessionId: orderId });
         setIsDonationSuccessModalOpen(true);

@@ -60,13 +60,32 @@ export default async function handler(req, res) {
       }
     }
 
+function safeDecodeString(str) {
+  if (!str || typeof str !== 'string') return '';
+  let result = str;
+  for (let i = 0; i < 3; i++) {
+    if (result.includes('%')) {
+      try {
+        const decoded = decodeURIComponent(result);
+        if (decoded === result) break;
+        result = decoded;
+      } catch {
+        break;
+      }
+    } else {
+      break;
+    }
+  }
+  return result.replace(/%20/g, ' ').replace(/\+/g, ' ').trim();
+}
+
     const isSuccess =
       transaction_status === 'capture'
         ? fraud_status === 'accept'
         : transaction_status === 'settlement';
 
-    const program = custom_field1 || 'Mitigasi Banjir & Pompa Air Kota';
-    const message = custom_field2 || '';
+    const program = safeDecodeString(custom_field1) || 'Mitigasi Banjir & Pompa Air Kota';
+    const message = safeDecodeString(custom_field2) || '';
     const isAnonymous = custom_field3 === 'true';
     const amountNum = parseFloat(gross_amount) || 0;
 

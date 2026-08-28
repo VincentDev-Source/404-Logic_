@@ -3,6 +3,25 @@
 
 import prisma from '../../src/lib/prisma.js';
 
+function safeDecodeString(str) {
+  if (!str || typeof str !== 'string') return '';
+  let result = str;
+  for (let i = 0; i < 3; i++) {
+    if (result.includes('%')) {
+      try {
+        const decoded = decodeURIComponent(result);
+        if (decoded === result) break;
+        result = decoded;
+      } catch {
+        break;
+      }
+    } else {
+      break;
+    }
+  }
+  return result.replace(/%20/g, ' ').replace(/\+/g, ' ').trim();
+}
+
 export default async function handler(req, res) {
   // Set CORS headers
   res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -42,10 +61,10 @@ export default async function handler(req, res) {
 
     const refId = orderId || transactionId || sessionId || `DONASI-${Date.now()}`;
     let finalAmount = parseFloat(amount) || 0;
-    let finalProgram = program || 'Mitigasi Banjir & Pompa Air Kota';
-    let finalDonorName = donorName || 'Warga Peduli';
+    let finalProgram = safeDecodeString(program) || 'Mitigasi Banjir & Pompa Air Kota';
+    let finalDonorName = safeDecodeString(donorName) || 'Warga Peduli';
     let finalEmail = donorEmail || null;
-    let finalMessage = message || '';
+    let finalMessage = safeDecodeString(message) || '';
     let finalIsAnonymous = isAnonymous === true || isAnonymous === 'true';
     let finalPaymentType = paymentType || 'Midtrans Sandbox';
 
@@ -75,10 +94,10 @@ export default async function handler(req, res) {
             finalPaymentType = statusData.payment_type;
           }
           if (statusData.custom_field1) {
-            finalProgram = statusData.custom_field1;
+            finalProgram = safeDecodeString(statusData.custom_field1) || finalProgram;
           }
           if (statusData.custom_field2) {
-            finalMessage = statusData.custom_field2;
+            finalMessage = safeDecodeString(statusData.custom_field2) || finalMessage;
           }
           if (statusData.custom_field3 !== undefined) {
             finalIsAnonymous = statusData.custom_field3 === 'true';

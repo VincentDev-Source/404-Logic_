@@ -1,6 +1,25 @@
 // Vercel Serverless Function to Generate Midtrans Snap Sandbox Token & Direct Redirect URL
 // Endpoint: POST /api/donate/midtrans-token
 
+function safeDecodeString(str) {
+  if (!str || typeof str !== 'string') return '';
+  let result = str;
+  for (let i = 0; i < 3; i++) {
+    if (result.includes('%')) {
+      try {
+        const decoded = decodeURIComponent(result);
+        if (decoded === result) break;
+        result = decoded;
+      } catch {
+        break;
+      }
+    } else {
+      break;
+    }
+  }
+  return result.replace(/%20/g, ' ').replace(/\+/g, ' ').trim();
+}
+
 export default async function handler(req, res) {
   // Set CORS headers
   res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -45,7 +64,10 @@ export default async function handler(req, res) {
       });
     }
 
-    const displayName = isAnonymous ? 'Hamba Allah (Anonim)' : (donorName.trim() || 'Warga Peduli');
+    const cleanProgram = safeDecodeString(program) || 'Mitigasi Banjir & Pompa Air Kota';
+    const cleanDonorName = safeDecodeString(donorName) || 'Warga Peduli';
+    const cleanMessage = safeDecodeString(message) || '';
+    const displayName = isAnonymous ? 'Hamba Allah (Anonim)' : cleanDonorName;
     const orderId = `DONASI-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`;
 
     const host = originUrl || req.headers.referer || req.headers.origin || 'https://404-logic.vercel.app';
@@ -68,19 +90,19 @@ export default async function handler(req, res) {
           id: 'CIVIC-SDG11-DONASI',
           price: numericAmount,
           quantity: 1,
-          name: `Donasi: ${program.slice(0, 40)}`,
+          name: `Donasi: ${cleanProgram.slice(0, 40)}`,
         },
       ],
       customer_details: {
         first_name: displayName,
         email: donorEmail && donorEmail.includes('@') ? donorEmail : 'donatur@civicpulse.id',
       },
-      custom_field1: program,
-      custom_field2: message.slice(0, 200),
+      custom_field1: cleanProgram,
+      custom_field2: cleanMessage.slice(0, 200),
       custom_field3: String(isAnonymous),
       callbacks: {
         finish: `${baseUrl}/?donation=success&order_id=${orderId}&amount=${numericAmount}&program=${encodeURIComponent(
-          program
+          cleanProgram
         )}&donor=${encodeURIComponent(displayName)}`,
         pending: `${baseUrl}/?donation=pending&order_id=${orderId}`,
         error: `${baseUrl}/?donation=error&order_id=${orderId}`,

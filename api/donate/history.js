@@ -41,6 +41,25 @@ const PROGRAM_TARGETS = [
   },
 ];
 
+function safeDecodeString(str) {
+  if (!str || typeof str !== 'string') return '';
+  let result = str;
+  for (let i = 0; i < 3; i++) {
+    if (result.includes('%')) {
+      try {
+        const decoded = decodeURIComponent(result);
+        if (decoded === result) break;
+        result = decoded;
+      } catch {
+        break;
+      }
+    } else {
+      break;
+    }
+  }
+  return result.replace(/%20/g, ' ').replace(/\+/g, ' ').trim();
+}
+
 export default async function handler(req, res) {
   // Set CORS headers
   res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -84,12 +103,14 @@ export default async function handler(req, res) {
   const targetGoal = 100000000; // Rp 100.000.000 Target Kota
 
   const programs = PROGRAM_TARGETS.map((pt) => {
-    const matchingDonations = realDonations.filter(
-      (d) =>
-        d.program &&
-        (d.program.toLowerCase().includes(pt.title.toLowerCase()) ||
-          pt.title.toLowerCase().includes(d.program.toLowerCase()))
-    );
+    const matchingDonations = realDonations.filter((d) => {
+      const decodedProg = safeDecodeString(d.program || '');
+      return (
+        decodedProg &&
+        (decodedProg.toLowerCase().includes(pt.title.toLowerCase()) ||
+          pt.title.toLowerCase().includes(decodedProg.toLowerCase()))
+      );
+    });
 
     const raised = matchingDonations.reduce(
       (sum, d) => sum + Number(d.amount || 0),
@@ -110,15 +131,20 @@ export default async function handler(req, res) {
     };
   });
 
-  const recentDonors = realDonations.slice(0, 20).map((d) => ({
-    id: d.id,
-    name: d.isAnonymous ? 'Hamba Allah (Anonim)' : d.donorName,
-    amount: Number(d.amount),
-    program: d.program,
-    message: d.message || 'Donasi untuk kemajuan dan mitigasi kota',
-    createdAt: d.createdAt,
-    verified: true,
-  }));
+  const recentDonors = realDonations.slice(0, 20).map((d) => {
+    const cleanDonor = safeDecodeString(d.donorName) || 'Warga Peduli';
+    const cleanProgram = safeDecodeString(d.program) || 'Mitigasi Banjir & Pompa Air Kota';
+    const cleanMessage = safeDecodeString(d.message) || 'Donasi untuk kemajuan dan mitigasi kota';
+    return {
+      id: d.id,
+      name: d.isAnonymous ? 'Hamba Allah (Anonim)' : cleanDonor,
+      amount: Number(d.amount),
+      program: cleanProgram,
+      message: cleanMessage,
+      createdAt: d.createdAt,
+      verified: true,
+    };
+  });
 
   return res.status(200).json({
     success: true,

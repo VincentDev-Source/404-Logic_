@@ -13,6 +13,7 @@ import {
   CreditCard
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { safeDecodeString } from '../utils/stringUtils';
 
 export default function DonationSuccessModal({
   isOpen,
@@ -49,12 +50,14 @@ export default function DonationSuccessModal({
 
   if (!isOpen) return null;
 
-  const {
-    amount = 100000,
-    program = 'Mitigasi Banjir & Pompa Air Kota',
-    donor = 'Warga Peduli',
-    sessionId = 'cs_test_' + Math.random().toString(36).slice(2, 9)
-  } = donationDetails;
+  const rawAmount = donationDetails.amount || 100000;
+  const rawProgram = donationDetails.program || 'Mitigasi Banjir & Pompa Air Kota';
+  const rawDonor = donationDetails.donor || 'Warga Peduli';
+  const sessionId = donationDetails.sessionId || 'DONASI-' + Date.now();
+
+  const amount = rawAmount;
+  const program = safeDecodeString(rawProgram) || 'Mitigasi Banjir & Pompa Air Kota';
+  const donor = safeDecodeString(rawDonor) || 'Warga Peduli';
 
   const handleShare = () => {
     const text = encodeURIComponent(`Saya baru saja berpartisipasi dalam program donasi kota "${program}" melalui CivicPulse SDG 11. Mari bersama membangun kota yang lebih tangguh dan berkelanjutan!`);
