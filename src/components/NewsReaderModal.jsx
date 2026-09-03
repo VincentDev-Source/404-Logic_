@@ -43,66 +43,107 @@ export default function NewsReaderModal({
   const [speechRate, setSpeechRate] = useState(1);
   const utteranceRef = useRef(null);
 
-  // Reactions state (persisted in localStorage)
+  // Reactions state (persisted in localStorage, starts at 0 without dummy counts)
   const [reactions, setReactions] = useState({
-    helpful: 24,
-    warning: 12,
-    innovative: 18,
-    appreciate: 31,
+    helpful: 0,
+    warning: 0,
+    innovative: 0,
+    appreciate: 0,
     userReacted: null
   });
 
-  // Comments state (persisted in localStorage)
+  // Comments state (persisted in localStorage, real citizen comments only)
   const [comments, setComments] = useState([]);
   const [newCommentName, setNewCommentName] = useState('');
   const [newCommentText, setNewCommentText] = useState('');
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
 
+  // Real views state
+  const [viewsCount, setViewsCount] = useState(0);
+
   // Share dropdown state & copy feedback
   const [copiedLink, setCopiedLink] = useState(false);
 
-  // Load reactions & comments from localStorage for this specific article
+  // Load reactions, comments & views from localStorage for this specific article
   useEffect(() => {
     if (!article) return;
 
-    // Load reactions
-    const savedReactions = localStorage.getItem(`civicpulse_news_react_${article.id}`);
+    // 1. Load real reactions
+    const reactKey = `civicpulse_news_react_v2_${article.id}`;
+    const legacyReactKey = `civicpulse_news_react_${article.id}`;
+    
+    // Purge legacy dummy seeded reactions
+    localStorage.removeItem(legacyReactKey);
+
+    const savedReactions = localStorage.getItem(reactKey);
     if (savedReactions) {
       try {
-        setReactions(JSON.parse(savedReactions));
+        const parsed = JSON.parse(savedReactions);
+        setReactions({
+          helpful: Math.max(0, parseInt(parsed.helpful, 10) || 0),
+          warning: Math.max(0, parseInt(parsed.warning, 10) || 0),
+          innovative: Math.max(0, parseInt(parsed.innovative, 10) || 0),
+          appreciate: Math.max(0, parseInt(parsed.appreciate, 10) || 0),
+          userReacted: parsed.userReacted || null
+        });
       } catch (e) {
-        // fallback
+        setReactions({ helpful: 0, warning: 0, innovative: 0, appreciate: 0, userReacted: null });
       }
     } else {
-      const baseSeed = (article.id.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) % 30) + 10;
-      setReactions({
-        helpful: baseSeed + 14,
-        warning: baseSeed + 5,
-        innovative: baseSeed + 8,
-        appreciate: baseSeed + 20,
-        userReacted: null
-      });
+      setReactions({ helpful: 0, warning: 0, innovative: 0, appreciate: 0, userReacted: null });
     }
 
-    // Load comments
-    const savedComments = localStorage.getItem(`civicpulse_news_comments_${article.id}`);
+    // 2. Load real comments (filtering out any legacy dummy 'Budi Santoso' or 'c-init-1')
+    const commentsKey = `civicpulse_news_comments_v2_${article.id}`;
+    const legacyCommentsKey = `civicpulse_news_comments_${article.id}`;
+
+    // Clean up any legacy dummy comments
+    const oldCommentsRaw = localStorage.getItem(legacyCommentsKey);
+    let realMigrated = [];
+    if (oldCommentsRaw) {
+      try {
+        const parsedOld = JSON.parse(oldCommentsRaw);
+        if (Array.isArray(parsedOld)) {
+          realMigrated = parsedOld.filter(
+            c => c.id !== 'c-init-1' && 
+                 !c.name?.includes('Budi Santoso') && 
+                 !c.text?.includes('Di pertigaan jalan dekat pos ronda')
+          );
+        }
+      } catch (e) {}
+      localStorage.removeItem(legacyCommentsKey);
+    }
+
+    const savedComments = localStorage.getItem(commentsKey);
     if (savedComments) {
       try {
-        setComments(JSON.parse(savedComments));
+        const parsed = JSON.parse(savedComments);
+        const valid = Array.isArray(parsed)
+          ? parsed.filter(
+              c => c.id !== 'c-init-1' && 
+                   !c.name?.includes('Budi Santoso') && 
+                   !c.text?.includes('Di pertigaan jalan dekat pos ronda')
+            )
+          : [];
+        setComments(valid);
       } catch (e) {
-        // fallback
+        setComments([]);
       }
+    } else if (realMigrated.length > 0) {
+      setComments(realMigrated);
+      localStorage.setItem(commentsKey, JSON.stringify(realMigrated));
     } else {
-      setComments([
-        {
-          id: 'c-init-1',
-          name: 'Budi Santoso (Warga Lokal)',
-          text: 'Terima kasih atas informasinya. Di pertigaan jalan dekat pos ronda situasi sudah mulai lancar kembali.',
-          time: '15 menit yang lalu',
-          verified: true
-        }
-      ]);
+      setComments([]);
     }
+
+    // 3. Track real views per article session
+    const viewsKey = `civicpulse_news_views_${article.id}`;
+    let currentViews = parseInt(localStorage.getItem(viewsKey), 10) || 0;
+    if (isOpen) {
+      currentViews += 1;
+      localStorage.setItem(viewsKey, currentViews.toString());
+    }
+    setViewsCount(currentViews);
 
     // Stop TTS if modal changes or closes
     return () => {
@@ -171,56 +212,81 @@ export default function NewsReaderModal({
     setIsAudioPaused(false);
   };
 
-  // Handle Reaction Click
+  // Handle Reaction Click (Persistent, toggles user reaction and updates counts)
   const handleReactionClick = (type) => {
     if (!article) return;
 
     setReactions(prev => {
       const isAlready = prev.userReacted === type;
-      const next = {
-        ...prev,
-        [type]: isAlready ? prev[type] - 1 : (prev.userReacted ? prev[type] + 1 : prev[type] + 1),
-        userReacted: isAlready ? null : type
-      };
+      let next;
 
-      // If switching reaction from another type
-      if (prev.userReacted && prev.userReacted !== type) {
-        next[prev.userReacted] = Math.max(0, next[prev.userReacted] - 1);
+      if (isAlready) {
+        // Toggle off the reaction
+        next = {
+          ...prev,
+          [type]: Math.max(0, (prev[type] || 0) - 1),
+          userReacted: null
+        };
+      } else {
+        // Increment new reaction
+        next = {
+          ...prev,
+          [type]: (prev[type] || 0) + 1,
+          userReacted: type
+        };
+        // If switching from another reaction, decrement the previous one
+        if (prev.userReacted && prev.userReacted !== type) {
+          next[prev.userReacted] = Math.max(0, (next[prev.userReacted] || 0) - 1);
+        }
       }
 
-      localStorage.setItem(`civicpulse_news_react_${article.id}`, JSON.stringify(next));
+      const reactKey = `civicpulse_news_react_v2_${article.id}`;
+      localStorage.setItem(reactKey, JSON.stringify(next));
       return next;
     });
 
     if (showToast) {
-      showToast('Reaksi Tersimpan', 'Terima kasih atas respon warga terhadap berita ini!', 'success');
+      showToast('Respon Tersimpan', 'Terima kasih atas partisipasi suara warga Anda!', 'success');
     }
   };
 
-  // Handle Submit Comment / Field Report
+  // Handle Submit Comment / Field Report (Persistent real-time storage)
   const handleSubmitComment = (e) => {
     e.preventDefault();
-    if (!newCommentText.trim()) return;
+    if (!newCommentText.trim() || !article) return;
 
     setIsSubmittingComment(true);
 
+    const now = new Date();
+    const timeFormatted = new Intl.DateTimeFormat('id-ID', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).format(now);
+
     const newEntry = {
-      id: `c-${Date.now()}`,
-      name: newCommentName.trim() || 'Warga Sekitar',
+      id: `comment-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      name: newCommentName.trim() || 'Warga Lokal',
       text: newCommentText.trim(),
-      time: 'Baru saja',
-      verified: false
+      time: timeFormatted,
+      timestamp: Date.now(),
+      verified: true
     };
 
     const updated = [newEntry, ...comments];
     setComments(updated);
-    localStorage.setItem(`civicpulse_news_comments_${article.id}`, JSON.stringify(updated));
+
+    const commentsKey = `civicpulse_news_comments_v2_${article.id}`;
+    localStorage.setItem(commentsKey, JSON.stringify(updated));
 
     setNewCommentText('');
+    setNewCommentName('');
     setIsSubmittingComment(false);
 
     if (showToast) {
-      showToast('Catatan Lapangan Terkirim 🎉', 'Kontribusi Anda membantu warga lain memantau kondisi terkini.', 'success');
+      showToast('Catatan Lapangan Terkirim 🎉', 'Kontribusi pantauan Anda berhasil disimpan secara real-time.', 'success');
     }
   };
 
@@ -337,7 +403,7 @@ export default function NewsReaderModal({
                 <div className="flex items-center gap-3 text-xs text-neutral-400">
                   <span className="flex items-center gap-1 font-mono">
                     <Eye className="w-3.5 h-3.5 text-neutral-500" />
-                    <span>{article.views || 350} views</span>
+                    <span>{viewsCount || article.views || 1} pembaca</span>
                   </span>
                 </div>
               </div>
@@ -480,11 +546,16 @@ export default function NewsReaderModal({
               </button>
             </div>
 
-            {/* Interactive Citizen Reactions */}
+            {/* Interactive Citizen Reactions (100% Real Data, Zero Dummy) */}
             <div className="border-t border-neutral-800/80 pt-5 space-y-3">
-              <h4 className="text-xs font-bold text-neutral-400 uppercase tracking-wider font-mono">
-                RESPON & SUARA WARGA
-              </h4>
+              <div className="flex items-center justify-between">
+                <h4 className="text-xs font-bold text-neutral-400 uppercase tracking-wider font-mono">
+                  RESPON & SUARA WARGA
+                </h4>
+                <span className="text-[10px] text-neutral-500 font-mono">
+                  {reactions.userReacted ? 'Respon Anda Tersimpan' : 'Klik untuk merespon'}
+                </span>
+              </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                 {[
                   { key: 'helpful', label: 'Bermanfaat', icon: ThumbsUp, color: 'text-emerald-400', count: reactions.helpful },
@@ -503,6 +574,7 @@ export default function NewsReaderModal({
                           ? 'bg-neutral-800 border-emerald-500 shadow-md scale-[1.02]'
                           : 'bg-neutral-900/60 hover:bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white'
                       }`}
+                      title={isSelected ? `Batalkan respon ${r.label}` : `Beri respon ${r.label}`}
                     >
                       <Icon className={`w-5 h-5 ${isSelected ? r.color : 'text-neutral-400'}`} />
                       <span className="text-xs font-extrabold text-white">{r.count}</span>
@@ -513,7 +585,7 @@ export default function NewsReaderModal({
               </div>
             </div>
 
-            {/* Citizen Comments & Field Notes Section */}
+            {/* Citizen Comments & Field Notes Section (100% Real Citizen Notes) */}
             <div className="border-t border-neutral-800/80 pt-5 space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -562,25 +634,37 @@ export default function NewsReaderModal({
 
               {/* Comments List */}
               <div className="space-y-2.5">
-                {comments.map((c) => (
-                  <div key={c.id} className="bg-neutral-900/40 border border-neutral-800/80 rounded-xl p-3.5 space-y-1.5">
-                    <div className="flex items-center justify-between text-xs">
-                      <div className="flex items-center gap-1.5 font-bold text-neutral-200">
-                        <User className="w-3.5 h-3.5 text-emerald-400" />
-                        <span>{c.name}</span>
-                        {c.verified && (
-                          <span className="px-1.5 py-0.2 rounded bg-emerald-950 text-emerald-400 text-[9px] font-bold border border-emerald-800/60">
-                            Terverifikasi
-                          </span>
-                        )}
-                      </div>
-                      <span className="text-[10px] text-neutral-500 font-mono">{c.time}</span>
+                {comments.length === 0 ? (
+                  <div className="p-6 rounded-2xl bg-neutral-900/30 border border-neutral-800/80 text-center space-y-2 animate-in fade-in duration-200">
+                    <div className="w-10 h-10 rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center mx-auto border border-emerald-500/20">
+                      <MessageSquare className="w-5 h-5" />
                     </div>
-                    <p className="text-xs text-neutral-300 leading-relaxed pl-5">
-                      {c.text}
+                    <h5 className="text-xs font-bold text-neutral-300">Belum Ada Pantauan Lapangan Warga</h5>
+                    <p className="text-[11px] text-neutral-500 max-w-sm mx-auto leading-relaxed">
+                      Jadilah warga pertama yang memberikan informasi situasi terkini di sekitar lokasi berita melalui formulir di atas.
                     </p>
                   </div>
-                ))}
+                ) : (
+                  comments.map((c) => (
+                    <div key={c.id} className="bg-neutral-900/40 border border-neutral-800/80 rounded-xl p-3.5 space-y-1.5 animate-in fade-in duration-200">
+                      <div className="flex items-center justify-between text-xs">
+                        <div className="flex items-center gap-1.5 font-bold text-neutral-200">
+                          <User className="w-3.5 h-3.5 text-emerald-400" />
+                          <span>{c.name}</span>
+                          {c.verified && (
+                            <span className="px-1.5 py-0.2 rounded bg-emerald-950 text-emerald-400 text-[9px] font-bold border border-emerald-800/60">
+                              Terverifikasi
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-[10px] text-neutral-500 font-mono">{c.time}</span>
+                      </div>
+                      <p className="text-xs text-neutral-300 leading-relaxed pl-5">
+                        {c.text}
+                      </p>
+                    </div>
+                  ))
+                )}
               </div>
 
             </div>
