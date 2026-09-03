@@ -131,17 +131,6 @@ export default function Navbar({
               </button>
             )}
 
-            {/* Operator Portal Entry Button */}
-            {onOpenOperatorPortal && (
-              <button
-                onClick={onOpenOperatorPortal}
-                className="hidden sm:flex px-3 py-1.5 rounded-xl bg-blue-600/10 hover:bg-blue-600/20 text-blue-500 dark:text-blue-400 border border-blue-500/30 text-xs font-extrabold items-center gap-1.5 transition-all active:scale-95 shadow-sm"
-              >
-                <UserCheck className="w-4 h-4" />
-                <span>Petugas</span>
-              </button>
-            )}
-
             {/* Quick Ticket Input Form (Desktop) */}
             <form onSubmit={handleTicketFormSubmit} className="hidden lg:block relative">
               <input
@@ -187,10 +176,22 @@ export default function Navbar({
               </button>
             )}
 
-            {/* CTA Button (Desktop & Mobile) */}
+            {/* Operator Portal Entry Button (Visible on mobile replacing 'Buat Aduan', and also on desktop) */}
+            {onOpenOperatorPortal && (
+              <button
+                onClick={onOpenOperatorPortal}
+                className="px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl bg-blue-600/10 hover:bg-blue-600/20 text-blue-600 dark:text-blue-400 border border-blue-500/30 text-xs font-extrabold flex items-center gap-1 sm:gap-1.5 transition-all active:scale-95 shadow-sm shrink-0"
+                title="Portal Petugas / Verifikator"
+              >
+                <UserCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <span>Petugas</span>
+              </button>
+            )}
+
+            {/* CTA Button (Desktop only; on mobile removed and replaced by Petugas since mobile uses CurvedNavbar bottom Lapor button) */}
             <button
               onClick={onOpenCreateModal}
-              className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-xs shadow flex items-center gap-1 sm:gap-1.5 transition-all active:scale-95 shrink-0"
+              className="hidden sm:flex px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-xs shadow items-center gap-1 sm:gap-1.5 transition-all active:scale-95 shrink-0"
             >
               <PlusCircle className="w-4 h-4" />
               <span>Buat Aduan</span>
@@ -256,16 +257,6 @@ export default function Navbar({
             >
               <Heart className="w-3 h-3 fill-rose-400 text-rose-400" />
               <span>Donasi</span>
-            </button>
-          )}
-
-          {onOpenOperatorPortal && (
-            <button
-              onClick={onOpenOperatorPortal}
-              className="px-2.5 py-1 rounded-lg text-[11px] font-extrabold shrink-0 bg-blue-600/10 text-blue-400 border border-blue-500/20 flex items-center gap-1"
-            >
-              <UserCheck className="w-3 h-3" />
-              <span>Petugas</span>
             </button>
           )}
         </div>
