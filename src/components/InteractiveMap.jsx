@@ -424,12 +424,12 @@ export default function InteractiveMap({
       </div>
 
       {/* Real Leaflet Map Container */}
-      <div className="relative w-full h-[540px] rounded-2xl overflow-hidden border border-neutral-200 dark:border-neutral-800 shadow-xl transition-colors z-10">
-        <div ref={mapRef} className="w-full h-full min-h-[540px]" />
+      <div className="relative w-full h-[400px] sm:h-[540px] rounded-2xl overflow-hidden border border-neutral-200 dark:border-neutral-800 shadow-xl transition-colors z-10">
+        <div ref={mapRef} className="w-full h-full min-h-[400px] sm:min-h-[540px]" />
 
         {/* High-Aesthetic Glassmorphism Bottom Drawer Overlay Card */}
         {selectedReport && (
-          <div className="absolute bottom-4 left-4 right-4 max-w-lg mx-auto bg-white/95 dark:bg-black/90 backdrop-blur-md border border-neutral-200 dark:border-neutral-800 rounded-2xl p-4 shadow-2xl z-[1000] space-y-3 animate-fade-in-up">
+          <div className="absolute bottom-2 sm:bottom-4 left-2 right-2 sm:left-4 sm:right-4 max-w-lg mx-auto bg-white/95 dark:bg-black/90 backdrop-blur-md border border-neutral-200 dark:border-neutral-800 rounded-2xl p-3 sm:p-4 shadow-2xl z-[1000] space-y-3 animate-fade-in-up">
 
             <div className="flex items-start gap-3">
               {/* Photo Thumbnail */}

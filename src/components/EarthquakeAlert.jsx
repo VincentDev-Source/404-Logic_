@@ -233,12 +233,12 @@ export default function EarthquakeAlert() {
           {/* Shakemap Image Modal Preview */}
           <AnimatePresence>
             {isModalOpen && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+              <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md overflow-y-auto">
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9, y: 20 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                  className="relative w-full max-w-lg bg-[#09090b] border border-neutral-800 rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4"
+                  className="relative w-full max-w-lg bg-[#09090b] border border-neutral-800 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-2xl space-y-3.5 sm:space-y-4 my-auto max-h-[calc(100dvh-1.5rem)] overflow-y-auto"
                 >
                   {/* Modal Header */}
                   <div className="flex items-center justify-between border-b border-neutral-800 pb-3">

@@ -11,8 +11,8 @@ export default function AlertModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[10000] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
-      <div className="relative w-full max-w-md bg-white dark:bg-black rounded-2xl border border-neutral-200 dark:border-neutral-800 shadow-2xl overflow-hidden">
+    <div className="fixed inset-0 z-[10000] bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-200">
+      <div className="relative w-full max-w-md bg-white dark:bg-black rounded-2xl sm:rounded-3xl border border-neutral-200 dark:border-neutral-800 shadow-2xl overflow-hidden my-auto max-h-[calc(100dvh-1.5rem)]">
         
         {/* Modal Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-100 dark:border-neutral-800">

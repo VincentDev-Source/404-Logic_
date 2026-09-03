@@ -49,14 +49,14 @@ export default function TicketTrackerModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-      <div className="relative w-full max-w-xl bg-white dark:bg-black rounded-3xl border border-neutral-200 dark:border-neutral-800 shadow-2xl overflow-hidden my-6 flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
+      <div className="relative w-full max-w-xl bg-white dark:bg-black rounded-2xl sm:rounded-3xl border border-neutral-200 dark:border-neutral-800 shadow-2xl overflow-hidden my-auto flex flex-col max-h-[calc(100dvh-1rem)] sm:max-h-[90vh]">
         
         {/* Header */}
-        <div className="flex items-center justify-between p-4 sm:p-5 border-b border-neutral-200 dark:border-neutral-800 shrink-0">
+        <div className="flex items-center justify-between p-3.5 sm:p-5 border-b border-neutral-200 dark:border-neutral-800 shrink-0">
           <div className="flex items-center space-x-2.5">
-            <div className="w-9 h-9 rounded-xl bg-emerald-500 text-black flex items-center justify-center font-extrabold shadow-md">
-              <Ticket className="w-5 h-5" />
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-emerald-500 text-black flex items-center justify-center font-extrabold shadow-md shrink-0">
+              <Ticket className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <div>
               <h2 className="text-base font-black text-neutral-900 dark:text-white">Lacak Tiket Aduan</h2>

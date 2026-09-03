@@ -182,18 +182,18 @@ export default function DonationModal({ isOpen, onClose, showToast, onDonationSu
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 md:p-6 bg-black/85 backdrop-blur-md overflow-y-auto">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-black/85 backdrop-blur-md overflow-y-auto">
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="relative w-full max-w-3xl bg-[#09090b] border border-neutral-800 rounded-3xl shadow-2xl overflow-hidden my-auto max-h-[92vh] flex flex-col text-neutral-200"
+          className="relative w-full max-w-3xl bg-[#09090b] border border-neutral-800 rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden my-auto max-h-[calc(100dvh-1rem)] sm:max-h-[92vh] flex flex-col text-neutral-200"
         >
           {/* Header Banner */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-800 bg-neutral-950/80 backdrop-blur-md sticky top-0 z-20 shrink-0">
+          <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-neutral-800 bg-neutral-950/80 backdrop-blur-md sticky top-0 z-20 shrink-0">
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-rose-500 to-amber-500 flex items-center justify-center text-white shadow-lg shadow-rose-500/20">
-                <Heart className="w-5 h-5 fill-white" />
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-rose-500 to-amber-500 flex items-center justify-center text-white shadow-lg shadow-rose-500/20 shrink-0">
+                <Heart className="w-4 h-4 sm:w-5 sm:h-5 fill-white" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
@@ -204,7 +204,7 @@ export default function DonationModal({ isOpen, onClose, showToast, onDonationSu
                     MIDTRANS SANDBOX
                   </span>
                 </div>
-                <p className="text-[11px] text-neutral-400">
+                <p className="text-[10px] sm:text-[11px] text-neutral-400">
                   Partisipasi publik real-time untuk mendukung program prioritas pemerintah (SDG 11).
                 </p>
               </div>
@@ -212,7 +212,7 @@ export default function DonationModal({ isOpen, onClose, showToast, onDonationSu
 
             <button
               onClick={onClose}
-              className="p-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white transition-colors"
+              className="p-1.5 sm:p-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white transition-colors"
             >
               <X className="w-4 h-4" />
             </button>

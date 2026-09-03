@@ -444,20 +444,20 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport, ope
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto font-sans animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 overflow-y-auto font-sans animate-in fade-in duration-200">
       
-      {/* Modal Dialog with Fixed Height Flex Column for 100% Scrollability */}
-      <div className="relative w-full max-w-2xl bg-white dark:bg-black rounded-2xl border border-neutral-200 dark:border-neutral-800 shadow-2xl overflow-hidden flex flex-col max-h-[90vh] my-auto animate-in zoom-in-95 duration-200">
+      {/* Modal Dialog with Fixed Height Flex Column for 100% Scrollability on Mobile & Desktop */}
+      <div className="relative w-full max-w-2xl bg-white dark:bg-black rounded-2xl sm:rounded-3xl border border-neutral-200 dark:border-neutral-800 shadow-2xl overflow-hidden flex flex-col max-h-[calc(100dvh-1rem)] sm:max-h-[90vh] my-auto animate-in zoom-in-95 duration-200">
         
         {/* Sticky Modal Header (Never cut off, title always accessible!) */}
-        <div className="sticky top-0 z-20 shrink-0 flex items-center justify-between px-5 py-4 bg-white dark:bg-black border-b border-neutral-200 dark:border-neutral-800">
+        <div className="sticky top-0 z-20 shrink-0 flex items-center justify-between px-4 sm:px-5 py-3 sm:py-4 bg-white dark:bg-black border-b border-neutral-200 dark:border-neutral-800">
           <div className="flex items-center space-x-2.5">
-            <div className="w-9 h-9 rounded-xl bg-emerald-500 text-black flex items-center justify-center font-extrabold shadow-sm">
-              <ShieldCheck className="w-5 h-5" />
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-emerald-500 text-black flex items-center justify-center font-extrabold shadow-sm shrink-0">
+              <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <div>
-              <h2 className="text-base font-black text-neutral-900 dark:text-white">Buat Aduan Fasilitas Publik</h2>
-              <p className="text-xs text-neutral-500 dark:text-neutral-400 font-medium">Lapor masalah publik langsung ke dinas teknis terkait</p>
+              <h2 className="text-sm sm:text-base font-black text-neutral-900 dark:text-white">Buat Aduan Fasilitas Publik</h2>
+              <p className="text-[11px] sm:text-xs text-neutral-500 dark:text-neutral-400 font-medium">Lapor masalah publik langsung ke dinas teknis terkait</p>
             </div>
           </div>
 
@@ -470,7 +470,7 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitReport, ope
         </div>
 
         {/* Scrollable Modal Form Body (Scroll up & down seamlessly) */}
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-5 space-y-4 text-xs">
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-3.5 sm:p-5 space-y-3.5 sm:space-y-4 text-xs">
           
           {/* Judul Laporan */}
           <div>

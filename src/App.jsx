@@ -509,7 +509,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-white dark:bg-black text-neutral-900 dark:text-white transition-colors duration-300">
+    <div className="min-h-screen min-h-screen-dvh flex flex-col bg-white dark:bg-black text-neutral-900 dark:text-white transition-colors duration-300 overflow-x-hidden selection:bg-emerald-500 selection:text-black">
       
       {/* Animated Opening Screen */}
       <AnimatePresence mode="wait">
@@ -539,7 +539,7 @@ export default function App() {
 
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed top-20 right-4 z-50 max-w-sm bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-3.5 shadow-xl flex items-start gap-2.5 animate-in slide-in-from-top-3 duration-200 text-xs">
+        <div className="fixed top-16 sm:top-20 left-3 right-3 sm:left-auto sm:right-4 z-50 max-w-sm bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-3.5 shadow-xl flex items-start gap-2.5 animate-in slide-in-from-top-3 duration-200 text-xs">
           <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
             toastMessage.type === 'error' 
               ? 'bg-red-500/10 text-red-500' 
@@ -584,12 +584,12 @@ export default function App() {
         {/* Dedicated Tab View Router */}
         {activeTab === 'analytics' ? (
           /* ANALITIK TAB VIEW */
-          <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-4 pb-28 sm:pb-16">
+          <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-4 pb-[calc(7.5rem+env(safe-area-inset-bottom,0px))] sm:pb-16">
             <AnalyticsDashboard reports={reports} theme={theme} />
           </div>
         ) : activeTab === 'map' ? (
           /* PETA TAB VIEW */
-          <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-4 pb-28 sm:pb-16">
+          <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-4 pb-[calc(7.5rem+env(safe-area-inset-bottom,0px))] sm:pb-16">
             <InteractiveMap
               reports={filteredReports}
               onUpvote={handleUpvote}
@@ -603,7 +603,7 @@ export default function App() {
           </div>
         ) : activeTab === 'news' ? (
           /* BERITA TAB VIEW (DEDICATED INTERACTIVE NEWS HUB) */
-          <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-4 pb-28 sm:pb-16 space-y-6">
+          <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-4 pb-[calc(7.5rem+env(safe-area-inset-bottom,0px))] sm:pb-16 space-y-6">
             <NewsPage
               onOpenReportModalWithContext={(ctx) => {
                 setCreateReportInitialData(ctx);
@@ -628,7 +628,7 @@ export default function App() {
               onOpenDonationModal={() => setIsDonationModalOpen(true)}
             />
 
-            <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pb-28 sm:pb-16 space-y-6">
+            <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pb-[calc(7.5rem+env(safe-area-inset-bottom,0px))] sm:pb-16 space-y-6">
               
               {/* Real-Time Earthquake Early Warning System Widget */}
               <EarthquakeAlert />
