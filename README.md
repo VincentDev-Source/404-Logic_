@@ -1,7 +1,4 @@
-<img width="647" height="717" alt="Screenshot 2026-09-04 173820" src="https://github.com/user-attachments/assets/5cf426cb-07a8-4e3c-a3a6-2683bce70ed0" />
-<img width="1919" height="858" alt="Screenshot 2026-09-04 173756" src="https://github.com/user-attachments/assets/facfad29-92c9-4fd3-ab98-7dae058d05b6" />
-<img width="1919" height="870" alt="Screenshot 2026-09-04 173725" src="https://github.com/user-attachments/assets/48400fa5-ec9d-411c-bf36-c9f34d3b6dd5" />
-<img width="1919" height="870" alt="Screenshot 2026-09-04 173725" src="https://github.com/user-attachments/assets/8ddc55fa-4f53-4648-85f3-609ae56060d2" />
+
 <div align="center">
   
   # 🏙️ CivicPulse - LaporKota
