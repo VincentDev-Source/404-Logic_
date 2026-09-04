@@ -116,7 +116,7 @@ Berdasarkan studi tata kelola pelayanan kota, **lebih dari 68% warga enggan mela
 
 ### Video Demo
 
-📹 **[Link Video Demonstrasi Aplikasi](https://404-logic.vercel.app/)** _(Demo interaktif dapat diakses langsung pada live deployment)_
+📹 **[Link Video Demonstrasi Aplikasi](https://youtu.be/JfwdDW_2Rgk)** _(Demo interaktif dapat diakses langsung pada live deployment)_
 
 ---
 
