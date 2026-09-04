@@ -1,4 +1,6 @@
 
+
+
 <div align="center">
   
   # 🏙️ CivicPulse - LaporKota
@@ -101,13 +103,14 @@ Berdasarkan studi tata kelola pelayanan kota, **lebih dari 68% warga enggan mela
 ### Screenshot Aplikasi
 
 <div align="center">
-  <img width="647" height="717" alt="Screenshot 2026-09-04 173820" src="https://github.com/user-attachments/assets/5cf426cb-07a8-4e3c-a3a6-2683bce70ed0" />
+<img width="1919" height="870" alt="Screenshot 2026-09-04 173725" src="https://github.com/user-attachments/assets/f4d7175e-7c7f-4094-8bfe-c0733f2b2171" />
   <p><em>Homepage - Tampilan utama aplikasi dengan Peta Interaktif GIS, Statistik Kota, dan Quick Actions</em></p>
   
-<img width="1919" height="870" alt="Screenshot 2026-09-04 173725" src="https://github.com/user-attachments/assets/8ddc55fa-4f53-4648-85f3-609ae56060d2" />
+<img width="1919" height="858" alt="Screenshot 2026-09-04 173756" src="https://github.com/user-attachments/assets/4bbeacd9-5c4c-4fa0-ac86-82129fb8301c" />
   <p><em>Dashboard Operator - Panel manajemen petugas dinas dengan verifikasi laporan & upload foto perbaikan</em></p>
   
-  <img src="https://raw.githubusercontent.com/VincentDev-Source/404-Logic_/main/dist/screenshots/features.png" alt="Features" width="800" onerror="this.src='https://placehold.co/800x450/0f172a/34d399?text=Ticket+Tracker+%26+BMKG+Earthquake+Alert+%26+Donation'"/>
+<img width="647" height="717" alt="Screenshot 2026-09-04 173820" src="https://github.com/user-attachments/assets/c4290e5b-a1d1-4fd5-b9b4-ecd147b23389" />
+
   <p><em>Fitur Utama - Pelacak Tiket Real-Time, Peringatan Gempa BMKG, dan Modul Donasi Midtrans</em></p>
 </div>
 
