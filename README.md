@@ -5,7 +5,7 @@
   
   [![Live Demo](https://img.shields.io/badge/🚀_Live_Demo-Visit_Site-success?style=for-the-badge)](https://404-logic.vercel.app/)
   [![GitHub](https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github)](https://github.com/VincentDev-Source/404-Logic_)
-  [![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](LICENSE)
+  [![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](https://github.com/VincentDev-Source/404-Logic_/blob/main/LICENSE)
   
   **Submission for ITECHNO CUP 2026 - Web Development**
   
