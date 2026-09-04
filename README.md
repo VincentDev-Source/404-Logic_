@@ -1,6 +1,3 @@
-
-
-
 <div align="center">
   
   # 🏙️ CivicPulse - LaporKota
@@ -48,25 +45,25 @@
 
 ### Latar Belakang
 
-Permasalahan infrastruktur publik di wilayah perkotaan—seperti jalan rusak berlubang, banjir/genangan air, lampu penerangan jalan umum (PJU) mati, tumpukan sampah liar, hingga ancaman bencana alam—seringkali lambat tertangani akibat birokrasi manual yang lamban dan ketiadaan transparansi data.
+Jalan berlubang, genangan air, lampu jalan mati, sampah liar, ancaman bencana alam — warga kota menghadapi masalah ini setiap hari, dan penanganannya sering terhambat di birokrasi manual dan data yang tidak transparan.
 
-Berdasarkan studi tata kelola pelayanan kota, **lebih dari 68% warga enggan melaporkan masalah fasilitas umum** karena minimnya sistem pelacakan tiket (*ticket tracking*) yang jelas, tidak adanya bukti pengerjaan (*proof of work*), dan kekhawatiran aduan mereka diabaikan. Di sisi lain, instansi dinas teknis pemerintah menghadapi kendala dalam memverifikasi keabsahan laporan warga, mengonfirmasi koordinat GPS yang akurat, serta mengelola antrean pekerjaan teknisi lapangan secara terpadu.
+Sebagian besar warga tidak melapor. Mereka tidak tahu apakah aduan mereka sampai ke orang yang tepat, tidak ada bukti bahwa perbaikan benar-benar dikerjakan, dan tidak ada cara melacak progres setelah laporan dikirim. Di sisi dinas teknis, petugas kesulitan memverifikasi laporan warga, mengonfirmasi koordinat GPS yang akurat, dan mengatur antrean teknisi lapangan dalam satu sistem.
 
 ### Solusi yang Ditawarkan
 
-**CivicPulse (LaporKota)** hadir sebagai solusi inovatif *Civic-Tech & Smart City Platform* untuk mewujudkan **SDG 11: Kota dan Komunitas yang Berkelanjutan**. Platform ini mengintegrasikan peran aktif warga dengan operasional dinas perkotaan melalui pendekatan teknologi mutakhir:
+CivicPulse (LaporKota) menghubungkan warga dan dinas kota lewat lima komponen, mendukung SDG 11 (Kota dan Komunitas yang Berkelanjutan):
 
-1. **Peta GIS Interaktif Real-Time**: Visualisasi titik aduan dengan koordinat geolokasi presisi (GPS & IP fallback).
-2. **AI Biometrik Wajah Operator**: Sistem autentikasi operator lapangan tanpa kata sandi (*passwordless face recognition*) menggunakan *128-D Euclidean Vector Matching* di sisi peramban.
-3. **Pelacakan Tiket Transparan**: Pemantauan progres 4 tahap laporan secara *live* lengkap dengan bukti foto pengerjaan (*Before & After*).
-4. **Early Disaster Warning**: Integrasi langsung dengan API BMKG untuk deteksi gempa bumi terkini dan mitigasi bahaya.
-5. **Dukungan Pendanaan Komunitas**: Fasilitas donasi publik terverifikasi melalui Midtrans Payment Gateway untuk penanganan darurat fasilitas umum.
+1. **Peta GIS Interaktif Real-Time** — titik aduan divisualisasikan dengan koordinat presisi (GPS & IP fallback).
+2. **AI Biometrik Wajah Operator** — operator lapangan login tanpa kata sandi lewat pencocokan vektor wajah 128-D di peramban.
+3. **Pelacakan Tiket Transparan** — warga memantau 4 tahap progres laporan, dengan foto pengerjaan sebelum dan sesudah.
+4. **Early Disaster Warning** — data gempa bumi terkini ditarik langsung dari API BMKG.
+5. **Dukungan Pendanaan Komunitas** — donasi publik diproses lewat Midtrans untuk penanganan darurat fasilitas umum.
 
 ### Tujuan Proyek
 
-- 🎯 **Tujuan Utama**: Mempercepat waktu tanggap (*response time*) penanganan infrastruktur perkotaan dan bencana, meningkatkan transparansi publik, serta memfasilitasi kolaborasi erat antara warga dan pemerintah.
-- 📊 **Target Pengguna**: Warga masyarakat perkotaan, operator teknis dinas pemerintahan, relawan komunitas kota, dan *city planners*.
-- 💡 **Value Proposition**: Ekosistem pelaporan holistik berbasis peta interaktif, verifikasi biometrik AI bebas kata sandi, transparansi bukti foto perbaikan, integrasi data bencana nasional BMKG, serta donasi terverifikasi Midtrans.
+- **Tujuan Utama**: mempercepat waktu tanggap penanganan infrastruktur dan bencana, membuat proses lebih transparan bagi warga, dan mempermudah kolaborasi antara warga dan pemerintah.
+- **Target Pengguna**: warga kota, operator teknis dinas pemerintahan, relawan komunitas, dan perencana kota.
+- **Yang membedakan platform ini**: peta interaktif sebagai pusat pelaporan, verifikasi operator lewat biometrik AI tanpa kata sandi, bukti foto untuk tiap perbaikan, data bencana nasional dari BMKG, dan donasi yang terverifikasi lewat Midtrans.
 
 ---
 
@@ -76,21 +73,21 @@ Berdasarkan studi tata kelola pelayanan kota, **lebih dari 68% warga enggan mela
 
 | Fitur | Deskripsi | Keunggulan |
 |----------|--------------|---------------|
-| **Peta GIS Interaktif** | Visualisasi spasial seluruh laporan fasilitas rusak di peta Leaflet secara *real-time*. | Dilengkapi *custom map marker*, filter kategori dinamis, dan navigasi titik koordinat presisi. |
-| **Pelaporan Cerdas & Geotagging** | Formulir aduan fasilitas publik dengan deteksi lokasi otomatis via GPS/IP, unggah foto bukti, dan opsi anonim. | Memastikan keakuratan lokasi fisik dan menjaga privasi pelapor. |
-| **Pelacakan Tiket Real-Time** | Sistem pelacakan status penanganan aduan menggunakan kode tiket unik (contoh: `LP-2026-0001`). | Menampilkan linimasa 4 fase progres, catatan resmi petugas, serta foto komparasi *Before/After*. |
-| **Autentikasi AI Biometrik Wajah** | Login dan pendaftaran operator dinas menggunakan teknologi pemindaian wajah (*Face-API*). | Autentikasi aman tanpa kata sandi berbasis *128-D facial vector descriptor*, mencegah impersonasi akun petugas. |
-| **Dashboard Manajemen Operator** | Panel kontrol terpadu untuk petugas dinas dalam memvalidasi aduan, mengubah status pengerjaan, dan mengunggah dokumentasi. | Mempercepat *dispatch* penanganan dari antrean *Menunggu*, *Diproses*, hingga *Selesai*. |
-| **Peringatan Dini Gempa BMKG** | Widget peringatan dini gempa bumi terintegrasi langsung dengan sumber data resmi BMKG. | Menampilkan magnitudo, kedalaman, koordinat pusat gempa, peta lokasi, serta instruksi keselamatan darurat. |
-| **Donasi Komunitas (Midtrans Gateway)** | Modul penggalangan dana terpadu untuk mendukung perbaikan fasilitas darurat perkotaan. | Pembayaran instan otomatis menggunakan QRIS, GoPay, dan Virtual Bank Transfer via Midtrans Snap. |
+| **Peta GIS Interaktif** | Visualisasi spasial seluruh laporan fasilitas rusak di peta Leaflet secara real-time. | Custom map marker, filter kategori dinamis, dan navigasi titik koordinat presisi. |
+| **Pelaporan Cerdas & Geotagging** | Formulir aduan fasilitas publik dengan deteksi lokasi otomatis via GPS/IP, unggah foto bukti, dan opsi anonim. | Lokasi fisik tercatat akurat, identitas pelapor tetap terjaga jika dipilih anonim. |
+| **Pelacakan Tiket Real-Time** | Sistem pelacakan status penanganan aduan menggunakan kode tiket unik (contoh: `LP-2026-0001`). | Linimasa 4 fase progres, catatan resmi petugas, dan foto komparasi before/after. |
+| **Autentikasi AI Biometrik Wajah** | Login dan pendaftaran operator dinas menggunakan pemindaian wajah (Face-API). | Autentikasi tanpa kata sandi berbasis descriptor wajah 128-D, mencegah impersonasi akun petugas. |
+| **Dashboard Manajemen Operator** | Panel kontrol terpadu untuk petugas dinas dalam memvalidasi aduan, mengubah status pengerjaan, dan mengunggah dokumentasi. | Antrean kerja bergerak cepat dari Menunggu ke Diproses ke Selesai. |
+| **Peringatan Dini Gempa BMKG** | Widget peringatan dini gempa bumi terintegrasi langsung dengan sumber data resmi BMKG. | Magnitudo, kedalaman, koordinat pusat gempa, peta lokasi, dan instruksi keselamatan darurat. |
+| **Donasi Komunitas (Midtrans Gateway)** | Modul penggalangan dana terpadu untuk mendukung perbaikan fasilitas darurat perkotaan. | Pembayaran instan lewat QRIS, GoPay, dan Virtual Bank Transfer via Midtrans Snap. |
 
 ### Fitur Tambahan
 
-- **Dashboard Analitik Kota** - Visualisasi data statistik performa penanganan, persentase resolusi laporan, dan tren aduan mingguan berbasis Recharts.
-- **Portal Berita & Cuaca Kota** - Agregator berita perkotaan terkurasi dan informasi perkiraan cuaca lokal untuk kewaspadaan warga.
-- **Jajak Pendapat Warga (Public Polling)** - Fitur aspirasi warga mengenai prioritas perbaikan infrastruktur di lingkungan sekitar.
-- **Sistem Rating & Ulasan Layanan** - Pelapor dapat memberikan penilaian bintang (1-5) dan testimoni atas hasil kerja dinas terkait.
-- **Desain Responsif & Micro-Animations** - Antarmuka modern dengan *curved navigation bar*, *safe-area touch controls*, dan efek perayaan (*canvas-confetti*).
+- **Dashboard Analitik Kota** — statistik performa penanganan, persentase resolusi laporan, dan tren aduan mingguan berbasis Recharts.
+- **Portal Berita & Cuaca Kota** — berita perkotaan terkurasi dan prakiraan cuaca lokal.
+- **Jajak Pendapat Warga** — warga memberi suara pada prioritas perbaikan infrastruktur di lingkungan sekitar.
+- **Sistem Rating & Ulasan Layanan** — pelapor menilai (1-5 bintang) dan memberi testimoni atas hasil kerja dinas terkait.
+- **Desain Responsif & Micro-Animations** — curved navigation bar, safe-area touch controls, dan efek confetti saat laporan selesai.
 
 ---
 
@@ -157,11 +154,11 @@ External API : BMKG Open Data Gempa, GNews API, OpenStreetMap Tile Servers
 
 | Teknologi | Alasan Pemilihan |
 |-----------|------------------|
-| **React 18 + Vite 6** | Memberikan performa rendering yang sangat cepat, waktu *build* instan, serta arsitektur komponen yang modular dan mudah diuji. |
-| **Prisma ORM & PostgreSQL** | Menghasilkan skema basis data yang *type-safe*, migrasi yang konsisten, relasi data terstruktur, serta keandalan penyimpanan tinggi. |
-| **@vladmandic/face-api** | Memungkinkan inferensi model kecerdasan buatan (*face detection & recognition*) langsung pada browser pengguna tanpa membebani *server resources*. |
-| **Leaflet.js** | Solusi pemetaan GIS berbasis web yang sangat ringan, responsif pada perangkat seluler (*mobile-first*), serta kaya dukungan *custom overlays*. |
-| **Midtrans Snap SDK** | Gateway pembayaran terpercaya di Indonesia yang memfasilitasi transaksi donasi publik secara instan via QRIS dan bank transfer. |
+| **React 18 + Vite 6** | Rendering cepat, build instan, komponen modular yang mudah diuji. |
+| **Prisma ORM & PostgreSQL** | Skema type-safe, migrasi konsisten, relasi data terstruktur, penyimpanan yang stabil. |
+| **@vladmandic/face-api** | Inferensi face detection & recognition berjalan langsung di browser pengguna, tanpa membebani server. |
+| **Leaflet.js** | Pemetaan GIS ringan, responsif di perangkat seluler, mendukung custom overlays. |
+| **Midtrans Snap SDK** | Gateway pembayaran yang umum dipakai di Indonesia, mendukung donasi instan via QRIS dan transfer bank. |
 
 ### Dependencies Utama
 
@@ -230,7 +227,7 @@ graph TD
 
 ### Database Schema
 
-Skema basis data dirancang efisien dengan **Prisma ORM** yang mencakup entitas Operator, Laporan Masyarakat, dan Transaksi Donasi:
+Skema database dibangun dengan Prisma ORM, mencakup entitas Operator, Laporan Masyarakat, dan Transaksi Donasi:
 
 ```prisma
 datasource db {
@@ -351,10 +348,10 @@ model Donation {
 
 ### Prerequisites
 
-Pastikan perangkat Anda telah memenuhi prasyarat berikut:
-- **Node.js** (versi 18.x atau versi LTS terbaru)
+Sebelum mulai, siapkan:
+- **Node.js** (versi 18.x atau LTS terbaru)
 - **npm** (v9.x atau lebih tinggi) / **yarn** / **pnpm**
-- **PostgreSQL Database** (Bisa menggunakan PostgreSQL lokal, Supabase, Neon, atau Vercel Postgres)
+- **PostgreSQL Database** (lokal, Supabase, Neon, atau Vercel Postgres)
 - **Git**
 
 ### Langkah Instalasi
@@ -415,7 +412,7 @@ npx prisma db push
 npm run dev
 ```
 
-Aplikasi frontend akan berjalan pada `http://localhost:5173` (atau port yang ditampilkan terminal Vite).
+Aplikasi frontend berjalan di `http://localhost:5173` (atau port yang ditampilkan terminal Vite).
 
 ---
 
@@ -441,27 +438,27 @@ npm run lint
 
 #### Untuk Pengguna Umum (Warga Kota)
 
-1. **Eksplorasi Peta & Informasi Kota**: Akses beranda untuk memantau sebaran fasilitas bermasalah di peta interaktif, status gempa bumi BMKG, dan berita terkini.
+1. **Eksplorasi Peta & Informasi Kota**: buka beranda untuk melihat sebaran fasilitas bermasalah di peta interaktif, status gempa bumi BMKG, dan berita terkini.
 2. **Kirim Laporan Fasilitas**:
    - Klik tombol **"Buat Laporan"**.
-   - Sistem akan mendeteksi koordinat GPS otomatis (atau tentukan secara manual).
-   - Masukkan judul, kategori, deskripsi masalah, serta unggah foto bukti kerusakan.
-   - Pilih opsi laporan publik atau anonim, lalu klik **Kirim Laporan**.
+   - Sistem mendeteksi koordinat GPS otomatis (atau tentukan lokasi secara manual).
+   - Isi judul, kategori, deskripsi masalah, dan unggah foto bukti kerusakan.
+   - Pilih laporan publik atau anonim, lalu klik **Kirim Laporan**.
 3. **Lacak Tiket Status**:
    - Buka menu **"Lacak Tiket"** dan masukkan kode tiket (misal: `LP-2026-0001`).
-   - Pantau tahapan penanganan (*Menunggu Verifikasi*, *Sedang Dikerjakan*, hingga *Selesai*).
-   - Periksa foto perbaikan (*After Image*) dan catatan resmi dari petugas lapangan.
-4. **Beri Ulasan Kepuasan**: Setelah laporan berstatus selesai, berikan penilaian bintang (1-5) dan saran perbaikan.
-5. **Donasi Komunitas**: Pilih menu donasi untuk mendukung perbaikan fasilitas mendesak via QRIS atau Virtual Account.
+   - Pantau tahapan penanganan (Menunggu Verifikasi, Sedang Dikerjakan, Selesai).
+   - Periksa foto perbaikan (After Image) dan catatan resmi dari petugas lapangan.
+4. **Beri Ulasan Kepuasan**: setelah laporan berstatus selesai, beri penilaian bintang (1-5) dan saran perbaikan.
+5. **Donasi Komunitas**: pilih menu donasi untuk mendukung perbaikan fasilitas mendesak via QRIS atau Virtual Account.
 
 #### Untuk Admin / Operator Dinas
 
-1. **Akses Panel Operator**: Klik tombol **"Petugas"** atau **"Mode Operator"** pada navigasi atas.
-2. **Autentikasi Biometrik Wajah**: Arahkan wajah ke kamera webcam peramban untuk verifikasi instan berbasis AI (*Face-API*).
+1. **Akses Panel Operator**: klik tombol **"Petugas"** atau **"Mode Operator"** pada navigasi atas.
+2. **Autentikasi Biometrik Wajah**: arahkan wajah ke kamera webcam untuk verifikasi lewat Face-API.
 3. **Manajemen Tiket Laporan**:
-   - Tinjau aduan baru yang masuk dari masyarakat.
-   - Ubah status pekerjaan menjadi **"Diproses"** saat teknisi dikerahkan ke lokasi.
-   - Setelah penanganan tuntas, ubah status menjadi **"Selesai"**, cantumkan catatan teknis, dan unggah foto dokumentasi hasil perbaikan (*After Image*).
+   - Tinjau aduan baru dari masyarakat.
+   - Ubah status menjadi **"Diproses"** saat teknisi dikerahkan ke lokasi.
+   - Setelah penanganan tuntas, ubah status menjadi **"Selesai"**, cantumkan catatan teknis, dan unggah foto hasil perbaikan (After Image).
 
 ---
 
