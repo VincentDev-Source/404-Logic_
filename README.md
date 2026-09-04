@@ -1,3 +1,4 @@
+<img width="1919" height="870" alt="Screenshot 2026-09-04 173725" src="https://github.com/user-attachments/assets/8ddc55fa-4f53-4648-85f3-609ae56060d2" />
 <div align="center">
   
   # 🏙️ CivicPulse - LaporKota
