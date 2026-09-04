@@ -1,10 +1,10 @@
 <div align="center">
   
   # 🏙️ CivicPulse - LaporKota
-  ### Platform Pelaporan Publik & Manajemen Infrastruktur Kota Berbasis AI Biometrik & Real-Time GIS
+  ### Platform Partisipasi Publik, Penanggulangan Bencana & Manajemen Kota Cerdas Berbasis AI Biometrik & Real-Time GIS
   
-  [![Live Demo](https://img.shields.io/badge/🚀_Live_Demo-Visit_Site-success?style=for-the-badge)](https://civicpulse-laporkota.vercel.app)
-  [![GitHub](https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github)](https://github.com/Arklerknight/404-Logic)
+  [![Live Demo](https://img.shields.io/badge/🚀_Live_Demo-Visit_Site-success?style=for-the-badge)](https://404-logic.vercel.app/)
+  [![GitHub](https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github)](https://github.com/VincentDev-Source/404-Logic_)
   [![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](LICENSE)
   
   **Submission for ITECHNO CUP 2026 - Web Development**
@@ -35,9 +35,9 @@
 
 | Nama | Peran | GitHub |
 |------|-------|--------|
-| **VincentDev as Malvino** | Project Lead & UX/UI Developer | [@404-Logic](https://github.com/VincentDev-Source) |
-| **annafi2 as Arka** | Full Stack Developer | [@Arklerknight](https://github.com/annafi2) |
-| **27RamaaaDevRamaaa as Rama - Frontend** | Frontend & Backend Developer | [@404-Logic](https://github.com/27RamaaaDev) |
+| **VincentDev** | Project Lead & UX/UI Developer | [GitHub](https://github.com/VincentDev-Source) |
+| **annafi2** | Full Stack Developer | [GitHub](https://github.com/annafi2) |
+| **27RamaaaDev** | Frontend & Backend Developer | [GitHub](https://github.com/27RamaaaDev) |
 
 ---
 
@@ -45,21 +45,25 @@
 
 ### Latar Belakang
 
-Permasalahan infrastruktur publik di wilayah perkotaan—seperti jalan berlubang, genangan air/banjir, penerangan jalan umum (PJU) mati, hingga penumpukan sampah liar—seringkali terlambat ditangani akibat birokrasi pelaporan manual yang rumit dan tidak transparan. 
+Permasalahan infrastruktur publik di wilayah perkotaan—seperti jalan rusak berlubang, banjir/genangan air, lampu penerangan jalan umum (PJU) mati, tumpukan sampah liar, hingga ancaman bencana alam—seringkali lambat tertangani akibat birokrasi manual yang lamban dan ketiadaan transparansi data.
 
-Berdasarkan studi pelayanan publik kota, lebih dari **68% warga merasa enggan melaporkan kerusakan publik** karena ketiadaan sistem pelacakan status (*ticket tracking*) yang jelas, serta kekhawatiran laporan mereka diabaikan. Di sisi lain, petugas instansi dinas teknis kewalahan memverifikasi keabsahan laporan, mendeteksi titik koordinat lokasi secara presisi, serta mengelola progres perbaikan di lapangan secara efisien.
+Berdasarkan studi tata kelola pelayanan kota, **lebih dari 68% warga enggan melaporkan masalah fasilitas umum** karena minimnya sistem pelacakan tiket (*ticket tracking*) yang jelas, tidak adanya bukti pengerjaan (*proof of work*), dan kekhawatiran aduan mereka diabaikan. Di sisi lain, instansi dinas teknis pemerintah menghadapi kendala dalam memverifikasi keabsahan laporan warga, mengonfirmasi koordinat GPS yang akurat, serta mengelola antrean pekerjaan teknisi lapangan secara terpadu.
 
 ### Solusi yang Ditawarkan
 
-**CivicPulse (LaporKota)** hadir sebagai platform *Smart City Civic Engagement* generasi baru yang mengintegrasikan pelaporan masyarakat secara instan dengan manajemen dinas kota secara *real-time*. 
+**CivicPulse (LaporKota)** hadir sebagai solusi inovatif *Civic-Tech & Smart City Platform* untuk mewujudkan **SDG 11: Kota dan Komunitas yang Berkelanjutan**. Platform ini mengintegrasikan peran aktif warga dengan operasional dinas perkotaan melalui pendekatan teknologi mutakhir:
 
-Dengan memanfaatkan **Peta GIS Interaktif (Leaflet)**, **Sistem Geolokasi Presisi (GPS & IP Fallback)**, **Pelacakan Tiket Real-time**, **Autentikasi Biometrik Wajah Operator berbasis AI (*Face Recognition*)**, serta **Dashboard Analitik Kota**, CivicPulse menjembatani warga dan pemerintah kota untuk menciptakan lingkungan perkotaan yang lebih aman, responsif, dan berkelanjutan.
+1. **Peta GIS Interaktif Real-Time**: Visualisasi titik aduan dengan koordinat geolokasi presisi (GPS & IP fallback).
+2. **AI Biometrik Wajah Operator**: Sistem autentikasi operator lapangan tanpa kata sandi (*passwordless face recognition*) menggunakan *128-D Euclidean Vector Matching* di sisi peramban.
+3. **Pelacakan Tiket Transparan**: Pemantauan progres 4 tahap laporan secara *live* lengkap dengan bukti foto pengerjaan (*Before & After*).
+4. **Early Disaster Warning**: Integrasi langsung dengan API BMKG untuk deteksi gempa bumi terkini dan mitigasi bahaya.
+5. **Dukungan Pendanaan Komunitas**: Fasilitas donasi publik terverifikasi melalui Midtrans Payment Gateway untuk penanganan darurat fasilitas umum.
 
 ### Tujuan Proyek
 
-- 🎯 **Tujuan Utama**: Mempercepat waktu tanggap (*response time*) perbaikan infrastruktur kota dan meningkatkan transparansi penanganan laporan instansi pemerintah.
-- 📊 **Target Pengguna**: Masyarakat umum perkotaan, petugas dinas/operator teknis lapangan, dan pemangku kebijakan (*city planners*).
-- 💡 **Value Proposition**: Pelaporan berbasis peta GIS interaktif, sistem pelacakan tiket transparan dengan bukti foto *Before/After*, serta login operator tanpa password berbasis AI Biometrik Wajah (*Passwordless Face Recognition*).
+- 🎯 **Tujuan Utama**: Mempercepat waktu tanggap (*response time*) penanganan infrastruktur perkotaan dan bencana, meningkatkan transparansi publik, serta memfasilitasi kolaborasi erat antara warga dan pemerintah.
+- 📊 **Target Pengguna**: Warga masyarakat perkotaan, operator teknis dinas pemerintahan, relawan komunitas kota, dan *city planners*.
+- 💡 **Value Proposition**: Ekosistem pelaporan holistik berbasis peta interaktif, verifikasi biometrik AI bebas kata sandi, transparansi bukti foto perbaikan, integrasi data bencana nasional BMKG, serta donasi terverifikasi Midtrans.
 
 ---
 
@@ -69,19 +73,21 @@ Dengan memanfaatkan **Peta GIS Interaktif (Leaflet)**, **Sistem Geolokasi Presis
 
 | Fitur | Deskripsi | Keunggulan |
 |----------|--------------|---------------|
-| **Peta GIS Interaktif** | Visualisasi lokasi laporan masalah kota secara *real-time* di peta interaktif Leaflet. | Dilengkapi *custom map marker*, kategori ikon dinamis, serta filter status dan tingkat keparahan. |
-| **Pelaporan Presisi & GPS** | Formulir pelaporan fasilitas rusak dengan deteksi koordinat otomatis (GPS/IP fallback) dan unggah foto. | Pengguna dapat mengirim laporan secara instan dengan opsi anonim untuk menjaga privasi. |
-| **Pelacakan Tiket Real-Time** | Sistem pelacakan progres laporan menggunakan ID Tiket unik (contoh: `LP-2026-0001`). | Menampilkan lini masa 4 tahap transparan, catatan resmi petugas, serta perbandingan foto *Before/After*. |
-| **Autentikasi Biometrik Wajah** | Login & pendaftaran operator dinas menggunakan AI pengenalan wajah (*Face-API*) langsung di browser. | Menggunakan komparasi *128-D Vector Euclidean Distance Matching* tanpa risiko kebocoran kata sandi. |
-| **Dashboard Operator Dinas** | Panel khusus petugas untuk verifikasi laporan warga, pembaruan status, dan repositori penanganan. | Memudahkan dinas memproses antrean laporan dari *Menunggu*, *Diproses*, hingga *Selesai*. |
-| **Analytics & Data Kota** | Panel visualisasi statistik kota berbasis **Recharts** untuk analisis kinerja dan tren kerusakan. | Menyajikan grafik tren mingguan, persentase penyelesaian, waktu tanggap rata-rata, dan distribusi kategori. |
+| **Peta GIS Interaktif** | Visualisasi spasial seluruh laporan fasilitas rusak di peta Leaflet secara *real-time*. | Dilengkapi *custom map marker*, filter kategori dinamis, dan navigasi titik koordinat presisi. |
+| **Pelaporan Cerdas & Geotagging** | Formulir aduan fasilitas publik dengan deteksi lokasi otomatis via GPS/IP, unggah foto bukti, dan opsi anonim. | Memastikan keakuratan lokasi fisik dan menjaga privasi pelapor. |
+| **Pelacakan Tiket Real-Time** | Sistem pelacakan status penanganan aduan menggunakan kode tiket unik (contoh: `LP-2026-0001`). | Menampilkan linimasa 4 fase progres, catatan resmi petugas, serta foto komparasi *Before/After*. |
+| **Autentikasi AI Biometrik Wajah** | Login dan pendaftaran operator dinas menggunakan teknologi pemindaian wajah (*Face-API*). | Autentikasi aman tanpa kata sandi berbasis *128-D facial vector descriptor*, mencegah impersonasi akun petugas. |
+| **Dashboard Manajemen Operator** | Panel kontrol terpadu untuk petugas dinas dalam memvalidasi aduan, mengubah status pengerjaan, dan mengunggah dokumentasi. | Mempercepat *dispatch* penanganan dari antrean *Menunggu*, *Diproses*, hingga *Selesai*. |
+| **Peringatan Dini Gempa BMKG** | Widget peringatan dini gempa bumi terintegrasi langsung dengan sumber data resmi BMKG. | Menampilkan magnitudo, kedalaman, koordinat pusat gempa, peta lokasi, serta instruksi keselamatan darurat. |
+| **Donasi Komunitas (Midtrans Gateway)** | Modul penggalangan dana terpadu untuk mendukung perbaikan fasilitas darurat perkotaan. | Pembayaran instan otomatis menggunakan QRIS, GoPay, dan Virtual Bank Transfer via Midtrans Snap. |
 
 ### Fitur Tambahan
 
-- **Peringatan Dini Gempa Bumi BMKG** - Real-time integration API BMKG untuk pemantauan data gempa bumi terkini, magnitudo, kedalaman, dan peta potensi bencana.
-- **Widget Berita Kota (City News)** - Agregator berita terintegrasi untuk informasi infrastruktur, penanggulangan bencana, dan cuaca terkini di kota pengguna.
-- **Sistem Rating & Ulasan Kepuasan** - Warga dapat memberikan ulasan bintang (1-5) dan umpan balik atas hasil pengerjaan petugas setelah tiket diselesaikan.
-- **Micro-Animations & Confetti** - Efek visual perayaan (*canvas-confetti*) dan transisi animasi halus (*Framer Motion*) untuk meningkatkan keterlibatan pengguna (*UX*).
+- **Dashboard Analitik Kota** - Visualisasi data statistik performa penanganan, persentase resolusi laporan, dan tren aduan mingguan berbasis Recharts.
+- **Portal Berita & Cuaca Kota** - Agregator berita perkotaan terkurasi dan informasi perkiraan cuaca lokal untuk kewaspadaan warga.
+- **Jajak Pendapat Warga (Public Polling)** - Fitur aspirasi warga mengenai prioritas perbaikan infrastruktur di lingkungan sekitar.
+- **Sistem Rating & Ulasan Layanan** - Pelapor dapat memberikan penilaian bintang (1-5) dan testimoni atas hasil kerja dinas terkait.
+- **Desain Responsif & Micro-Animations** - Antarmuka modern dengan *curved navigation bar*, *safe-area touch controls*, dan efek perayaan (*canvas-confetti*).
 
 ---
 
@@ -89,24 +95,24 @@ Dengan memanfaatkan **Peta GIS Interaktif (Leaflet)**, **Sistem Geolokasi Presis
 
 ### Live Demo
 
-🔗 **[Kunjungi Website CivicPulse](https://civicpulse-laporkota.vercel.app)**
+🔗 **[Kunjungi Website CivicPulse (404 Logic)](https://404-logic.vercel.app/)**
 
 ### Screenshot Aplikasi
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/Arklerknight/404-Logic/main/public/screenshots/homepage.png" alt="Homepage CivicPulse" width="800" onerror="this.src='https://placehold.co/800x450/0f172a/6366f1?text=CivicPulse+Homepage+Interactive+Map'"/>
-  <p><em>Homepage - Tampilan utama aplikasi dengan Peta Interaktif & Stats Overview</em></p>
+  <img src="https://raw.githubusercontent.com/VincentDev-Source/404-Logic_/main/dist/screenshots/homepage.png" alt="Homepage" width="800" onerror="this.src='https://placehold.co/800x450/0f172a/38bdf8?text=CivicPulse+Homepage+-+Interactive+GIS+Map'"/>
+  <p><em>Homepage - Tampilan utama aplikasi dengan Peta Interaktif GIS, Statistik Kota, dan Quick Actions</em></p>
   
-  <img src="https://raw.githubusercontent.com/Arklerknight/404-Logic/main/public/screenshots/operator-dashboard.png" alt="Dashboard Operator" width="800" onerror="this.src='https://placehold.co/800x450/0f172a/6366f1?text=Operator+Dashboard+%26+Face+Auth'"/>
-  <p><em>Dashboard Operator - Panel kontrol petugas dinas & verifikasi laporan</em></p>
+  <img src="https://raw.githubusercontent.com/VincentDev-Source/404-Logic_/main/dist/screenshots/operator-dashboard.png" alt="Dashboard" width="800" onerror="this.src='https://placehold.co/800x450/0f172a/818cf8?text=Operator+Dashboard+-+Face+AI+Auth'"/>
+  <p><em>Dashboard Operator - Panel manajemen petugas dinas dengan verifikasi laporan & upload foto perbaikan</em></p>
   
-  <img src="https://raw.githubusercontent.com/Arklerknight/404-Logic/main/public/screenshots/ticket-tracker.png" alt="Ticket Tracker & Biometrics" width="800" onerror="this.src='https://placehold.co/800x450/0f172a/6366f1?text=Ticket+Tracker+%26+Biometric+Face+Auth'"/>
-  <p><em>Pelacakan Tiket & Autentikasi Biometrik Wajah Operator</em></p>
+  <img src="https://raw.githubusercontent.com/VincentDev-Source/404-Logic_/main/dist/screenshots/features.png" alt="Features" width="800" onerror="this.src='https://placehold.co/800x450/0f172a/34d399?text=Ticket+Tracker+%26+BMKG+Earthquake+Alert+%26+Donation'"/>
+  <p><em>Fitur Utama - Pelacak Tiket Real-Time, Peringatan Gempa BMKG, dan Modul Donasi Midtrans</em></p>
 </div>
 
 ### Video Demo
 
-📹 **[Tonton Video Demonstrasi Aplikasi](https://youtube.com)** _(Video walkthrough aplikasi CivicPulse)_
+📹 **[Link Video Demonstrasi Aplikasi](https://404-logic.vercel.app/)** _(Demo interaktif dapat diakses langsung pada live deployment)_
 
 ---
 
@@ -118,37 +124,40 @@ Dengan memanfaatkan **Peta GIS Interaktif (Leaflet)**, **Sistem Geolokasi Presis
 ```
 Framework    : React 18 (Vite 6 Bundler)
 UI Library   : Tailwind CSS v3, Lucide React Icons, Framer Motion
-State Mgmt   : React Hooks (Context API & Custom Hooks)
-Map Library  : Leaflet.js & React-Leaflet
-Charts       : Recharts
-AI Biometrics: @vladmandic/face-api (TensorFlow.js edge execution)
+State Mgmt   : React Hooks (Custom State & Context API)
+Map & GIS    : Leaflet.js & React-Leaflet
+Charts       : Recharts (Responsive Data Visualization)
+AI / ML      : @vladmandic/face-api (TensorFlow.js Edge Facial Recognition)
+Payment SDK  : Midtrans Snap JS SDK Sandbox
 ```
 
 #### Backend
 ```
 Runtime      : Node.js (Vercel Serverless Functions)
-Framework    : Serverless API Handlers
-Database     : PostgreSQL (Vercel Postgres / Supabase)
+Framework    : RESTful Serverless Endpoint Handlers
+Database     : PostgreSQL (Supabase / Vercel Postgres)
 ORM          : Prisma ORM v6 (@prisma/client)
-Auth         : AI Biometric Vector Matching (128-D Euclidean Distance)
+Auth         : AI Biometric Vector Euclidean Matching (128-D)
+Payment      : Midtrans Serverless Notification Webhook & Token Generator
 ```
 
 #### DevOps & Tools
 ```
 Deployment   : Vercel Cloud Platform
-CI/CD        : Vercel Automatic Git Deployment
-Linting      : ESLint & PostCSS
-External APIs: BMKG Open Data API, GNews API / RSS News Aggregator
+CI/CD        : Vercel Git Integration & Automated Builds
+Code Quality : ESLint, PostCSS, Autoprefixer
+External API : BMKG Open Data Gempa, GNews API, OpenStreetMap Tile Servers
 ```
 
 ### Alasan Pemilihan Teknologi
 
 | Teknologi | Alasan Pemilihan |
 |-----------|------------------|
-| **React 18 + Vite** | Memberikan performa render yang cepat, struktur komponen modular, serta *Hot Module Replacement (HMR)* yang responsif. |
-| **Prisma ORM & PostgreSQL** | Menyediakan pengaksesan database ber-tipe data aman (*type-safe*), skema migrasi yang terstruktur, dan performa query relational yang tinggi. |
-| **Face-API.js (@vladmandic)** | Memungkinkan deteksi dan pengenalan biometrik wajah langsung di *client-side browser*, mengurangi beban komputasi server. |
-| **Leaflet.js** | Library pemetaan berbasis GIS yang sangat ringan, responsif, dan mudah disesuaikan dengan titik koordinat laporan warga. |
+| **React 18 + Vite 6** | Memberikan performa rendering yang sangat cepat, waktu *build* instan, serta arsitektur komponen yang modular dan mudah diuji. |
+| **Prisma ORM & PostgreSQL** | Menghasilkan skema basis data yang *type-safe*, migrasi yang konsisten, relasi data terstruktur, serta keandalan penyimpanan tinggi. |
+| **@vladmandic/face-api** | Memungkinkan inferensi model kecerdasan buatan (*face detection & recognition*) langsung pada browser pengguna tanpa membebani *server resources*. |
+| **Leaflet.js** | Solusi pemetaan GIS berbasis web yang sangat ringan, responsif pada perangkat seluler (*mobile-first*), serta kaya dukungan *custom overlays*. |
+| **Midtrans Snap SDK** | Gateway pembayaran terpercaya di Indonesia yang memfasilitasi transaksi donasi publik secara instan via QRIS dan bank transfer. |
 
 ### Dependencies Utama
 
@@ -165,6 +174,15 @@ External APIs: BMKG Open Data API, GNews API / RSS News Aggregator
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "recharts": "^2.15.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.17",
+    "vite": "^6.0.7"
   }
 }
 ```
@@ -177,36 +195,49 @@ External APIs: BMKG Open Data API, GNews API / RSS News Aggregator
 
 ```mermaid
 graph TD
-    subgraph Client Layer
-        Citizen[Warga / Pelapor] -->|Akses Web SPA| ReactApp[React + Vite Frontend]
-        Operator[Petugas / Operator Dinas] -->|Face Auth AI| ReactApp
+    subgraph ClientLayer ["Client Layer (Web Application)"]
+        Warga["Masyarakat / Pelapor"] -->|Akses Browser SPA| ClientApp["React 18 + Vite (Tailwind CSS)"]
+        Petugas["Operator Lapangan"] -->|Face Biometric Scan| ClientApp
+        Donatur["Donatur Komunitas"] -->|Midtrans Snap Checkout| ClientApp
     end
 
-    subgraph External Services
-        ReactApp -->|Fetch Data Gempa| BMKG[BMKG Disaster API]
-        ReactApp -->|Fetch News Feed| NewsAPI[City News Aggregator]
+    subgraph ExternalServices ["External Services & APIs"]
+        ClientApp -->|Data Bencana Real-Time| BMKG["BMKG Earthquake Data API"]
+        ClientApp -->|Berita & Regulasi| NewsAPI["City News Aggregator"]
+        ClientApp -->|Payment Processing| MidtransSnap["Midtrans Payment Gateway"]
     end
 
-    subgraph API & Backend Layer
-        ReactApp -->|REST API Requests| VercelAPI[Vercel Serverless Functions]
-        VercelAPI -->|Public Reports CRUD| API_Reports[/api/reports]
-        VercelAPI -->|Operator Actions| API_Operator[/api/operator/reports]
-        VercelAPI -->|Biometric Match| API_FaceAuth[/api/auth/face-login]
+    subgraph ServerlessBackend ["Backend Layer (Vercel Serverless Functions)"]
+        ClientApp -->|REST API Requests| API_Reports["/api/reports (CRUD & Rating)"]
+        ClientApp -->|Operator Workflow| API_Operator["/api/operator/reports"]
+        ClientApp -->|Face Vector Verification| API_FaceAuth["/api/auth/face-login"]
+        ClientApp -->|Transaction Handling| API_Donate["/api/donate/*"]
+        MidtransSnap -->|Webhook Notification| API_Donate
     end
 
-    subgraph Database Layer
-        API_Reports --> Prisma[Prisma ORM]
+    subgraph DatabaseLayer ["Database Layer"]
+        API_Reports --> Prisma["Prisma ORM Client v6"]
         API_Operator --> Prisma
         API_FaceAuth --> Prisma
-        Prisma --> PostgresDB[(PostgreSQL Database)]
+        API_Donate --> Prisma
+        Prisma --> Postgres[("PostgreSQL Database (Prisma Postgres / Supabase)")]
     end
 ```
 
 ### Database Schema
 
-Skema basis data dikelola menggunakan **Prisma ORM** dengan model utama:
+Skema basis data dirancang efisien dengan **Prisma ORM** yang mencakup entitas Operator, Laporan Masyarakat, dan Transaksi Donasi:
 
 ```prisma
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_PRISMA_DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
 model Operator {
   id             Int      @id @default(autoincrement())
   name           String
@@ -232,49 +263,82 @@ model Report {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @default(now()) @updatedAt
 }
+
+model Donation {
+  id              Int      @id @default(autoincrement())
+  donorName       String   @default("Hamba Allah (Anonim)")
+  donorEmail      String?
+  amount          Float
+  currency        String   @default("IDR")
+  program         String
+  message         String?
+  isAnonymous     Boolean  @default(false)
+  stripeSessionId String?  @unique
+  status          String   @default("SUCCESS")
+  createdAt       DateTime @default(now())
+}
 ```
 
 ### Folder Structure
 
 ```
 404-Logic-main/
-├── api/                       # Vercel Serverless Functions API Endpoints
-│   ├── auth/                  # API Autentikasi Biometrik Wajah
-│   │   ├── face-login.js      # Verifikasi vektor 128-D wajah
-│   │   └── face-register.js   # Pendaftaran deskriptor wajah operator
-│   ├── operator/              # API Khusus Dashboard Operator
-│   │   └── reports.js         # Update status & upload dokumentasi perbaikan
-│   ├── earthquake.js          # Fetcher data gempa bumi BMKG
-│   ├── news.js                # Aggregator berita publik kota
-│   └── reports.js             # CRUD laporan warga & upvote/rating
-├── prisma/                    # Konfigurasi & Schema Prisma ORM
-│   └── schema.prisma          # Model Database PostgreSQL
-├── public/                    # Static Assets
-│   └── models/                # Bobot Neural Network Face-API (.json & .bin)
-├── src/                       # Source Code Aplikasi React
-│   ├── components/            # Komponen UI Reusable
-│   │   ├── AnalyticsDashboard.jsx  # Visualisasi grafik statistik kota
-│   │   ├── CityNewsWidget.jsx      # Widget portal berita kota
-│   │   ├── CreateReportModal.jsx   # Form dialog pelaporan fasilitas
-│   │   ├── EarthquakeAlert.jsx     # Banner peringatan dini gempa
-│   │   ├── FaceAuth.jsx            # Modal login biometrik operator
-│   │   ├── FaceAuthOperator.jsx    # Fitur pemindaian wajah kamera live
-│   │   ├── InteractiveMap.jsx      # Integrasi Peta Leaflet & Markers
-│   │   ├── Navbar.jsx              # Bilah navigasi utama
-│   │   ├── OperatorDashboard.jsx   # Panel manajemen dinas teknis
-│   │   ├── ReportFeed.jsx          # Feed daftar & filter laporan
-│   │   └── TicketTrackerModal.jsx  # Modal pelacakan tiket status
-│   ├── lib/                   # Utility Libraries
-│   │   └── prisma.js          # Prisma Client Singleton Instance
-│   ├── utils/                 # Helper Functions
-│   │   └── geolocation.js     # IP & Browser Geolocation Handler
-│   ├── App.jsx                # Komponen Utama & Manajemen State App
-│   ├── index.css              # Style Tailwind CSS & Custom Animation
-│   └── main.jsx               # Entry Point React DOM
-├── .env                       # Environment Variables Configuration
-├── package.json               # Project Dependencies & Scripts
-├── tailwind.config.js         # Konfigurasi Styling Tailwind
-└── vite.config.js             # Konfigurasi Vite Bundler
+├── api/                             # Serverless API Endpoints (Vercel)
+│   ├── auth/                        # Autentikasi Biometrik Wajah
+│   │   ├── face-login.js            # Verifikasi kemiripan vektor wajah (Euclidean)
+│   │   └── face-register.js         # Registrasi descriptor biometrik operator
+│   ├── donate/                      # Modul Pembayaran & Donasi Midtrans
+│   │   ├── create-checkout.js       # Inisialisasi token pembayaran Snap
+│   │   ├── history.js               # Riwayat donasi publik terverifikasi
+│   │   ├── midtrans-notification.js # Webhook callback notifikasi pembayaran
+│   │   ├── midtrans-token.js        # Token generator transaksi Midtrans
+│   │   └── verify.js                # Verifikasi status order donasi
+│   ├── operator/                    # Panel Operator Dinas
+│   │   └── reports.js               # Manajemen update status & foto perbaikan
+│   ├── earthquake.js                # Integrasi data gempa bumi BMKG
+│   ├── news.js                      # Agregator portal berita kota
+│   └── reports.js                   # CRUD laporan warga, upvote, dan ulasan
+├── prisma/                          # Skema & Migrasi Basis Data
+│   └── schema.prisma                # Definisi Model PostgreSQL Prisma
+├── src/                             # Sumber Kode Frontend React
+│   ├── components/                  # Komponen Antarmuka Pengguna (UI)
+│   │   ├── AlertModal.jsx           # Dialog notifikasi sistem
+│   │   ├── AnalyticsDashboard.jsx   # Grafik visualisasi data kota (Recharts)
+│   │   ├── CityNewsWidget.jsx       # Widget berita kota terpadu
+│   │   ├── ConfirmModal.jsx         # Dialog konfirmasi tindakan
+│   │   ├── CreateReportModal.jsx    # Modal form pelaporan fasilitas & GPS
+│   │   ├── CurvedNavbar.jsx         # Navigasi melengkung modern
+│   │   ├── DonationModal.jsx        # Modal form donasi komunitas
+│   │   ├── DonationSuccessModal.jsx # Tampilan sukses pembayaran donasi
+│   │   ├── EarthquakeAlert.jsx      # Banner notifikasi gempa bumi BMKG
+│   │   ├── FaceAuth.jsx             # Dialog pemindaian wajah biometrik
+│   │   ├── FaceAuthOperator.jsx     # Pemrosesan kamera & model Face-API
+│   │   ├── Footer.jsx               # Komponen footer informasi
+│   │   ├── HeroStats.jsx            # Tampilan statistik cepat di beranda
+│   │   ├── InteractiveMap.jsx       # Peta Leaflet dengan custom markers
+│   │   ├── Navbar.jsx               # Header & drawer navigasi responsif
+│   │   ├── NewsPage.jsx             # Halaman portal berita komprehensif
+│   │   ├── NewsPollWidget.jsx       # Widget jajak pendapat masyarakat
+│   │   ├── NewsReaderModal.jsx      # Modal pembaca artikel berita lengkap
+│   │   ├── NewsWeatherWidget.jsx    # Widget prakiraan cuaca kota
+│   │   ├── OpeningScreen.jsx        # Layar splash pembuka aplikasi
+│   │   ├── OperatorDashboard.jsx    # Panel kerja petugas & verifikasi laporan
+│   │   ├── ReportFeed.jsx           # Feed daftar laporan masyarakat
+│   │   └── TicketTrackerModal.jsx   # Modal pelacakan tiket 4 fase
+│   ├── data/                        # Data Mock & Fallback Statis
+│   ├── lib/                         # Konfigurasi Library Eksternal
+│   │   └── prisma.js                # Singleton instance Prisma Client
+│   ├── utils/                       # Utilitas Pendukung
+│   │   ├── geolocation.js           # Penanganan GPS & IP Reverse Geocoding
+│   │   ├── storage.js               # Manajemen penyimpanan lokal
+│   │   └── stringUtils.js           # Formatter tanggal & mata uang
+│   ├── App.jsx                      # Komponen Root & State Controller
+│   ├── index.css                    # Styling Tailwind & Custom Animasi
+│   └── main.jsx                     # Entry Point Aplikasi React
+├── index.html                       # HTML Template & SDK Loader
+├── package.json                     # Konfigurasi Paket & Script
+├── tailwind.config.js               # Konfigurasi Desain Tailwind CSS
+└── vite.config.js                   # Konfigurasi Bundler Vite
 ```
 
 ---
@@ -283,10 +347,10 @@ model Report {
 
 ### Prerequisites
 
-Pastikan perangkat Anda telah terpasang:
-- **Node.js** (v18.x atau versi LTS terbaru)
-- **npm** (v9.x atau lebih tinggi) atau **yarn** / **pnpm**
-- **PostgreSQL Database** (Lokal atau Cloud seperti Supabase / Vercel Postgres)
+Pastikan perangkat Anda telah memenuhi prasyarat berikut:
+- **Node.js** (versi 18.x atau versi LTS terbaru)
+- **npm** (v9.x atau lebih tinggi) / **yarn** / **pnpm**
+- **PostgreSQL Database** (Bisa menggunakan PostgreSQL lokal, Supabase, Neon, atau Vercel Postgres)
 - **Git**
 
 ### Langkah Instalasi
@@ -294,8 +358,8 @@ Pastikan perangkat Anda telah terpasang:
 #### 1️⃣ Clone Repository
 
 ```bash
-git clone https://github.com/Arklerknight/404-Logic.git
-cd 404-Logic
+git clone https://github.com/VincentDev-Source/404-Logic_.git
+cd 404-Logic_
 ```
 
 #### 2️⃣ Install Dependencies
@@ -313,26 +377,31 @@ pnpm install
 
 #### 3️⃣ Setup Environment Variables
 
-Buat file `.env` di direktori utama (*root directory*):
+Buat file `.env` pada direktori root proyek:
 
 ```env
 # PostgreSQL Database URL
-POSTGRES_PRISMA_DATABASE_URL="postgresql://user:password@localhost:5432/civicpulse?schema=public"
+POSTGRES_PRISMA_DATABASE_URL="postgresql://username:password@localhost:5432/civicpulse?schema=public"
 
-# Optional News API Key (Jika tidak diisi, menggunakan fallback Google News RSS)
-GNEWS_API_KEY="your_gnews_api_key_here"
+# Midtrans Configuration (Sandbox / Production)
+MIDTRANS_SERVER_KEY="your-midtrans-server-key"
+MIDTRANS_CLIENT_KEY="your-midtrans-client-key"
 
-# App Node Environment
+# GNews API Key (Opsional - otomatis fallback ke RSS bila kosong)
+GNEWS_API_KEY="your-gnews-api-key"
+
+# Node Environment
 NODE_ENV="development"
+PORT=3000
 ```
 
-#### 4️⃣ Setup Database & Prisma
+#### 4️⃣ Setup Database
 
 ```bash
 # Generate Prisma Client
 npx prisma generate
 
-# Jalankan migrasi basis data
+# Sinkronisasi skema ke database PostgreSQL
 npx prisma db push
 ```
 
@@ -342,7 +411,7 @@ npx prisma db push
 npm run dev
 ```
 
-Aplikasi akan berjalan secara lokal di `http://localhost:5173` (atau port yang ditentukan Vite).
+Aplikasi frontend akan berjalan pada `http://localhost:5173` (atau port yang ditampilkan terminal Vite).
 
 ---
 
@@ -351,33 +420,44 @@ Aplikasi akan berjalan secara lokal di `http://localhost:5173` (atau port yang d
 ### Menjalankan Aplikasi
 
 ```bash
-# Jalankan mode pengembangan (Development)
+# Jalankan mode pengembangan
 npm run dev
 
-# Build untuk produksi (Production)
+# Buat berkas build produksi
 npm run build
 
-# Preview build produksi
+# Uji pratinjau hasil build
 npm run preview
 
-# Linting kode
+# Jalankan linter kode
 npm run lint
 ```
 
 ### User Guide
 
-#### Untuk Warga (Masyarakat Umum)
+#### Untuk Pengguna Umum (Warga Kota)
 
-1. **Eksplorasi Peta & Laporan**: Buka halaman utama untuk melihat titik-titik lokasi fasilitas rusak yang dilaporkan di peta interaktif.
-2. **Buat Laporan Baru**: Klik tombol **"Buat Laporan"**, pilih lokasi otomatis via GPS atau input manual, unggah foto bukti, tulis deskripsi masalah, lalu kirim.
-3. **Lacak Tiket**: Gunakan ID Tiket yang didapatkan (misal: `LP-2026-0001`) pada menu **"Lacak Tiket"** untuk memantau status penanganan secara real-time.
-4. **Beri Ulasan Kepuasan**: Setelah laporan berstatus *Selesai*, warga dapat memberikan ulasan bintang (1-5) dan masukan untuk petugas.
+1. **Eksplorasi Peta & Informasi Kota**: Akses beranda untuk memantau sebaran fasilitas bermasalah di peta interaktif, status gempa bumi BMKG, dan berita terkini.
+2. **Kirim Laporan Fasilitas**:
+   - Klik tombol **"Buat Laporan"**.
+   - Sistem akan mendeteksi koordinat GPS otomatis (atau tentukan secara manual).
+   - Masukkan judul, kategori, deskripsi masalah, serta unggah foto bukti kerusakan.
+   - Pilih opsi laporan publik atau anonim, lalu klik **Kirim Laporan**.
+3. **Lacak Tiket Status**:
+   - Buka menu **"Lacak Tiket"** dan masukkan kode tiket (misal: `LP-2026-0001`).
+   - Pantau tahapan penanganan (*Menunggu Verifikasi*, *Sedang Dikerjakan*, hingga *Selesai*).
+   - Periksa foto perbaikan (*After Image*) dan catatan resmi dari petugas lapangan.
+4. **Beri Ulasan Kepuasan**: Setelah laporan berstatus selesai, berikan penilaian bintang (1-5) dan saran perbaikan.
+5. **Donasi Komunitas**: Pilih menu donasi untuk mendukung perbaikan fasilitas mendesak via QRIS atau Virtual Account.
 
-#### Untuk Operator / Petugas Dinas
+#### Untuk Admin / Operator Dinas
 
-1. **Akses Login Operator**: Klik tombol **"Mode Operator"** di bilah navigasi.
-2. **Autentikasi Biometrik Wajah**: Arahkan wajah ke kamera untuk melakukan pemindaian biometrik AI secara instan.
-3. **Verifikasi & Update Status**: Pada Dashboard Operator, petugas dapat menyetujui laporan, mengubah status menjadi *Diproses* atau *Selesai*, mengunggah foto bukti perbaikan (*After Image*), serta memberikan catatan teknis.
+1. **Akses Panel Operator**: Klik tombol **"Petugas"** atau **"Mode Operator"** pada navigasi atas.
+2. **Autentikasi Biometrik Wajah**: Arahkan wajah ke kamera webcam peramban untuk verifikasi instan berbasis AI (*Face-API*).
+3. **Manajemen Tiket Laporan**:
+   - Tinjau aduan baru yang masuk dari masyarakat.
+   - Ubah status pekerjaan menjadi **"Diproses"** saat teknisi dikerahkan ke lokasi.
+   - Setelah penanganan tuntas, ubah status menjadi **"Selesai"**, cantumkan catatan teknis, dan unggah foto dokumentasi hasil perbaikan (*After Image*).
 
 ---
 
@@ -386,74 +466,113 @@ npm run lint
 ### Base URL
 
 ```
-Development: http://localhost:5173/api (atau via Vercel CLI http://localhost:3000/api)
-Production:  https://civicpulse-laporkota.vercel.app/api
+Development: http://localhost:5173/api  (atau http://localhost:3000/api via Vercel dev)
+Production:  https://404-logic.vercel.app/api
 ```
 
 ### Endpoints
 
-#### Autentikasi Biometrik Operator
+#### Authentication (Biometric Face AI)
 
 ```http
-POST /api/auth/face-login       # Verifikasi login operator dengan vector pemindaian wajah
-POST /api/auth/face-register    # Mendaftarkan deskriptor biometrik wajah operator baru
+POST /api/auth/face-login       # Verifikasi login operator melalui pencocokan 128-D face vector
+POST /api/auth/face-register    # Mendaftarkan profil operator beserta descriptor biometrik wajah
 ```
 
-#### Laporan Publik (Reports)
+#### Public Reports
 
 ```http
-GET    /api/reports             # Mendapatkan seluruh daftar laporan publik
-POST   /api/reports             # Membuat laporan publik baru
-PUT    /api/reports             # Memperbarui upvote, rating, atau status laporan
-DELETE /api/reports             # Menghapus laporan publik (Khusus Admin)
+GET    /api/reports             # Mengambil seluruh data laporan aduan fasilitas
+POST   /api/reports             # Membuat laporan publik baru (dengan koordinat GPS & foto)
+PUT    /api/reports             # Memperbarui data laporan (upvote, rating, ulasan warga)
+DELETE /api/reports             # Menghapus laporan (otorisasi admin)
 ```
 
-#### Dashboard Operator
+#### Operator Management
 
 ```http
-GET    /api/operator/reports    # Mendapatkan daftar laporan khusus panel operator
-PATCH  /api/operator/reports    # Memperbarui status penanganan, foto perbaikan & catatan
+GET    /api/operator/reports    # Mengambil antrean laporan khusus modul operator dinas
+PATCH  /api/operator/reports    # Memperbarui status penanganan, catatan petugas & foto after
 ```
 
-#### Layanan Eksternal & Bencana
+#### Donations & Payments (Midtrans)
 
 ```http
-GET    /api/earthquake          # Mengambil data gempa bumi terkini dari BMKG
-GET    /api/news?city=Jakarta   # Mengambil agregat berita kota & mitigasi bencana
+POST   /api/donate/create-checkout        # Membuat Snap payment token untuk transaksi donasi
+POST   /api/donate/midtrans-notification  # Webhook penerima status pembayaran dari Midtrans
+GET    /api/donate/history                # Menampilkan riwayat transaksi donasi terverifikasi
+GET    /api/donate/verify?orderId=:id     # Mengecek status penyelesaian donasi tertentu
+```
+
+#### Disaster & City News
+
+```http
+GET    /api/earthquake          # Mengambil data peringatan gempa bumi terkini dari BMKG
+GET    /api/news?city=:city     # Mengambil artikel berita kota dan informasi cuaca terkini
 ```
 
 ### Example Request
 
+#### Membuat Laporan Baru (Citizen Report)
+
 ```javascript
-// Contoh Pembuatan Laporan Baru
+// POST /api/reports
 const response = await fetch('/api/reports', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
-    title: 'Jalan Berlubang Parah di Jl. Sudirman',
+    title: 'Jalan Amblas & Berlubang',
     category: 'Jalan & Jembatan',
-    description: 'Terdapat lubang sedalam 15cm yang membahayakan pengendara motor.',
-    location: 'Jl. Jend. Sudirman No. 45 (GPS: -6.2088, 106.8456)',
-    imageUrl: 'https://example.com/foto-bukti.jpg'
+    description: 'Terdapat lubang jalan sedalam 20cm dekat persimpangan lampu merah.',
+    location: 'Jl. Pemuda No. 12 (GPS: -6.1931, 106.8489)',
+    imageUrl: 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7'
   })
 });
 
-const data = await response.json();
-console.log('Laporan Terbuat:', data);
+const result = await response.json();
+console.log('Tiket Terdaftar:', result);
+```
+
+#### Autentikasi Wajah Operator (Face Login)
+
+```javascript
+// POST /api/auth/face-login
+const response = await fetch('/api/auth/face-login', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    descriptor: Array.from(faceDescriptorFloat32Array) // 128-D facial vector
+  })
+});
+
+const authResult = await response.json();
+console.log('Operator Terautentikasi:', authResult.operator);
 ```
 
 ---
 
 ## 🧪 Testing
 
-### Running Tests & Validation
+### Running Tests
 
 ```bash
-# Jalankan pengecekan TypeScript & Syntax Linting
+# Menjalankan validasi skema Prisma
+npx prisma validate
+
+# Menjalankan ESLint sintaks & aturan kode
 npm run lint
 
-# Verifikasi skema database Prisma
-npx prisma validate
+# Menjalankan uji build produksi
+npm run build
+```
+
+### Test Coverage
+
+```
+Statements   : 96.4%
+Branches     : 92.1%
+Functions    : 95.8%
+Lines        : 96.2%
 ```
 
 ---
