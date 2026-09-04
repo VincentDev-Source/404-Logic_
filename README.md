@@ -1,3 +1,6 @@
+<img width="647" height="717" alt="Screenshot 2026-09-04 173820" src="https://github.com/user-attachments/assets/5cf426cb-07a8-4e3c-a3a6-2683bce70ed0" />
+<img width="1919" height="858" alt="Screenshot 2026-09-04 173756" src="https://github.com/user-attachments/assets/facfad29-92c9-4fd3-ab98-7dae058d05b6" />
+<img width="1919" height="870" alt="Screenshot 2026-09-04 173725" src="https://github.com/user-attachments/assets/48400fa5-ec9d-411c-bf36-c9f34d3b6dd5" />
 <img width="1919" height="870" alt="Screenshot 2026-09-04 173725" src="https://github.com/user-attachments/assets/8ddc55fa-4f53-4648-85f3-609ae56060d2" />
 <div align="center">
   
@@ -101,10 +104,10 @@ Berdasarkan studi tata kelola pelayanan kota, **lebih dari 68% warga enggan mela
 ### Screenshot Aplikasi
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/VincentDev-Source/404-Logic_/main/dist/screenshots/homepage.png" alt="Homepage" width="800" onerror="this.src='https://placehold.co/800x450/0f172a/38bdf8?text=CivicPulse+Homepage+-+Interactive+GIS+Map'"/>
+  <img width="647" height="717" alt="Screenshot 2026-09-04 173820" src="https://github.com/user-attachments/assets/5cf426cb-07a8-4e3c-a3a6-2683bce70ed0" />
   <p><em>Homepage - Tampilan utama aplikasi dengan Peta Interaktif GIS, Statistik Kota, dan Quick Actions</em></p>
   
-  <img src="https://raw.githubusercontent.com/VincentDev-Source/404-Logic_/main/dist/screenshots/operator-dashboard.png" alt="Dashboard" width="800" onerror="this.src='https://placehold.co/800x450/0f172a/818cf8?text=Operator+Dashboard+-+Face+AI+Auth'"/>
+<img width="1919" height="870" alt="Screenshot 2026-09-04 173725" src="https://github.com/user-attachments/assets/8ddc55fa-4f53-4648-85f3-609ae56060d2" />
   <p><em>Dashboard Operator - Panel manajemen petugas dinas dengan verifikasi laporan & upload foto perbaikan</em></p>
   
   <img src="https://raw.githubusercontent.com/VincentDev-Source/404-Logic_/main/dist/screenshots/features.png" alt="Features" width="800" onerror="this.src='https://placehold.co/800x450/0f172a/34d399?text=Ticket+Tracker+%26+BMKG+Earthquake+Alert+%26+Donation'"/>
