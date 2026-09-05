@@ -30,3 +30,5 @@ dist-ssr
 skills-lock.json
 
 /src/generated/prisma
+
+api/
