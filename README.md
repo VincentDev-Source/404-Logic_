@@ -473,14 +473,28 @@ Production:  https://404-logic.vercel.app/api
 
 ### Endpoints
 
-#### Authentication (Biometric Face AI)
+Daftar endpoint REST API yang tersedia pada CivicPulse Serverless Backend:
+
+#### 1. Authentication (Biometric Face AI)
+
+| Method | Endpoint | Deskripsi |
+|:---:|---|---|
+| `POST` | `/api/auth/face-login` | Verifikasi login operator melalui pencocokan 128-D face vector |
+| `POST` | `/api/auth/face-register` | Mendaftarkan profil operator beserta descriptor biometrik wajah |
 
 ```http
 POST /api/auth/face-login       # Verifikasi login operator melalui pencocokan 128-D face vector
 POST /api/auth/face-register    # Mendaftarkan profil operator beserta descriptor biometrik wajah
 ```
 
-#### Public Reports
+#### 2. Public Reports
+
+| Method | Endpoint | Deskripsi |
+|:---:|---|---|
+| `GET` | `/api/reports` | Mengambil seluruh data laporan aduan fasilitas publik |
+| `POST` | `/api/reports` | Membuat laporan publik baru (dengan koordinat GPS & foto bukti) |
+| `PUT` | `/api/reports` | Memperbarui data laporan (upvote, rating, atau ulasan warga) |
+| `DELETE` | `/api/reports` | Menghapus laporan (otorisasi admin dinas) |
 
 ```http
 GET    /api/reports             # Mengambil seluruh data laporan aduan fasilitas
@@ -489,14 +503,26 @@ PUT    /api/reports             # Memperbarui data laporan (upvote, rating, ulas
 DELETE /api/reports             # Menghapus laporan (otorisasi admin)
 ```
 
-#### Operator Management
+#### 3. Operator Management
+
+| Method | Endpoint | Deskripsi |
+|:---:|---|---|
+| `GET` | `/api/operator/reports` | Mengambil antrean laporan khusus modul verifikasi dinas |
+| `PATCH` | `/api/operator/reports` | Memperbarui status penanganan, catatan petugas & foto bukti perbaikan (*After Image*) |
 
 ```http
 GET    /api/operator/reports    # Mengambil antrean laporan khusus modul operator dinas
 PATCH  /api/operator/reports    # Memperbarui status penanganan, catatan petugas & foto after
 ```
 
-#### Donations & Payments (Midtrans)
+#### 4. Donations & Payments (Midtrans)
+
+| Method | Endpoint | Deskripsi |
+|:---:|---|---|
+| `POST` | `/api/donate/create-checkout` | Membuat Snap payment token untuk transaksi donasi |
+| `POST` | `/api/donate/midtrans-notification` | Webhook penerima status notifikasi pembayaran otomatis dari Midtrans |
+| `GET` | `/api/donate/history` | Menampilkan riwayat transaksi donasi publik terverifikasi |
+| `GET` | `/api/donate/verify?orderId=:id` | Mengecek status verifikasi dan penyelesaian donasi tertentu |
 
 ```http
 POST   /api/donate/create-checkout        # Membuat Snap payment token untuk transaksi donasi
@@ -505,7 +531,12 @@ GET    /api/donate/history                # Menampilkan riwayat transaksi donasi
 GET    /api/donate/verify?orderId=:id     # Mengecek status penyelesaian donasi tertentu
 ```
 
-#### Disaster & City News
+#### 5. Disaster & City News
+
+| Method | Endpoint | Deskripsi |
+|:---:|---|---|
+| `GET` | `/api/earthquake` | Mengambil data peringatan gempa bumi terkini dari BMKG (real-time) |
+| `GET` | `/api/news?city=:city` | Mengambil artikel berita kota dan informasi cuaca terkini |
 
 ```http
 GET    /api/earthquake          # Mengambil data peringatan gempa bumi terkini dari BMKG
@@ -514,7 +545,7 @@ GET    /api/news?city=:city     # Mengambil artikel berita kota dan informasi cu
 
 ### Example Request
 
-#### Membuat Laporan Baru (Citizen Report)
+#### 1. Membuat Laporan Baru (Citizen Report)
 
 ```javascript
 // POST /api/reports
@@ -534,7 +565,7 @@ const result = await response.json();
 console.log('Tiket Terdaftar:', result);
 ```
 
-#### Autentikasi Wajah Operator (Face Login)
+#### 2. Autentikasi Wajah Operator (Face Login)
 
 ```javascript
 // POST /api/auth/face-login
@@ -548,6 +579,28 @@ const response = await fetch('/api/auth/face-login', {
 
 const authResult = await response.json();
 console.log('Operator Terautentikasi:', authResult.operator);
+```
+
+#### 3. Inisialisasi Donasi Komunitas (Midtrans Snap Checkout)
+
+```javascript
+// POST /api/donate/create-checkout
+const response = await fetch('/api/donate/create-checkout', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    donorName: 'Ahmad Fauzi',
+    donorEmail: 'ahmad@example.com',
+    amount: 50000,
+    program: 'Perbaikan Lampu Jalan Darurat',
+    message: 'Semoga lekas diperbaiki demi keselamatan bersama',
+    isAnonymous: false
+  })
+});
+
+const { token, redirectUrl } = await response.json();
+// Buka popup pembayaran Snap
+window.snap.pay(token);
 ```
 
 ---
